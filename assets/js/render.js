@@ -179,7 +179,11 @@
       // A paragraph holding only display math or only an image is not wrapped in <p>
       if (/^\uE000\d+\uE001$/.test(joined)) { out.push('<div class="q-display">' + joined + '</div>'); return; }
       if (/^!\[[^\]]*\]\([^)]+\)$/.test(joined)) { out.push('<div class="q-figure">' + inlineMd(joined, opts) + '</div>'); return; }
-      out.push('<p>' + inlineMd(joined, opts).replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>')
+      // Roman-numeral statements ("I. ...", "II. ...") are indented like on the SAT
+      var stmt = /^(?:I{1,3}|IV|VI{0,3})\.\s/.test(joined);
+      // "Note: Figure not drawn to scale." sits centered under the figure
+      var note = /^[*_]?Note:\s+Figures?\s+(?:are\s+)?not\s+drawn\s+to\s+scale\.?[*_]?$/i.test(joined);
+      out.push((note ? '<p class="q-note">' : stmt ? '<p class="q-stmt">' : '<p>') + inlineMd(joined, opts).replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>')
         // Numbered steps ("1. ...", "2) ...") and bullets on their own lines keep their line breaks
         .replace(/\n(?=[ \t]*(?:\d{1,3}[.)]|[•‣◦])[ \t])/g, '<br>\n') + '</p>');
     }
