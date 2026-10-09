@@ -1,22 +1,22 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SAT Math Practice</title>
-  <meta name="description" content="Luyện đề SAT Math với giao diện giống Bluebook: đồng hồ, máy tính Desmos, tờ công thức, đánh dấu câu, chấm điểm tức thì. Tự soạn và tải đề mới lên.">
-  <meta name="theme-color" content="#1f2a6b">
+  <title>SAT Math Practice — Bluebook-style Digital SAT Math practice</title>
+  <meta name="description" content="Free Digital SAT Math practice tests in a Bluebook-style interface: timer, Desmos calculator, reference sheet, mark for review, answer eliminator, instant scoring and explanations.">
+  <meta name="theme-color" content="#2f4bc8">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SAT Math Practice">
-  <meta property="og:title" content="SAT Math Practice — Luyện SAT Math giao diện giống Bluebook">
-  <meta property="og:description" content="Làm đề SAT Math miễn phí với đồng hồ, máy tính Desmos, tờ công thức, đánh dấu câu và chấm điểm kèm lời giải ngay.">
+  <meta property="og:title" content="SAT Math Practice — Bluebook-style Digital SAT Math tests">
+  <meta property="og:description" content="Take free Digital SAT Math practice tests with a timer, Desmos calculator, reference sheet and instant scoring with explanations.">
   <meta property="og:url" content="https://tungthanhdo18022-lgtm.github.io/Web/">
   <meta property="og:image" content="https://tungthanhdo18022-lgtm.github.io/Web/assets/img/og-image.jpg">
   <link rel="canonical" href="https://tungthanhdo18022-lgtm.github.io/Web/">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:locale" content="vi_VN">
+  <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/img/icon-192.png" type="image/png" sizes="192x192">
@@ -24,33 +24,36 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+  <!-- Fonts load without blocking the page; system fonts are used until they arrive -->
+  <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap"></noscript>
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/app.css">
-  <link rel="stylesheet" href="assets/css/exam.css">
+  <link rel="stylesheet" href="assets/css/app.css?v=2.0.0">
+  <link rel="stylesheet" href="assets/css/exam.css?v=2.0.0">
 </head>
 <body>
   <div id="app"></div>
-  <noscript><p style="padding:24px;font-family:sans-serif">Trang web cần bật JavaScript để hoạt động.</p></noscript>
+  <noscript><p style="padding:24px;font-family:sans-serif">This site needs JavaScript to run.</p></noscript>
 
   <script src="vendor/katex/katex.min.js"></script>
-  <script>window.APP_VERSION = '1.0.0';</script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/util.js"></script>
-  <script src="assets/js/render.js"></script>
-  <script src="assets/js/grading.js"></script>
-  <script src="assets/js/parser.js"></script>
-  <script src="assets/js/latex.js"></script>
-  <script src="assets/js/store.js"></script>
-  <script src="assets/js/reference.js"></script>
-  <script src="assets/js/views/home.js"></script>
-  <script src="assets/js/views/intro.js"></script>
-  <script src="assets/js/views/exam.js"></script>
-  <script src="assets/js/views/results.js"></script>
-  <script src="assets/js/views/builder.js"></script>
-  <script src="assets/js/views/guide.js"></script>
-  <script src="assets/js/app.js"></script>
-  <script src="tests/manifest.js"></script>
+  <script>window.APP_VERSION = '2.0.0';</script>
+  <script src="assets/js/config.js?v=2.0.0"></script>
+  <script src="assets/js/util.js?v=2.0.0"></script>
+  <script src="assets/js/render.js?v=2.0.0"></script>
+  <script src="assets/js/grading.js?v=2.0.0"></script>
+  <script src="assets/js/parser.js?v=2.0.0"></script>
+  <script src="assets/js/latex.js?v=2.0.0"></script>
+  <script src="assets/js/store.js?v=2.0.0"></script>
+  <script src="assets/js/admin.js?v=2.0.0"></script>
+  <script src="assets/js/reference.js?v=2.0.0"></script>
+  <script src="assets/js/views/home.js?v=2.0.0"></script>
+  <script src="assets/js/views/intro.js?v=2.0.0"></script>
+  <script src="assets/js/views/exam.js?v=2.0.0"></script>
+  <script src="assets/js/views/results.js?v=2.0.0"></script>
+  <script src="assets/js/views/builder.js?v=2.0.0"></script>
+  <script src="assets/js/views/admin.js?v=2.0.0"></script>
+  <script src="assets/js/views/guide.js?v=2.0.0"></script>
+  <script src="assets/js/app.js?v=2.0.0"></script>
   <script>App.start();</script>
 </body>
 </html>

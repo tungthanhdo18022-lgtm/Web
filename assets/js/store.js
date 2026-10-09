@@ -180,6 +180,21 @@
 
     manifestEntries: function () { return manifest.map(function (e) { return { file: e.file, v: e.v }; }); },
 
+    /** Registers a just-published test in memory (the live site updates after GitHub Pages redeploys). */
+    registerLocal: function (def, entry) {
+      var prev = currentEntry;
+      var e = normalizeEntry(entry);
+      currentEntry = e;
+      try { Library.register(def); } finally { currentEntry = prev; }
+      if (e) manifest = manifest.filter(function (x) { return x.file !== e.file; }).concat([e]);
+    },
+
+    /** Removes an unpublished test from memory. */
+    unregisterLocal: function (file) {
+      builtin.forEach(function (t, id) { if (t.file === file) builtin.delete(id); });
+      manifest = manifest.filter(function (x) { return x.file !== file; });
+    },
+
     loadBuiltins: function () {
       var base = 'tests/';
       var bust = Date.now().toString(36);

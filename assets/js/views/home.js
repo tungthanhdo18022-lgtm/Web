@@ -1,198 +1,196 @@
-/* Trang chủ: thư viện đề + lịch sử làm bài. */
+/* Home: notice, SAT countdown, practice test grid with filters, recent results. */
 (function (global) {
   'use strict';
 
   var U = global.U;
+  var SEASONS = ['spring', 'summer', 'fall', 'winter'];
+  var DISMISS_KEY = 'satmath.noticeDismissed';
 
-  function testCard(t) {
-    var A = global.Attempts;
-    var prog = A.inProgress(t.id);
-    var best = A.best(t.id);
-    var count = A.forTest(t.id).filter(function (a) { return a.status === 'completed'; }).length;
-    var mcq = 0, spr = 0;
-    t.modules.forEach(function (m) { m.questions.forEach(function (q) { if (q.type === 'mcq') mcq++; else spr++; }); });
-    var id = encodeURIComponent(t.id);
-    var bestTxt = best ? best.result.correct + '/' + best.result.total : '—';
-    var progressPct = prog ? Math.round(Object.keys(prog.answers || {}).length / Math.max(1, t.questionCount) * 100) : 0;
-
-    return '<article class="test-card" data-id="' + U.esc(t.id) + '">' +
-      '<div class="test-card-top">' +
-      '<span class="badge ' + (t.builtin ? 'badge--blue' : 'badge--green') + '">' + (t.builtin ? 'Đề có sẵn' : 'Đề của bạn') + '</span>' +
-      (t.hasErrors ? '<span class="badge badge--red">Cần sửa</span>' : '') +
-      '<span class="spacer"></span>' +
-      '<div class="card-menu">' +
-      (t.builtin
-        ? '<button class="icon-btn" data-act="duplicate" data-id="' + U.esc(t.id) + '" title="Sao chép để chỉnh sửa" aria-label="Sao chép để chỉnh sửa">' + U.icon('copy') + '</button>'
-        : '<a class="icon-btn" href="#/builder/' + id + '" title="Chỉnh sửa" aria-label="Chỉnh sửa">' + U.icon('edit') + '</a>') +
-      '<button class="icon-btn" data-act="export" data-id="' + U.esc(t.id) + '" title="Tải file JSON" aria-label="Tải file JSON">' + U.icon('download') + '</button>' +
-      (!t.builtin ? '<button class="icon-btn icon-btn--danger" data-act="delete" data-id="' + U.esc(t.id) + '" title="Xóa đề" aria-label="Xóa đề">' + U.icon('trash') + '</button>' : '') +
-      '</div></div>' +
-      '<h3 class="test-card-title"><a href="#/test/' + id + '">' + U.esc(t.title || 'Đề không tên') + '</a></h3>' +
-      '<p class="test-card-meta">' + (t.author ? U.esc(t.author) + ' · ' : '') + t.questionCount + ' câu · ' + Math.round(t.totalTime) + ' phút' +
-      (t.modules.length > 1 ? ' · ' + t.modules.length + ' module' : '') + '</p>' +
-      (t.description ? '<p class="test-card-desc">' + U.esc(t.description) + '</p>' : '') +
-      '<div class="test-card-mix"><span>' + mcq + ' trắc nghiệm</span><span>' + spr + ' điền đáp án</span></div>' +
-      '<div class="test-card-stats">' +
-      '<div><span>Điểm cao nhất</span><b>' + bestTxt + '</b></div>' +
-      '<div><span>Đã làm</span><b>' + count + ' lần</b></div>' +
-      (best ? '<div><span>Ước tính</span><b>' + best.result.estimated + '</b></div>' : '') +
-      '</div>' +
-      (prog ? '<div class="progress" title="Đã trả lời ' + progressPct + '%"><span style="width:' + progressPct + '%"></span></div>' : '') +
-      '<div class="test-card-actions">' +
-      (prog
-        ? '<a class="btn btn--primary" href="#/exam/' + encodeURIComponent(prog.id) + '">' + U.icon('play') + 'Tiếp tục làm</a>'
-        : '<a class="btn btn--primary" href="#/test/' + id + '">' + U.icon('play') + 'Bắt đầu</a>') +
-      (best ? '<a class="btn btn--ghost" href="#/results/' + encodeURIComponent(best.id) + '">Xem kết quả</a>' : '') +
-      '</div>' +
-      '</article>';
+  function parseDay(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function fmtLong(d) {
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function fmtShort(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  function historyRows() {
-    var list = global.Attempts.all().filter(function (a) { return a.status === 'completed' && a.result; }).slice(0, 30);
-    if (!list.length) return '<div class="empty-mini">Chưa có bài làm nào. Hãy chọn một đề ở trên để bắt đầu!</div>';
-    return '<div class="table-wrap"><table class="data-table"><thead><tr><th>Đề</th><th>Ngày làm</th><th>Kết quả</th><th>Ước tính</th><th>Thời gian</th><th></th></tr></thead><tbody>' +
-      list.map(function (a) {
-        var r = a.result;
-        return '<tr><td><b>' + U.esc(a.testTitle || a.testId) + '</b>' + (a.timed ? '' : ' <span class="badge badge--gray">Không tính giờ</span>') + '</td>' +
-          '<td>' + U.fmtDate(a.finishedAt) + '</td>' +
-          '<td><span class="score-pill ' + scoreClass(r.percent) + '">' + r.correct + '/' + r.total + '</span> <span class="muted">(' + r.percent + '%)</span></td>' +
-          '<td>' + r.estimated + '</td>' +
-          '<td>' + U.fmtDuration(a.totalElapsed || 0) + '</td>' +
-          '<td class="row-actions"><a class="btn btn--sm btn--ghost" href="#/results/' + encodeURIComponent(a.id) + '">Xem</a>' +
-          '<button class="icon-btn" data-act="del-attempt" data-id="' + U.esc(a.id) + '" title="Xóa" aria-label="Xóa bài làm">' + U.icon('trash') + '</button></td></tr>';
-      }).join('') + '</tbody></table></div>';
+  function nextTestDate() {
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var list = (global.APP_CONFIG.satTestDates || []).map(function (e) {
+      return { date: parseDay(e.date), deadline: parseDay(e.deadline) };
+    }).filter(function (e) { return e.date && e.date >= today; })
+      .sort(function (a, b) { return a.date - b.date; });
+    return list[0] || null;
   }
 
   function scoreClass(p) { return p >= 80 ? 'is-good' : p >= 50 ? 'is-mid' : 'is-low'; }
 
+  function examCard(t) {
+    var A = global.Attempts;
+    var prog = A.inProgress(t.id);
+    var best = A.best(t.id);
+    var id = encodeURIComponent(t.id);
+    var status = '';
+    if (prog) {
+      var answered = Object.keys(prog.answers || {}).length;
+      status = '<p class="exam-card-status is-progress">In progress · ' + answered + ' of ' + t.questionCount + ' answered</p>';
+    } else if (best) {
+      status = '<p class="exam-card-status is-done">Best score: ' + best.result.correct + '/' + best.result.total + ' · est. ' + best.result.estimated + '</p>';
+    }
+    return '<article class="exam-card" data-id="' + U.esc(t.id) + '">' +
+      '<div class="exam-card-pills">' +
+      '<span class="pill pill--blue">Total: ' + t.questionCount + '</span>' +
+      '<span class="spacer"></span>' +
+      '<span class="pill" title="Multiple-choice questions">MCQ: ' + t.mcqCount + '</span>' +
+      '<span class="pill" title="Student-produced response questions">SPR: ' + t.sprCount + '</span>' +
+      '</div>' +
+      '<h3 class="exam-card-title"><a href="#/test/' + id + '">' + U.esc(t.title || 'Untitled test') + '</a></h3>' +
+      '<p class="exam-card-meta">' + Math.round(t.totalTime) + ' minutes' + (t.modules.length > 1 ? ' · ' + t.modules.length + ' modules' : '') + (t.author ? ' · by ' + U.esc(t.author) : '') + '</p>' +
+      status +
+      (prog
+        ? '<a class="btn btn--primary btn--block" href="#/exam/' + encodeURIComponent(prog.id) + '">Resume Exam</a>'
+        : '<a class="btn btn--primary btn--block" href="#/test/' + id + '">Start Exam</a>') +
+      (best ? '<div class="exam-card-links"><a href="#/results/' + encodeURIComponent(best.id) + '">View results</a></div>' : '') +
+      '</article>';
+  }
+
+  function recentResults() {
+    var list = global.Attempts.completed().slice(0, 6);
+    if (!list.length) return '';
+    return '<section class="section">' +
+      '<div class="section-head"><div><h2>Recent Results</h2><p class="muted">Saved in this browser.</p></div>' +
+      '<a class="btn btn--ghost" href="#/results">View all</a></div>' +
+      '<div class="table-wrap"><table class="data-table"><thead><tr><th>Test</th><th>Date</th><th>Score</th><th>Est. SAT Math</th><th>Time</th><th></th></tr></thead><tbody>' +
+      list.map(function (a) {
+        var r = a.result;
+        return '<tr class="click-row" data-href="#/results/' + encodeURIComponent(a.id) + '"><td><b>' + U.esc(a.testTitle || a.testId) + '</b>' + (a.timed ? '' : ' <span class="badge badge--gray">Untimed</span>') + '</td>' +
+          '<td>' + U.fmtDate(a.finishedAt) + '</td>' +
+          '<td><span class="score-pill ' + scoreClass(r.percent) + '">' + r.correct + '/' + r.total + '</span> <span class="muted">(' + r.percent + '%)</span></td>' +
+          '<td>' + r.estimated + '</td>' +
+          '<td>' + U.fmtDuration(a.totalElapsed || 0) + '</td>' +
+          '<td class="row-actions"><a class="btn btn--sm btn--ghost" href="#/results/' + encodeURIComponent(a.id) + '">Details</a></td></tr>';
+      }).join('') + '</tbody></table></div></section>';
+  }
+
   function HomeView(root) {
     var Lib = global.SATLibrary;
-    var query = '';
+    var filter = { year: 'all', season: 'all' };
+    var timer = null;
 
     function render() {
-      var tests = Lib.all();
-      var first = tests[0];
+      var cfg = global.APP_CONFIG;
+      var tests = Lib.published();
       var errs = Lib.errors();
-      var inProg = global.Attempts.all().filter(function (a) { return a.status === 'in-progress' && Lib.get(a.testId); });
+      var note = String(cfg.announcement || '').trim();
+      var dismissed = U.lsGet(DISMISS_KEY, '') === note;
+      var next = nextTestDate();
+      var years = [];
+      tests.forEach(function (t) { if (t.year && years.indexOf(t.year) === -1) years.push(t.year); });
+      years.sort(function (a, b) { return b - a; });
+      var seasonsPresent = SEASONS.filter(function (s) { return tests.some(function (t) { return t.season === s; }); });
 
       root.innerHTML =
         '<div class="page">' +
-        '<section class="hero">' +
-        '<div class="hero-text">' +
-        '<span class="eyebrow">' + U.icon('sparkles') + 'Digital SAT · Math</span>' +
-        '<h1>Luyện SAT Math với giao diện <span class="hl">giống Bluebook</span></h1>' +
-        '<p class="lead">Làm bài trên giao diện y như phòng thi: đồng hồ đếm ngược, máy tính Desmos, tờ công thức, đánh dấu câu, gạch đáp án. Nộp bài là có điểm và lời giải ngay.</p>' +
-        '<div class="hero-actions">' +
-        (first ? '<a class="btn btn--primary btn--lg" href="#/test/' + encodeURIComponent(first.id) + '">' + U.icon('play') + 'Làm đề ' + U.esc(first.title) + '</a>' : '') +
-        '<button class="btn btn--ghost btn--lg" data-act="upload">' + U.icon('upload') + 'Tải đề lên</button>' +
-        '</div>' +
-        '</div>' +
-        '<div class="hero-visual" aria-hidden="true">' + heroMock() + '</div>' +
-        '</section>' +
+        (note && !dismissed ? '<div class="notice" role="status">' + U.icon('info') + '<span>' + U.esc(note) + '</span>' +
+          '<button class="icon-btn" data-act="dismiss" aria-label="Dismiss notice">' + U.icon('close') + '</button></div>' : '') +
 
-        (errs.length ? '<div class="alert alert--error">' + U.icon('warn') + '<div><b>Một số đề không tải được:</b><ul>' +
-          errs.map(function (e) { return '<li><b>' + U.esc(e.title) + '</b>: ' + U.esc((e.errors[0] && e.errors[0].msg) || 'lỗi') + (e.errors.length > 1 ? ' (+' + (e.errors.length - 1) + ' lỗi khác)' : '') + '</li>'; }).join('') +
+        (errs.length && global.Admin && global.Admin.isAdmin() ? '<div class="alert alert--error">' + U.icon('warn') + '<div><b>Some tests could not be loaded:</b><ul>' +
+          errs.map(function (e) { return '<li><b>' + U.esc(e.title) + '</b>: ' + U.esc((e.errors[0] && e.errors[0].msg) || 'error') + (e.errors.length > 1 ? ' (+' + (e.errors.length - 1) + ' more)' : '') + '</li>'; }).join('') +
           '</ul></div></div>' : '') +
 
-        (inProg.length ? '<section class="resume-list">' + inProg.map(function (a) {
-          var t = Lib.get(a.testId);
-          var answered = Object.keys(a.answers || {}).length;
-          return '<a class="resume-card" href="#/exam/' + encodeURIComponent(a.id) + '">' +
-            '<span class="resume-icon">' + U.icon('play') + '</span>' +
-            '<span class="resume-text"><b>Đang làm dở: ' + U.esc(t.title) + '</b><span>Đã trả lời ' + answered + '/' + t.questionCount + ' câu · cập nhật ' + U.fmtDate(a.updatedAt) + '</span></span>' +
-            '<span class="resume-go">Tiếp tục ' + U.icon('chevronRight') + '</span></a>';
-        }).join('') + '</section>' : '') +
+        (next ? '<section class="countdown" aria-label="Next SAT test date">' +
+          '<div><div class="countdown-label">Next SAT</div>' +
+          '<div class="countdown-date">' + fmtLong(next.date) + '</div>' +
+          (next.deadline ? '<div class="countdown-sub">' + (next.deadline >= new Date(new Date().toDateString()) ? 'Registration deadline: ' + fmtShort(next.deadline) : 'Regular registration has closed') + '</div>' : '') +
+          '</div>' +
+          '<div class="countdown-boxes" id="cd-boxes">' +
+          ['days', 'hours', 'minutes', 'seconds'].map(function (u) {
+            return '<div class="cd-box"><div class="cd-num" data-unit="' + u + '">00</div><div class="cd-unit">' + u + '</div></div>';
+          }).join('') +
+          '</div></section>' : '') +
 
         '<section class="section">' +
-        '<div class="section-head">' +
-        '<div><h2>Thư viện đề</h2><p class="muted">' + tests.length + ' đề · Đề bạn tải lên được lưu ngay trong trình duyệt này.</p></div>' +
-        '<div class="section-tools">' +
-        '<label class="search">' + U.icon('search') + '<input type="search" id="home-search" placeholder="Tìm đề…" value="' + U.esc(query) + '" aria-label="Tìm đề"></label>' +
-        '<button class="btn btn--ghost" data-act="upload">' + U.icon('upload') + '<span>Tải đề lên</span></button>' +
-        '<a class="btn btn--primary" href="#/builder">' + U.icon('plus') + '<span>Tạo đề mới</span></a>' +
-        '</div></div>' +
-        '<div class="test-grid" id="test-grid"></div>' +
+        '<div class="section-head"><h2>Practice Tests</h2>' +
+        (tests.length ? '<div class="filters">' +
+          (years.length ? '<div class="seg" role="group" aria-label="Filter by year">' + seg('year', 'all', 'All') + years.map(function (y) { return seg('year', String(y), String(y)); }).join('') + '</div>' : '') +
+          (seasonsPresent.length ? '<div class="seg" role="group" aria-label="Filter by season">' + seg('season', 'all', 'All') + SEASONS.map(function (s) { return seg('season', s, s); }).join('') + '</div>' : '') +
+          '</div>' : '') +
+        '</div>' +
+        '<div class="exam-grid" id="exam-grid"></div>' +
         '</section>' +
-
-        '<section class="section">' +
-        '<div class="section-head"><div><h2>Lịch sử làm bài</h2><p class="muted">Các bài đã nộp trên trình duyệt này.</p></div></div>' +
-        historyRows() +
-        '</section>' +
+        recentResults() +
         '</div>';
       renderGrid();
-      var s = document.getElementById('home-search');
-      s.addEventListener('input', function () { query = s.value; renderGrid(); });
+      startCountdown(next);
+    }
+
+    function seg(kind, value, label) {
+      return '<button type="button" class="' + (filter[kind] === value ? 'is-on' : '') + '" data-filter="' + kind + '" data-value="' + U.esc(value) + '" aria-pressed="' + (filter[kind] === value) + '">' + U.esc(label) + '</button>';
     }
 
     function renderGrid() {
-      var grid = document.getElementById('test-grid');
+      var grid = document.getElementById('exam-grid');
       if (!grid) return;
-      var qn = query.trim().toLowerCase();
-      var tests = Lib.all().filter(function (t) {
-        return !qn || (t.title + ' ' + (t.author || '') + ' ' + (t.description || '')).toLowerCase().indexOf(qn) !== -1;
+      var tests = Lib.published().filter(function (t) {
+        return (filter.year === 'all' || String(t.year) === filter.year) &&
+          (filter.season === 'all' || t.season === filter.season);
       });
-      grid.innerHTML = tests.map(testCard).join('') +
-        '<button class="test-card test-card--add" data-act="upload">' +
-        '<span class="add-icon">' + U.icon('upload') + '</span><b>Tải đề mới lên</b>' +
-        '<span>File .json, .txt hoặc .tex (LaTeX)</span></button>' +
-        '<a class="test-card test-card--add" href="#/builder">' +
-        '<span class="add-icon">' + U.icon('edit') + '</span><b>Soạn đề trực tiếp</b>' +
-        '<span>Gõ hoặc dán đề, xem trước ngay</span></a>';
-      if (!tests.length && qn) grid.insertAdjacentHTML('afterbegin', '<div class="empty-mini grid-span">Không tìm thấy đề nào khớp với "' + U.esc(query) + '".</div>');
+      grid.innerHTML = tests.length ? tests.map(examCard).join('')
+        : '<div class="empty-mini grid-span">' + (Lib.published().length ? 'No tests match this filter.' : 'No practice tests have been published yet. Check back soon!') + '</div>';
+    }
+
+    function startCountdown(next) {
+      if (timer) clearInterval(timer);
+      if (!next) return;
+      var target = next.date.getTime();
+      function tick() {
+        var box = document.getElementById('cd-boxes');
+        if (!box) { clearInterval(timer); return; }
+        var diff = Math.max(0, Math.floor((target - Date.now()) / 1000));
+        var parts = { days: Math.floor(diff / 86400), hours: Math.floor(diff % 86400 / 3600), minutes: Math.floor(diff % 3600 / 60), seconds: diff % 60 };
+        Object.keys(parts).forEach(function (k) {
+          var el = box.querySelector('[data-unit="' + k + '"]');
+          if (el) el.textContent = String(parts[k]).padStart(2, '0');
+        });
+      }
+      tick();
+      timer = setInterval(tick, 1000);
     }
 
     function onClick(e) {
-      var b = e.target.closest('[data-act]');
-      if (!b) return;
-      var act = b.getAttribute('data-act');
-      var id = b.getAttribute('data-id');
-      if (act === 'upload') { global.App.uploadTests().then(function (changed) { if (changed) render(); }); }
-      else if (act === 'export') {
-        var t = Lib.get(id);
-        if (t) U.download(U.slug(t.title) + '.json', Lib.exportJson(t), 'application/json');
-      }
-      else if (act === 'duplicate') {
-        var src = Lib.get(id);
-        if (!src) return;
-        global.App.pendingDraft = { source: src.source || global.P.toText(src), title: src.title + ' (bản sao)', author: src.author, description: src.description, assets: src.assets };
-        location.hash = '#/builder';
-      }
-      else if (act === 'delete') {
-        var td = Lib.get(id);
-        U.confirm('Xóa đề này?', 'Đề <b>' + U.esc(td && td.title) + '</b> sẽ bị xóa khỏi trình duyệt. Lịch sử làm bài vẫn được giữ lại.', 'Xóa đề', { danger: true })
-          .then(function (ok) {
-            if (!ok) return;
-            Lib.remove(id).then(function () { U.toast('Đã xóa đề.', 'success'); render(); })
-              .catch(function (err) { U.toast('Không xóa được: ' + err.message, 'error'); });
-          });
-      }
-      else if (act === 'del-attempt') {
-        U.confirm('Xóa bài làm này?', 'Kết quả của lần làm bài này sẽ bị xóa vĩnh viễn.', 'Xóa', { danger: true }).then(function (ok) {
-          if (ok) { global.Attempts.remove(id); render(); }
+      var f = e.target.closest('[data-filter]');
+      if (f) {
+        var kind = f.getAttribute('data-filter');
+        filter[kind] = f.getAttribute('data-value');
+        U.$$('[data-filter="' + kind + '"]', root).forEach(function (b) {
+          var on = b.getAttribute('data-value') === filter[kind];
+          b.classList.toggle('is-on', on);
+          b.setAttribute('aria-pressed', String(on));
         });
+        renderGrid();
+        return;
       }
+      var d = e.target.closest('[data-act="dismiss"]');
+      if (d) {
+        U.lsSet(DISMISS_KEY, String(global.APP_CONFIG.announcement || '').trim());
+        var n = root.querySelector('.notice');
+        if (n) n.remove();
+        return;
+      }
+      var row = e.target.closest('[data-href]');
+      if (row && !e.target.closest('a, button')) location.hash = row.getAttribute('data-href');
     }
 
     root.addEventListener('click', onClick);
     render();
-    return function () { root.removeEventListener('click', onClick); };
-  }
-
-  function heroMock() {
-    return '<div class="mock">' +
-      '<div class="mock-head"><div class="mock-l"><i></i><i class="s"></i></div><div class="mock-c"><b>32:47</b><i class="pill"></i></div><div class="mock-r"><i class="ic"></i><i class="ic"></i><i class="ic"></i></div></div>' +
-      '<div class="mock-dash"></div>' +
-      '<div class="mock-body">' +
-      '<div class="mock-q"><div class="mock-qbar"><span class="mock-num">7</span><i class="mock-mark"></i><span class="mock-abc">ABC</span></div>' +
-      '<i class="ln"></i><i class="ln"></i><i class="ln short"></i>' +
-      '<div class="mock-choice"><span>A</span><i></i></div>' +
-      '<div class="mock-choice is-sel"><span>B</span><i></i></div>' +
-      '<div class="mock-choice"><span>C</span><i></i></div>' +
-      '<div class="mock-choice"><span>D</span><i></i></div>' +
-      '</div></div>' +
-      '<div class="mock-dash"></div>' +
-      '<div class="mock-foot"><i class="nm"></i><span class="mock-nav">Question 7 of 25</span><span class="mock-btns"><i></i><i></i></span></div>' +
-      '</div>';
+    return function () {
+      root.removeEventListener('click', onClick);
+      if (timer) clearInterval(timer);
+    };
   }
 
   global.Views = global.Views || {};

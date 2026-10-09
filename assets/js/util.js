@@ -1,4 +1,4 @@
-/* Các hàm tiện ích dùng chung: DOM, định dạng, modal, toast, icon. */
+/* Shared helpers: DOM, formatting, modal, toast, icons. */
 (function (global) {
   'use strict';
 
@@ -27,7 +27,7 @@
 
   U.clamp = function (v, min, max) { return Math.min(max, Math.max(min, v)); };
 
-  /** Định dạng số giây thành mm:ss hoặc h:mm:ss */
+  /** Formats seconds as m:ss or h:mm:ss */
   U.fmtClock = function (sec) {
     sec = Math.max(0, Math.round(sec));
     var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
@@ -35,21 +35,21 @@
     return (h ? h + ':' : '') + mm + ':' + ss;
   };
 
-  /** "1 giờ 5 phút", "12 phút 3 giây" */
+  /** "1 hr 5 min", "12 min 3 sec" */
   U.fmtDuration = function (sec) {
     sec = Math.max(0, Math.round(sec));
     var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
     var parts = [];
-    if (h) parts.push(h + ' giờ');
-    if (m) parts.push(m + ' phút');
-    if (!h && (s || !m)) parts.push(s + ' giây');
+    if (h) parts.push(h + ' hr');
+    if (m) parts.push(m + ' min');
+    if (!h && (s || !m)) parts.push(s + ' sec');
     return parts.join(' ');
   };
 
   U.fmtDate = function (ts) {
     if (!ts) return '';
     try {
-      return new Date(ts).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+      return new Date(ts).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
     } catch (e) { return new Date(ts).toISOString(); }
   };
 
@@ -75,7 +75,7 @@
     return new Promise(function (resolve, reject) {
       var r = new FileReader();
       r.onload = function () { resolve(r.result); };
-      r.onerror = function () { reject(r.error || new Error('Không đọc được file')); };
+      r.onerror = function () { reject(r.error || new Error('Could not read the file')); };
       if (as === 'dataurl') r.readAsDataURL(file); else r.readAsText(file, 'utf-8');
     });
   };
@@ -102,16 +102,16 @@
       var s = document.createElement('script');
       var done = false;
       var timer = setTimeout(function () {
-        if (done) return; done = true; reject(new Error('Hết thời gian tải ' + src));
+        if (done) return; done = true; reject(new Error('Timed out loading ' + src));
       }, timeoutMs || 20000);
       s.src = src; s.async = true;
       s.onload = function () { if (done) return; done = true; clearTimeout(timer); resolve(); };
-      s.onerror = function () { if (done) return; done = true; clearTimeout(timer); s.remove(); reject(new Error('Không tải được ' + src)); };
+      s.onerror = function () { if (done) return; done = true; clearTimeout(timer); s.remove(); reject(new Error('Could not load ' + src)); };
       document.head.appendChild(s);
     });
   };
 
-  /* ---------------- Icons (SVG nội tuyến) ---------------- */
+  /* ---------------- Icons (inline SVG) ---------------- */
   var ICONS = {
     calculator: '<rect x="5" y="2.5" width="14" height="19" rx="2.2"/><rect x="8" y="5.5" width="8" height="3.5" rx=".6"/><circle cx="8.6" cy="12.6" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="12.6" r=".9" fill="currentColor" stroke="none"/><circle cx="15.4" cy="12.6" r=".9" fill="currentColor" stroke="none"/><circle cx="8.6" cy="15.9" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="15.9" r=".9" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.9" r=".9" fill="currentColor" stroke="none"/><circle cx="8.6" cy="19" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r=".9" fill="currentColor" stroke="none"/><circle cx="15.4" cy="19" r=".9" fill="currentColor" stroke="none"/>',
     reference: '<path d="M6 2.5h8.5L19 7v14.5H6z"/><path d="M14.5 2.5V7H19"/><text x="12.4" y="17.6" text-anchor="middle" font-size="8.5" font-family="Georgia,serif" font-style="italic" stroke="none" fill="currentColor">x²</text>',
@@ -187,7 +187,7 @@
   /* ---------------- Modal ---------------- */
   /**
    * U.modal({ title, body (HTML string | Node), actions: [{label, value, kind}], dismissible, wide, className })
-   * Trả về Promise với `value` của nút được bấm (hoặc null khi đóng).
+   * Resolves with the clicked action's `value` (or null when dismissed).
    */
   U.modal = function (opts) {
     opts = opts || {};
@@ -205,7 +205,7 @@
       var html = '';
       if (opts.title) {
         html += '<div class="modal-head"><h2 id="' + titleId + '">' + U.esc(opts.title) + '</h2>';
-        if (opts.dismissible !== false) html += '<button class="icon-btn modal-x" data-modal-close aria-label="Đóng">' + U.icon('close') + '</button>';
+        if (opts.dismissible !== false) html += '<button class="icon-btn modal-x" data-modal-close aria-label="Close">' + U.icon('close') + '</button>';
         html += '</div>';
       }
       html += '<div class="modal-body"></div>';
@@ -259,8 +259,8 @@
       title: title,
       body: '<p>' + message + '</p>',
       actions: [
-        { label: opts.cancelLabel || 'Hủy', value: false, kind: 'ghost' },
-        { label: okLabel || 'Đồng ý', value: true, kind: opts.danger ? 'danger' : 'primary' }
+        { label: opts.cancelLabel || 'Cancel', value: false, kind: 'ghost' },
+        { label: okLabel || 'OK', value: true, kind: opts.danger ? 'danger' : 'primary' }
       ]
     }).then(function (v) { return v === true; });
   };
@@ -269,7 +269,7 @@
     return U.modal({ title: title, body: '<p>' + message + '</p>', actions: [{ label: 'OK', value: true, kind: 'primary' }] });
   };
 
-  /* ---------------- Kéo thả (drag) cho cửa sổ nổi ---------------- */
+  /* ---------------- Dragging for floating panels ---------------- */
   U.makeDraggable = function (panel, handle, opts) {
     opts = opts || {};
     var startX, startY, origX, origY, dragging = false;
@@ -328,7 +328,7 @@
     grip.addEventListener('pointercancel', end);
   };
 
-  /* ---------------- localStorage an toàn ---------------- */
+  /* ---------------- Safe localStorage ---------------- */
   U.lsGet = function (key, fallback) {
     try {
       var raw = localStorage.getItem(key);
