@@ -1,15 +1,16 @@
 /*
- * Đề mẫu: September 2026 (25 câu).
- * File này dùng đúng định dạng văn bản giống trang "Tạo đề" (xem trang Hướng dẫn).
- * Lưu ý: viết nội dung bên trong String.raw`...` — không dùng dấu ` (backtick) trong đề.
+ * Practice test: September 2026 (25 questions).
+ * Written in the same text format as the admin builder (see the "Syntax" guide there).
+ * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
  */
 SATLibrary.register({
   id: 'september-2026',
   source: String.raw`
 ---
-title: September 2026
+title: SAT Math September 2026
 author: tungtks18022
-description: Đề luyện tập SAT Math gồm 25 câu, trộn trắc nghiệm và điền đáp án.
+date: 2026-09
+description: A 25-question SAT Math practice set mixing multiple-choice and student-produced response questions.
 time: 40
 ---
 

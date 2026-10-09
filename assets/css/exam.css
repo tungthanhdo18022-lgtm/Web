@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Màn hình làm bài — mô phỏng giao diện Bluebook (Digital SAT)
+   Exam screen — Bluebook-style (Digital SAT) testing interface
    ========================================================================== */
 
 :root {
@@ -66,7 +66,7 @@
 .bb-menu button:hover { background: #f1f3f8; }
 .bb-menu .ico { width: 19px; height: 19px; color: var(--bb-gray); }
 
-/* Đường gạch ngang đặc trưng */
+/* Signature dashed divider line */
 .bb-dashline {
   flex: none; height: 3px;
   background: repeating-linear-gradient(90deg, #2b2b2b 0 10px, transparent 10px 15px);
@@ -128,7 +128,7 @@
 
 .bb-prompt { margin-bottom: 22px; }
 
-/* Lựa chọn */
+/* Answer choices */
 .bb-choices { display: grid; gap: 14px; }
 .bb-choice-row { display: flex; align-items: center; gap: 12px; position: relative; }
 .bb-choice {
@@ -165,7 +165,7 @@
   text-decoration: underline; color: var(--bb-ink);
 }
 
-/* ---------------- Câu điền: chia đôi màn hình ---------------- */
+/* ---------------- Student-produced response: split screen ---------------- */
 .bb-stage--split { --split: 50%; display: grid; grid-template-columns: var(--split) 14px 1fr; height: 100%; }
 .bb-stage--split.is-resizing { user-select: none; cursor: col-resize; }
 .bb-pane { min-width: 0; overflow: auto; }
@@ -198,7 +198,7 @@
 .bb-spr-preview { margin-top: 14px; font-size: 15px; font-weight: 600; min-height: 34px; display: flex; align-items: center; gap: 8px; }
 .bb-spr-preview-val { font-family: var(--font-serif); font-weight: 400; font-size: 19px; }
 
-/* ---------------- Trang Check Your Work ---------------- */
+/* ---------------- Check Your Work page ---------------- */
 .bb-review { max-width: 920px; margin: 0 auto; padding: 34px 24px 48px; text-align: center; }
 .bb-review h1 { font-size: 30px; font-weight: 700; margin-bottom: 14px; }
 .bb-review > p { margin: 0 0 4px; font-size: 16px; }
@@ -211,7 +211,7 @@
 .bb-review-stat { margin: 18px 0 0; color: var(--bb-gray); font-size: 14px; }
 .bb-review-warn { color: #b45309; font-weight: 700; }
 
-/* ---------------- Lưới câu hỏi ---------------- */
+/* ---------------- Question grid ---------------- */
 .bb-legend { display: flex; justify-content: center; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 13.5px; font-weight: 600; }
 .bb-legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .bb-legend-pin .ico { width: 18px; height: 18px; color: var(--bb-ink); }
@@ -256,7 +256,7 @@
 .bb-btn--outline { background: #fff; color: var(--bb-blue); border-color: var(--bb-blue); }
 .bb-btn--outline:hover { background: #f3f5ff; }
 
-/* Bảng điều hướng (Question X of Y) */
+/* Question navigator (Question X of Y) */
 .bb-navpop {
   position: absolute; bottom: calc(100% + 22px); left: 50%; transform: translateX(-50%); z-index: 65;
   width: min(600px, calc(100vw - 24px)); max-height: calc(100vh - 200px); overflow: auto;
@@ -272,7 +272,7 @@
 .bb-icon-btn:hover { background: rgba(0, 0, 0, .07); }
 .bb-icon-btn .ico { width: 19px; height: 19px; }
 
-/* ---------------- Cửa sổ nổi: Calculator / Reference ---------------- */
+/* ---------------- Floating panels: Calculator / Reference ---------------- */
 .bb-float {
   position: fixed; z-index: 80; display: flex; flex-direction: column; overflow: hidden;
   background: #fff; border-radius: 12px; box-shadow: 0 24px 60px -16px rgba(0, 0, 0, .5), 0 0 0 1px rgba(0, 0, 0, .1);
@@ -326,7 +326,8 @@
   .bb-pill-sm { min-height: 22px; padding: 1px 10px; font-size: 11.5px; }
   .bb-h-right { gap: 0; }
   .bb-tool { min-width: 40px; padding: 6px 6px; }
-  .bb-tool span { display: none; }
+  /* Visually hidden, but still gives the icon-only buttons an accessible name */
+  .bb-tool span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .bb-directions { top: 67px; padding: 0; }
   .bb-directions-body { padding: 18px 18px 6px; font-size: 15.5px; }
   .bb-stage--single { padding: 18px 16px 36px; }
@@ -352,4 +353,8 @@
   .bb-review h1 { font-size: 24px; }
   .bb-review-card { padding: 16px 14px 20px; }
   .bb-float { left: 8px !important; right: 8px !important; width: auto !important; top: 72px !important; height: calc(100vh - 150px) !important; }
+  /* Keep the calculator's Graphing/Scientific switch and close button inside 320–375px screens */
+  .bb-float--calc .bb-float-title { display: none; }
+  .bb-seg { margin-left: 4px; }
+  .bb-float-head .bb-icon-btn { flex: none; }
 }

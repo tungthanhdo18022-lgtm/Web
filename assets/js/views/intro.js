@@ -1,4 +1,4 @@
-/* Trang giới thiệu đề trước khi làm bài. */
+/* Test details page shown before starting a test. */
 (function (global) {
   'use strict';
 
@@ -6,9 +6,9 @@
 
   function IntroView(root, params) {
     var test = global.SATLibrary.get(params.id);
-    if (!test) {
+    if (!test || (!test.builtin && !(global.Admin && global.Admin.isAdmin()))) {
       root.innerHTML = '<div class="page narrow"><div class="empty-state">' + U.icon('warn') +
-        '<h2>Không tìm thấy đề</h2><p>Đề này không tồn tại hoặc đã bị xóa.</p><a class="btn btn--primary" href="#/">Về thư viện</a></div></div>';
+        '<h2>Test not found</h2><p>This test does not exist or is no longer available.</p><a class="btn btn--primary" href="#/">Back to practice tests</a></div></div>';
       return null;
     }
     var A = global.Attempts;
@@ -18,72 +18,79 @@
     function render() {
       var prog = A.inProgress(test.id);
       var done = A.forTest(test.id).filter(function (a) { return a.status === 'completed' && a.result; });
-      var mcq = 0, spr = 0;
-      test.modules.forEach(function (m) { m.questions.forEach(function (q) { if (q.type === 'mcq') mcq++; else spr++; }); });
 
       var progInfo = '';
       if (prog) {
-        var m = test.modules[prog.moduleIndex] || test.modules[0];
-        var ms = prog.modules[prog.moduleIndex] || { elapsed: 0, current: 0 };
+        var mi = Math.min(prog.moduleIndex || 0, test.modules.length - 1);
+        var m = test.modules[mi];
+        var ms = prog.modules[mi] || { elapsed: 0, current: 0 };
         var left = prog.timed ? Math.max(0, (m.time * 60) - (ms.elapsed || 0)) : null;
-        progInfo = 'Đang ở câu ' + ((ms.current || 0) + 1) + '/' + m.questions.length +
-          (test.modules.length > 1 ? ' (module ' + (prog.moduleIndex + 1) + ')' : '') +
-          ' · đã trả lời ' + Object.keys(prog.answers || {}).length + ' câu' +
-          (left != null ? ' · còn ' + U.fmtClock(left) : ' · không tính giờ');
+        progInfo = 'Question ' + ((ms.current || 0) + 1) + ' of ' + m.questions.length +
+          (test.modules.length > 1 ? ' (module ' + (mi + 1) + ')' : '') +
+          ' · ' + Object.keys(prog.answers || {}).length + ' answered' +
+          (left != null ? ' · ' + U.fmtClock(left) + ' left' : ' · untimed');
       }
 
       root.innerHTML =
-        '<div class="page narrow">' +
-        '<a class="back-link" href="#/">' + U.icon('chevronLeft') + 'Thư viện đề</a>' +
-        '<div class="intro-card">' +
-        '<div class="intro-head">' +
-        '<div class="intro-icon">' + U.icon('sigma') + '</div>' +
-        '<div><h1>' + U.esc(test.title || 'Đề không tên') + '</h1>' +
-        '<p class="muted">' + (test.author ? 'Tác giả: ' + U.esc(test.author) : 'SAT Math') + '</p></div>' +
-        '</div>' +
-        (test.description ? '<p class="intro-desc">' + U.esc(test.description) + '</p>' : '') +
+        '<div class="page">' +
+        '<a class="back-link" href="#/">' + U.icon('chevronLeft') + 'All practice tests</a>' +
+        '<div class="detail">' +
+        '<div class="card detail-main">' +
+        '<div class="exam-card-pills"><span class="pill pill--blue">Total: ' + test.questionCount + '</span>' +
+        '<span class="pill">MCQ: ' + test.mcqCount + '</span><span class="pill">SPR: ' + test.sprCount + '</span>' +
+        (test.builtin ? '' : '<span class="badge badge--amber">Draft — only visible to you</span>') + '</div>' +
+        '<h1>' + U.esc(test.title || 'Untitled test') + '</h1>' +
+        (test.author ? '<p class="muted">By ' + U.esc(test.author) + '</p>' : '') +
+        (test.description ? '<p class="detail-desc">' + U.esc(test.description) + '</p>' : '') +
         '<div class="facts">' +
-        fact('Số câu', test.questionCount) +
-        fact('Thời gian', Math.round(test.totalTime) + ' phút') +
-        fact('Trắc nghiệm', mcq) +
-        fact('Điền đáp án', spr) +
-        (test.modules.length > 1 ? fact('Module', test.modules.length) : '') +
+        fact('Questions', test.questionCount) +
+        fact('Time limit', Math.round(test.totalTime) + ' min') +
+        fact('Multiple choice', test.mcqCount) +
+        fact('Student response', test.sprCount) +
+        (test.modules.length > 1 ? fact('Modules', test.modules.length) : '') +
         '</div>' +
-        (test.modules.length > 1 ? '<ol class="module-list">' + test.modules.map(function (m) {
-          return '<li><b>' + U.esc(m.title) + '</b><span>' + m.questions.length + ' câu · ' + m.time + ' phút</span></li>';
+        (test.modules.length > 1 ? '<ol class="module-list">' + test.modules.map(function (mm) {
+          return '<li><b>' + U.esc(mm.title) + '</b><span>' + mm.questions.length + ' questions · ' + mm.time + ' min</span></li>';
         }).join('') + '</ol>' : '') +
 
-        (prog ? '<div class="alert alert--info">' + U.icon('history') + '<div><b>Bạn có một bài đang làm dở.</b><br>' + progInfo + '</div></div>' : '') +
+        (prog ? '<div class="alert alert--info">' + U.icon('history') + '<div><b>You have a test in progress.</b><br>' + progInfo + '</div></div>' : '') +
 
         '<div class="form-grid">' +
-        '<label class="field"><span class="field-label">Tên hiển thị khi làm bài</span>' +
-        '<input id="intro-name" type="text" maxlength="40" placeholder="Ví dụ: Nguyễn Văn A" value="' + U.esc(settings.name || '') + '"></label>' +
-        '<div class="field"><span class="field-label">Chế độ</span><div class="mode-pick" role="radiogroup">' +
-        modeCard('timed', 'Tính giờ', Math.round(test.totalTime) + ' phút, tự nộp khi hết giờ — giống thi thật', U.icon('clock')) +
-        modeCard('untimed', 'Không tính giờ', 'Đồng hồ đếm lên, làm thoải mái để luyện', U.icon('book')) +
+        '<label class="field"><span class="field-label">Your name (shown during the test)</span>' +
+        '<input id="intro-name" type="text" maxlength="40" autocomplete="name" placeholder="e.g. Alex Nguyen" value="' + U.esc(settings.name || '') + '"></label>' +
+        '<div class="field"><span class="field-label">Mode</span><div class="mode-pick" role="radiogroup" aria-label="Mode">' +
+        modeCard('timed', 'Timed', Math.round(test.totalTime) + ' minutes, submits automatically when time runs out — like test day.', U.icon('clock')) +
+        modeCard('untimed', 'Untimed', 'The clock counts up. Take your time and focus on accuracy.', U.icon('book')) +
         '</div></div>' +
         '</div>' +
 
-        '<ul class="tool-list">' +
-        '<li>' + U.icon('calculator') + '<span><b>Máy tính Desmos</b> Graphing &amp; Scientific</span></li>' +
-        '<li>' + U.icon('reference') + '<span><b>Reference</b> tờ công thức SAT</span></li>' +
-        '<li>' + U.icon('bookmark') + '<span><b>Mark for Review</b> đánh dấu câu</span></li>' +
-        '<li><span class="abc-mini">ABC</span><span><b>Cross out</b> gạch bỏ đáp án</span></li>' +
-        '</ul>' +
-
-        '<div class="intro-actions">' +
+        '<div class="detail-actions">' +
         (prog
-          ? '<a class="btn btn--primary btn--lg" href="#/exam/' + encodeURIComponent(prog.id) + '">' + U.icon('play') + 'Tiếp tục làm bài</a>' +
-          '<button class="btn btn--ghost btn--lg" data-act="restart">' + U.icon('refresh') + 'Làm lại từ đầu</button>'
-          : '<button class="btn btn--primary btn--lg" data-act="start">' + U.icon('play') + 'Bắt đầu làm bài</button>') +
+          ? '<a class="btn btn--primary btn--lg" href="#/exam/' + encodeURIComponent(prog.id) + '">' + U.icon('play') + 'Resume Exam</a>' +
+          '<button class="btn btn--ghost btn--lg" data-act="restart">' + U.icon('refresh') + 'Start Over</button>'
+          : '<button class="btn btn--primary btn--lg" data-act="start">' + U.icon('play') + 'Start Exam</button>') +
         '</div>' +
         '</div>' +
 
-        (done.length ? '<div class="section"><h2 class="h3">Các lần làm trước</h2><div class="attempt-list">' +
+        '<aside class="card side-card">' +
+        '<h3>Testing tools</h3>' +
+        '<ul class="tool-list">' +
+        '<li>' + U.icon('calculator') + '<span><b>Desmos calculator</b>Graphing and scientific</span></li>' +
+        '<li>' + U.icon('reference') + '<span><b>Reference sheet</b>SAT Math formulas</span></li>' +
+        '<li>' + U.icon('bookmark') + '<span><b>Mark for Review</b>Flag questions to revisit</span></li>' +
+        '<li><span class="abc-mini">ABC</span><span><b>Answer eliminator</b>Cross out choices</span></li>' +
+        '<li>' + U.icon('grid') + '<span><b>Question navigator</b>Jump to any question</span></li>' +
+        '</ul>' +
+        '<p class="muted" style="margin:16px 0 0;font-size:13px">Your answers are saved automatically. You can leave and resume later on this device.</p>' +
+        '</aside>' +
+        '</div>' +
+
+        (done.length ? '<div class="section"><h2 class="h3">Previous attempts</h2><div class="attempt-list">' +
           done.map(function (a) {
+            var p = a.result.percent;
             return '<a class="attempt-row" href="#/results/' + encodeURIComponent(a.id) + '">' +
-              '<span class="score-pill ' + (a.result.percent >= 80 ? 'is-good' : a.result.percent >= 50 ? 'is-mid' : 'is-low') + '">' + a.result.correct + '/' + a.result.total + '</span>' +
-              '<span class="attempt-row-main"><b>' + U.fmtDate(a.finishedAt) + '</b><span>' + (a.timed ? 'Tính giờ' : 'Không tính giờ') + ' · ' + U.fmtDuration(a.totalElapsed || 0) + ' · ước tính ' + a.result.estimated + '</span></span>' +
+              '<span class="score-pill ' + (p >= 80 ? 'is-good' : p >= 50 ? 'is-mid' : 'is-low') + '">' + a.result.correct + '/' + a.result.total + '</span>' +
+              '<span class="attempt-row-main"><b>' + U.fmtDate(a.finishedAt) + '</b><span>' + (a.timed ? 'Timed' : 'Untimed') + ' · ' + U.fmtDuration(a.totalElapsed || 0) + ' · est. ' + a.result.estimated + '</span></span>' +
               U.icon('chevronRight') + '</a>';
           }).join('') + '</div></div>' : '') +
         '</div>';
@@ -122,7 +129,7 @@
       var act = b.getAttribute('data-act');
       if (act === 'start') start();
       if (act === 'restart') {
-        U.confirm('Làm lại từ đầu?', 'Bài đang làm dở sẽ bị xóa và bạn bắt đầu một bài mới.', 'Làm lại', { danger: true }).then(function (ok) {
+        U.confirm('Start over?', 'Your current progress on this test will be discarded and a new attempt will begin.', 'Start Over', { danger: true }).then(function (ok) {
           if (!ok) return;
           var p = A.inProgress(test.id);
           if (p) A.remove(p.id);
@@ -131,9 +138,18 @@
       }
     }
 
+    function onKey(e) {
+      if (e.key === 'Enter' && e.target && e.target.id === 'intro-name') {
+        e.preventDefault();
+        var btn = root.querySelector('[data-act="start"]');
+        if (btn) btn.click();
+      }
+    }
+
     root.addEventListener('click', onClick);
+    root.addEventListener('keydown', onKey);
     render();
-    return function () { root.removeEventListener('click', onClick); };
+    return function () { root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
   }
 
   global.Views = global.Views || {};

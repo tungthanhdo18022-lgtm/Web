@@ -1,4 +1,4 @@
-/* Tờ công thức tham khảo (Reference Sheet) của SAT Math. */
+/* SAT Math reference sheet shown in the exam's Reference panel. */
 (function (global) {
   'use strict';
 

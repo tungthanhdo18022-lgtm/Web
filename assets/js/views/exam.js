@@ -1,4 +1,4 @@
-/* Màn hình làm bài – mô phỏng giao diện Bluebook (Digital SAT). */
+/* Exam screen: a Bluebook-style (Digital SAT) testing interface. */
 (function (global) {
   'use strict';
 
@@ -39,12 +39,13 @@
 
   function ExamView(root, params) {
     var attempt = global.Attempts.get(params.id);
-    if (!attempt) return notFound(root, 'Không tìm thấy bài làm này.');
+    if (!attempt) return notFound(root, 'This test attempt could not be found.');
     if (attempt.status === 'completed') { location.replace('#/results/' + attempt.id); return null; }
     var test = global.SATLibrary.get(attempt.testId);
-    if (!test) return notFound(root, 'Đề thi của bài làm này không còn tồn tại (có thể đã bị xóa).');
+    if (!test) return notFound(root, 'The test for this attempt is no longer available. It may have been deleted.');
+    if (!test.modules || !test.modules.length) return notFound(root, 'This test has no questions.');
 
-    // Đồng bộ cấu trúc nếu đề thay đổi sau khi bắt đầu
+    // Keep the attempt in sync if the test's structure changed after it was started
     while (attempt.modules.length < test.modules.length) attempt.modules.push({ elapsed: 0, current: 0, review: false, done: false });
     attempt.moduleIndex = U.clamp(attempt.moduleIndex || 0, 0, test.modules.length - 1);
 
@@ -58,7 +59,8 @@
       moreOpen: false,
       splitPct: U.clamp(+settings.splitPct || 50, 25, 75),
       warned: false,
-      ended: false
+      ended: false,
+      leaving: false
     };
     var mi, mod, ms;
     var timerId = null, lastTick = 0, lastSave = 0;
@@ -67,8 +69,20 @@
 
     function setModule(i) {
       mi = i; mod = test.modules[mi]; ms = attempt.modules[mi];
-      ms.current = U.clamp(ms.current || 0, 0, mod.questions.length - 1);
+      ms.current = U.clamp(ms.current || 0, 0, Math.max(0, mod.questions.length - 1));
       ui.warned = remaining() <= (global.APP_CONFIG.timeWarningSeconds || 300);
+    }
+
+    // Defensive: skip modules that have no questions. Returns false when no module with
+    // questions is left (the caller should submit instead).
+    function skipEmptyModules() {
+      while (!mod.questions.length) {
+        ms.done = true;
+        if (mi >= test.modules.length - 1) return false;
+        attempt.moduleIndex = mi + 1;
+        setModule(mi + 1);
+      }
+      return true;
     }
 
     function limitSec() { return Math.round((mod.time || 0) * 60); }
@@ -76,14 +90,40 @@
     function remaining() { return limitSec() - (ms.elapsed || 0); }
     function q() { return mod.questions[ms.current]; }
 
+    function getStored() {
+      return global.Attempts.getStored ? global.Attempts.getStored(attempt.id) : global.Attempts.get(attempt.id);
+    }
+    // Only treat a missing stored copy as "deleted elsewhere" once this attempt has actually been
+    // written to storage (when storage is full it may only exist in this tab's memory).
+    var everStored = !!getStored();
+
     function save(force) {
       var now = Date.now();
       if (!force && now - lastSave < 1500) return;
       lastSave = now;
-      if (!global.Attempts.save(attempt)) U.toast('Không lưu được tiến độ (bộ nhớ trình duyệt đầy).', 'error');
+      var res = global.Attempts.save(attempt);
+      if (res === 'stale') endedElsewhere(false);
+      else if (!res) U.toast('Couldn’t save your progress: browser storage is full.', 'error');
+      else everStored = true;
     }
 
-    /* ---------------- Khung giao diện ---------------- */
+    // Another tab submitted (or deleted) this attempt: stop here so this tab can't overwrite it.
+    function endedElsewhere(deleted) {
+      if (ui.ended) return;
+      ui.ended = true;
+      stopTimer();
+      U.toast(deleted ? 'This test was deleted in another tab.' : 'This test was submitted in another tab.', 'info', 5000);
+      if (!ui.leaving) location.hash = deleted ? '#/' : '#/results/' + encodeURIComponent(attempt.id);
+    }
+
+    function onStorage(e) {
+      if (ui.ended || (e.storageArea && e.storageArea !== global.localStorage)) return;
+      var stored = getStored();
+      if (!stored) { if (everStored) endedElsewhere(true); }
+      else if (stored.status === 'completed') endedElsewhere(false);
+    }
+
+    /* ---------------- Layout ---------------- */
     root.innerHTML =
       '<div class="bb" id="bb">' +
       '<header class="bb-header">' +
@@ -96,9 +136,9 @@
       '    <button class="bb-pill-sm" data-act="timer" id="bb-timer-btn">Hide</button>' +
       '  </div>' +
       '  <div class="bb-h-right">' +
-      '    <button class="bb-tool" data-act="calc" id="bb-calc-btn">' + U.icon('calculator') + '<span>Calculator</span></button>' +
-      '    <button class="bb-tool" data-act="ref" id="bb-ref-btn">' + U.icon('reference') + '<span>Reference</span></button>' +
-      '    <div class="bb-more-wrap"><button class="bb-tool" data-act="more" id="bb-more-btn" aria-haspopup="menu" aria-expanded="false">' + U.icon('more') + '<span>More</span></button>' +
+      '    <button class="bb-tool" data-act="calc" id="bb-calc-btn" aria-label="Calculator">' + U.icon('calculator') + '<span>Calculator</span></button>' +
+      '    <button class="bb-tool" data-act="ref" id="bb-ref-btn" aria-label="Reference">' + U.icon('reference') + '<span>Reference</span></button>' +
+      '    <div class="bb-more-wrap"><button class="bb-tool" data-act="more" id="bb-more-btn" aria-label="More" aria-haspopup="menu" aria-expanded="false">' + U.icon('more') + '<span>More</span></button>' +
       '      <div class="bb-menu" id="bb-more-menu" role="menu" hidden>' +
       '        <button role="menuitem" data-act="help">' + U.icon('help') + 'Help</button>' +
       '        <button role="menuitem" data-act="exit">' + U.icon('logout') + 'Save and Exit</button>' +
@@ -254,6 +294,7 @@
     }
 
     function moduleName() {
+      // Titles that already name the module are shown as-is ("Phần" covers older Vietnamese tests)
       return /^(module|section|phần|part)\b/i.test(mod.title) ? mod.title : 'Module ' + (mi + 1) + ': ' + mod.title;
     }
 
@@ -308,7 +349,7 @@
       renderFooter();
     }
 
-    /* ---------------- Điều hướng ---------------- */
+    /* ---------------- Navigation ---------------- */
     function goTo(i) {
       ms.review = false;
       ms.current = U.clamp(i, 0, mod.questions.length - 1);
@@ -351,15 +392,19 @@
           (unanswered ? 'You have <b>' + unanswered + ' unanswered</b> question' + (unanswered > 1 ? 's' : '') + '. ' : '') +
           'You won’t be able to return to this module.', 'Continue', { cancelLabel: 'Keep Working' });
       }
+      var from = mi;
       return p.then(function (ok) {
-        if (!ok) return;
+        // A dialog answered late (after time ran out, the module changed, or the test ended) must not act.
+        if (!ok || ui.ended || mi !== from || (ms.done && !timeUp)) return;
         ms.done = true;
         if (last) return submit();
         attempt.moduleIndex = mi + 1;
         setModule(mi + 1);
+        if (!skipEmptyModules()) return submit();
         ms.review = false;
         ui.navOpen = false; ui.elimMode = false;
         save(true);
+        if (ui.ended) return;
         renderAll();
         startTimer();
         openDirections(true);
@@ -368,6 +413,9 @@
 
     function submit() {
       if (ui.ended) return;
+      // Never overwrite a result that another tab already submitted
+      var stored = getStored();
+      if (stored && stored.status === 'completed') return endedElsewhere(false);
       ui.ended = true;
       stopTimer();
       attempt.modules.forEach(function (m) { m.done = true; });
@@ -383,9 +431,10 @@
       location.hash = '#/results/' + attempt.id;
     }
 
-    /* ---------------- Đồng hồ ---------------- */
+    /* ---------------- Timer ---------------- */
     function startTimer() {
       stopTimer();
+      if (ui.ended) return;
       lastTick = performance.now();
       timerId = setInterval(tick, 250);
     }
@@ -402,7 +451,8 @@
         if (!ui.warned && r <= warnAt && r > 0 && limitSec() > warnAt) {
           ui.warned = true;
           if (ui.timerHidden) ui.timerHidden = false;
-          U.toast(Math.round(warnAt / 60) + ' minutes remaining in this module.', 'info', 4500);
+          var warnMin = Math.round(warnAt / 60);
+          U.toast(warnMin + (warnMin === 1 ? ' minute' : ' minutes') + ' remaining in this module.', 'info', 4500);
         }
         if (r <= 0) {
           ms.elapsed = limitSec();
@@ -417,9 +467,17 @@
 
     function timeUp() {
       stopTimer();
+      if (ui.ended || ui.leaving) return;
       closeAllPops();
+      // Dismiss any dialog still open (e.g. "Move on to the next module?") so its buttons can't act later
+      U.$$('.modal-overlay').forEach(function (m) {
+        var x = m.querySelector('[data-modal-close]');
+        if (x) x.click();
+        m.remove();
+      });
       var last = mi >= test.modules.length - 1;
       save(true);
+      if (ui.ended) return;
       U.modal({
         title: 'Time’s up!',
         body: '<p>Time for this module has run out. Your answers have been saved.</p>' +
@@ -452,10 +510,12 @@
       els.moreBtn.classList.toggle('is-active', ui.moreOpen);
     }
 
-    /* ---------------- Máy tính Desmos ---------------- */
+    /* ---------------- Floating panels: Desmos calculator / Reference ---------------- */
     function buildFloat(kind, title, extraHead) {
       var el = document.createElement('div');
       el.className = 'bb-float bb-float--' + kind;
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-label', title);
       el.innerHTML =
         '<div class="bb-float-head">' +
         '<span class="bb-float-grip">' + U.icon('drag') + '</span>' +
@@ -469,6 +529,36 @@
       return el;
     }
 
+    // Keep a floating panel reachable after the window shrinks (expanded/hidden panels are skipped).
+    function keepInView(el) {
+      if (!el || el.hidden || el.classList.contains('is-expanded')) return;
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var cur = parseFloat(el.style.width) || el.offsetWidth;
+      // Remember the width the student chose (anything we didn't set ourselves) so the panel
+      // grows back to it when the window widens again.
+      var autoW = parseFloat(el.getAttribute('data-auto-w'));
+      if (isNaN(autoW) || Math.abs(cur - autoW) > 1) el.setAttribute('data-pref-w', cur);
+      var w = Math.min(parseFloat(el.getAttribute('data-pref-w')) || cur, Math.max(0, vw - 16));
+      if (Math.abs(w - cur) > 0.5) el.style.width = w + 'px';
+      el.setAttribute('data-auto-w', w);
+      var rect = el.getBoundingClientRect();
+      var left = parseFloat(el.style.left), top = parseFloat(el.style.top);
+      if (isNaN(left)) left = rect.left;
+      if (isNaN(top)) top = rect.top;
+      el.style.left = U.clamp(left, 8, Math.max(8, vw - w - 8)) + 'px';
+      el.style.top = U.clamp(top, 8, Math.max(8, vh - 60)) + 'px';
+    }
+
+    function onResize() {
+      keepInView(calc.el);
+      keepInView(ref.el);
+    }
+
+    function setExpandButton(btn, big) {
+      btn.innerHTML = U.icon(big ? 'collapse' : 'expand');
+      btn.setAttribute('aria-label', big ? 'Collapse' : 'Expand');
+    }
+
     function resizeCalcs() {
       try { if (calc.graphing) calc.graphing.resize(); } catch (e) { /* ignore */ }
       try { if (calc.scientific) calc.scientific.resize(); } catch (e) { /* ignore */ }
@@ -477,10 +567,10 @@
     function toggleCalc(force) {
       if (!calc.el) {
         calc.el = buildFloat('calc', 'Calculator',
-          '<div class="bb-seg" role="tablist"><button class="is-on" data-calc="graphing" role="tab">Graphing</button><button data-calc="scientific" role="tab">Scientific</button></div>');
+          '<div class="bb-seg" role="tablist" aria-label="Calculator type"><button class="is-on" data-calc="graphing" role="tab" aria-selected="true">Graphing</button><button data-calc="scientific" role="tab" aria-selected="false">Scientific</button></div>');
         var body = calc.el.querySelector('.bb-float-body');
         body.innerHTML = '<div class="calc-host" id="calc-graphing"></div><div class="calc-host" id="calc-scientific" hidden></div>' +
-          '<div class="calc-msg" id="calc-msg"><div class="spinner"></div><p>Đang tải máy tính Desmos…</p></div>';
+          '<div class="calc-msg" id="calc-msg"><div class="spinner"></div><p>Loading the Desmos calculator…</p></div>';
         var vw = window.innerWidth, vh = window.innerHeight;
         calc.el.style.left = '16px';
         calc.el.style.top = '84px';
@@ -493,7 +583,8 @@
           if (f && f.getAttribute('data-float') === 'close') toggleCalc(false);
           if (f && f.getAttribute('data-float') === 'expand') {
             var big = calc.el.classList.toggle('is-expanded');
-            f.innerHTML = U.icon(big ? 'collapse' : 'expand');
+            setExpandButton(f, big);
+            if (!big) keepInView(calc.el);
             setTimeout(resizeCalcs, 60);
           }
         });
@@ -505,12 +596,16 @@
       calc.open = force != null ? force : !calc.open;
       calc.el.hidden = !calc.open;
       els.calcBtn.classList.toggle('is-active', calc.open);
-      if (calc.open) ensureDesmos();
+      if (calc.open) { keepInView(calc.el); ensureDesmos(); }
     }
 
     function setCalcMode(mode) {
       calc.mode = mode;
-      U.$$('[data-calc]', calc.el).forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-calc') === mode); });
+      U.$$('[data-calc]', calc.el).forEach(function (b) {
+        var on = b.getAttribute('data-calc') === mode;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-selected', String(on));
+      });
       document.getElementById('calc-graphing').hidden = mode !== 'graphing';
       document.getElementById('calc-scientific').hidden = mode !== 'scientific';
       ensureDesmos();
@@ -540,12 +635,12 @@
         var msg = document.getElementById('calc-msg');
         if (msg) {
           msg.hidden = false;
-          msg.innerHTML = '<p><b>Không tải được máy tính Desmos.</b></p><p>Hãy kiểm tra kết nối Internet rồi thử lại, hoặc mở Desmos trong tab mới.</p>' +
-            '<div class="calc-msg-actions"><button class="bb-btn bb-btn--primary" data-calc-retry>Thử lại</button>' +
-            '<a class="bb-btn bb-btn--outline" href="https://www.desmos.com/calculator" target="_blank" rel="noopener">Mở Desmos</a></div>';
+          msg.innerHTML = '<p><b>The Desmos calculator couldn’t load.</b></p><p>Check your internet connection and try again, or open Desmos in a new tab.</p>' +
+            '<div class="calc-msg-actions"><button class="bb-btn bb-btn--primary" data-calc-retry>Try Again</button>' +
+            '<a class="bb-btn bb-btn--outline" href="https://www.desmos.com/calculator" target="_blank" rel="noopener">Open Desmos</a></div>';
           var retry = msg.querySelector('[data-calc-retry]');
           if (retry) retry.addEventListener('click', function () {
-            msg.innerHTML = '<div class="spinner"></div><p>Đang tải máy tính Desmos…</p>';
+            msg.innerHTML = '<div class="spinner"></div><p>Loading the Desmos calculator…</p>';
             ensureDesmos();
           });
         }
@@ -567,16 +662,18 @@
           if (f && f.getAttribute('data-float') === 'close') toggleRef(false);
           if (f && f.getAttribute('data-float') === 'expand') {
             var big = ref.el.classList.toggle('is-expanded');
-            f.innerHTML = U.icon(big ? 'collapse' : 'expand');
+            setExpandButton(f, big);
+            if (!big) keepInView(ref.el);
           }
         });
       }
       ref.open = force != null ? force : !ref.open;
       ref.el.hidden = !ref.open;
       els.refBtn.classList.toggle('is-active', ref.open);
+      if (ref.open) keepInView(ref.el);
     }
 
-    /* ---------------- Thanh chia đôi màn hình (câu điền) ---------------- */
+    /* ---------------- Split-pane divider (student-produced response questions) ---------------- */
     function bindDivider() {
       var div = document.getElementById('bb-divider');
       var stage = els.main.querySelector('.bb-stage--split');
@@ -605,14 +702,16 @@
           stage.style.setProperty('--split', ui.splitPct + '%');
           global.Settings.set({ splitPct: Math.round(ui.splitPct) });
           e.preventDefault();
+          e.stopPropagation(); // arrow keys resize the panes here; they must not change the question
         }
       });
     }
 
-    /* ---------------- Xử lý sự kiện ---------------- */
+    /* ---------------- Event handling ---------------- */
     function onClick(e) {
+      if (ui.ended) return;
       var t = e.target.closest('[data-act]');
-      // Đóng popover khi bấm ra ngoài
+      // Close popovers when clicking outside them
       if (ui.navOpen && !e.target.closest('#bb-navpop') && !e.target.closest('#bb-navbtn')) { ui.navOpen = false; renderFooter(); }
       if (ui.moreOpen && !e.target.closest('.bb-more-wrap')) toggleMore(false);
       if (!t || !els.bb.contains(t)) return;
@@ -686,6 +785,7 @@
         case 'exit':
           toggleMore(false);
           save(true);
+          if (ui.ended) break; // submitted in another tab: endedElsewhere() already navigated
           location.hash = '#/test/' + encodeURIComponent(test.id);
           break;
         case 'submit-now':
@@ -725,7 +825,7 @@
     }
 
     function onKey(e) {
-      if (document.querySelector('.modal-overlay')) return;
+      if (e.defaultPrevented || ui.ended || document.querySelector('.modal-overlay')) return;
       if (e.key === 'Escape') {
         if (ui.navOpen || ui.dirOpen || ui.moreOpen) { closeAllPops(); e.preventDefault(); }
         return;
@@ -738,26 +838,47 @@
       else if (e.key === 'ArrowLeft') { if (ms.review || ms.current > 0) back(); e.preventDefault(); }
     }
 
-    function onVisibility() { save(true); }
+    function onVisibility() { if (!ui.ended) save(true); }
 
     function showHelp() {
+      var warnMin = Math.round((global.APP_CONFIG.timeWarningSeconds || 300) / 60);
       U.modal({
         title: 'Help',
         wide: true,
         body:
           '<div class="help-grid">' +
-          '<div><h4>' + U.icon('bookmark') + ' Mark for Review</h4><p>Đánh dấu câu để xem lại. Câu được đánh dấu có cờ đỏ trong bảng điều hướng.</p></div>' +
-          '<div><h4><span class="abc-mini">ABC</span> Cross out</h4><p>Bật chế độ gạch bỏ, rồi bấm vào chữ cái bên phải mỗi lựa chọn để loại trừ đáp án.</p></div>' +
-          '<div><h4>' + U.icon('calculator') + ' Calculator</h4><p>Máy tính Desmos (Graphing / Scientific). Kéo thanh tiêu đề để di chuyển, kéo góc dưới để đổi kích thước.</p></div>' +
-          '<div><h4>' + U.icon('reference') + ' Reference</h4><p>Tờ công thức SAT Math.</p></div>' +
-          '<div><h4>' + U.icon('clock') + ' Timer</h4><p>Bấm <b>Hide</b> để ẩn đồng hồ. Khi còn 5 phút đồng hồ sẽ hiện lại và báo nhắc.</p></div>' +
-          '<div><h4>' + U.icon('grid') + ' Question X of Y</h4><p>Mở bảng điều hướng để nhảy tới câu bất kỳ và xem câu chưa làm.</p></div>' +
-          '</div><p class="muted">Phím tắt: ← / → để chuyển câu (khi không gõ đáp án), Esc để đóng bảng. Bài làm được tự động lưu — bạn có thể thoát và làm tiếp sau.</p>',
+          '<div><h4>' + U.icon('bookmark') + ' Mark for Review</h4><p>Flag a question to come back to it later. Flagged questions show a red bookmark in the question navigator.</p></div>' +
+          '<div><h4><span class="abc-mini">ABC</span> Cross Out</h4><p>Turn on Cross Out, then select the letter to the right of an answer choice to eliminate it.</p></div>' +
+          '<div><h4>' + U.icon('calculator') + ' Calculator</h4><p>Desmos graphing and scientific calculator. Drag the title bar to move it and the bottom-right corner to resize it.</p></div>' +
+          '<div><h4>' + U.icon('reference') + ' Reference</h4><p>The SAT Math reference sheet of formulas.</p></div>' +
+          '<div><h4>' + U.icon('clock') + ' Timer</h4><p>Select <b>Hide</b> to hide the timer. It reappears with a reminder when ' + warnMin + ' minute' + (warnMin === 1 ? '' : 's') + ' remain' + (warnMin === 1 ? 's' : '') + '.</p></div>' +
+          '<div><h4>' + U.icon('grid') + ' Question X of Y</h4><p>Open the question navigator to jump to any question and see which ones are unanswered.</p></div>' +
+          '</div><p class="muted">Shortcuts: ← / → to move between questions (when you aren’t typing an answer), Esc to close panels. Your work is saved automatically, so you can exit and continue later.</p>',
         actions: [{ label: 'Close', value: true, kind: 'primary' }]
       });
     }
 
-    function onBeforeUnload() { save(true); }
+    function onBeforeUnload() { if (!ui.ended) save(true); }
+
+    var onWindowResize = U.debounce(onResize, 100);
+
+    function cleanup() {
+      ui.leaving = true;
+      stopTimer();
+      if (!ui.ended) save(true);
+      els.bb.removeEventListener('click', onClick);
+      els.bb.removeEventListener('input', onInput);
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      window.removeEventListener('pagehide', onBeforeUnload);
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('resize', onWindowResize);
+      try { if (calc.graphing) calc.graphing.destroy(); } catch (e) { /* ignore */ }
+      try { if (calc.scientific) calc.scientific.destroy(); } catch (e) { /* ignore */ }
+      if (calc.ro) calc.ro.disconnect();
+      document.body.classList.remove('in-exam');
+    }
 
     els.bb.addEventListener('click', onClick);
     els.bb.addEventListener('input', onInput);
@@ -765,12 +886,19 @@
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('beforeunload', onBeforeUnload);
     window.addEventListener('pagehide', onBeforeUnload);
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('resize', onWindowResize);
 
-    // Khởi động
+    // Start
     setModule(attempt.moduleIndex);
     if (ms.done) {
-      // Module hiện tại đã xong (ví dụ: tải lại trang giữa chừng) → chuyển tiếp
+      // The current module was already finished (e.g. the page reloaded mid-transition): move on.
       if (mi < test.modules.length - 1) { attempt.moduleIndex = mi + 1; setModule(mi + 1); }
+      else ms.done = false; // the last module was never submitted, so let the student submit it
+    }
+    if (!skipEmptyModules()) {
+      submit();
+      return cleanup;
     }
     renderAll();
     if (timed() && remaining() <= 0) {
@@ -780,25 +908,12 @@
       openDirections(true);
     }
 
-    return function cleanup() {
-      stopTimer();
-      if (!ui.ended) save(true);
-      els.bb.removeEventListener('click', onClick);
-      els.bb.removeEventListener('input', onInput);
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      window.removeEventListener('pagehide', onBeforeUnload);
-      try { if (calc.graphing) calc.graphing.destroy(); } catch (e) { /* ignore */ }
-      try { if (calc.scientific) calc.scientific.destroy(); } catch (e) { /* ignore */ }
-      if (calc.ro) calc.ro.disconnect();
-      document.body.classList.remove('in-exam');
-    };
+    return cleanup;
   }
 
   function notFound(root, msg) {
     root.innerHTML = '<div class="page narrow"><div class="empty-state">' + U.icon('warn') +
-      '<h2>Không mở được bài làm</h2><p>' + U.esc(msg) + '</p><a class="btn btn--primary" href="#/">Về trang chủ</a></div></div>';
+      '<h2>Can’t open this test</h2><p>' + U.esc(msg) + '</p><a class="btn btn--primary" href="#/">Back to Home</a></div></div>';
     return null;
   }
 

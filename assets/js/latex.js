@@ -1,12 +1,13 @@
 /*
- * Chuyển đề viết bằng LaTeX (.tex) sang định dạng văn bản của trang web.
- * Hỗ trợ các cấu trúc thường gặp:
- *   \begin{enumerate} \item ... (câu hỏi)  + danh sách lồng nhau (lựa chọn A/B/C/D)
- *   \begin{questions} \question ... \begin{choices} \choice / \CorrectChoice  (lớp exam)
+ * Converts a test written in LaTeX (.tex) to the site's text format.
+ * Supported structures:
+ *   \begin{enumerate} \item ... (questions) + a nested list (choices A/B/C/D)
+ *   hand-typed choices at the end of an item ("A. 2\\ B. 3\\ C. 4\\ D. 5")
+ *   \begin{questions} \question ... \begin{choices} \choice / \CorrectChoice  (exam class)
  *   \begin{tasks} \task ...
  *   $...$, \[...\], \(...\), equation/align/gather
- *   \textbf, \textit, \emph, \underline, tabular (-> bảng), bảng đáp án ("Answer Key")
- * Hình TikZ / \includegraphics không chuyển được -> để lại ghi chú để chèn ảnh.
+ *   \textbf, \textit, \emph, \underline, tabular (-> table), an answer key ("Answer Key" table or list)
+ * TikZ drawings and \includegraphics cannot be converted: a note is left where an image should go.
  */
 (function (global) {
   'use strict';
@@ -17,6 +18,7 @@
     gather: 'gathered', 'gather*': 'gathered', multline: 'gathered', 'multline*': 'gathered', eqnarray: 'aligned', 'eqnarray*': 'aligned',
     displaymath: 'plain', math: 'inline', flalign: 'aligned', 'flalign*': 'aligned' };
 
+  var LETTERS = 'ABCDEFGH';
   var PH_MATH_O = '\u0002', PH_MATH_C = '\u0003';
   var PH_BLK_O = '\u0005', PH_BLK_C = '\u0006';
 
@@ -73,7 +75,7 @@
     return g ? g.content : '';
   }
 
-  /** Tìm \end{name} tương ứng (có xét lồng nhau) bắt đầu từ vị trí from */
+  /** Find the matching \end{name} (nesting aware), starting at position from */
   function findEnvEnd(s, name, from) {
     var esc = name.replace(/[*]/g, '\\*');
     var re = new RegExp('\\\\(begin|end)\\s*\\{' + esc + '\\}', 'g');
@@ -86,10 +88,10 @@
     return null;
   }
 
-  /* ---------------- Macro đơn giản (\newcommand không tham số) ---------------- */
+  /* ---------------- Simple macros (\newcommand without arguments) ---------------- */
   var DEF_RE = /\\(?:re)?newcommand\*?\s*(?:\{\s*\\([a-zA-Z]+)\s*\}|\\([a-zA-Z]+))\s*(?:\[(\d)\])?|\\def\s*\\([a-zA-Z]+)\s*(?=\{)/g;
 
-  /** Lấy các định nghĩa macro; trả về chuỗi đã xóa định nghĩa. */
+  /** Collect macro definitions; returns the string with the definitions removed. */
   function collectDefs(s, defs, warnings) {
     var out = '', last = 0, m;
     DEF_RE.lastIndex = 0;
@@ -98,7 +100,7 @@
       var g = readGroup(s, m.index + m[0].length);
       if (!g) continue;
       if (m[3] && +m[3] > 0) {
-        warnings.push('Lệnh tự định nghĩa \\' + name + ' có tham số — chưa hỗ trợ, hãy kiểm tra các chỗ dùng lệnh này.');
+        warnings.push('Custom command \\' + name + ' takes arguments, which is not supported. Check every place it is used.');
       } else {
         defs.push({ name: name, body: g.content });
       }
@@ -118,7 +120,7 @@
     return s;
   }
 
-  /* ---------------- Bảo vệ công thức ---------------- */
+  /* ---------------- Protect math ---------------- */
   function cleanMath(tex) {
     return tex.replace(/\\label\s*\{[^}]*\}/g, '').replace(/\\(?:nonumber|notag)\b/g, '')
       .replace(/\\textdegree\b/g, '^\\circ').replace(/\\degree\b/g, '^\\circ')
@@ -175,7 +177,7 @@
     return out;
   }
 
-  /* ---------------- Chuyển văn bản LaTeX -> Markdown ---------------- */
+  /* ---------------- LaTeX text -> Markdown ---------------- */
   var DROP0 = 'noindent indent centering raggedright raggedleft medskip bigskip smallskip vfill hfill hfil vfil maketitle tableofcontents ' +
     'large Large LARGE huge Huge small footnotesize normalsize scriptsize tiny bfseries itshape normalfont rmfamily sffamily ttfamily upshape mdseries ' +
     'bf it rm sf tt sc em sl newpage clearpage pagebreak nopagebreak linebreak nolinebreak columnbreak relax protect displaystyle selectfont ' +
@@ -225,7 +227,7 @@
           var g, o2;
           if (DROP0_SET[base]) {
             if (base === 'par') out += '\n\n';
-            // Bỏ khoảng trắng ngay sau lệnh
+            // Drop the command (and the space right after it)
             continue;
           }
           if (DROP1_SET[base] || DROP1_SET[name]) {
@@ -261,7 +263,7 @@
                   else if (env === 'multicols' || env === 'wrapfigure') { g = readGroup(s, i); if (g) i = g.end; g = readGroup(s, i); if (env === 'wrapfigure' && g) i = g.end; }
                   else if (env === 'adjustwidth') { g = readGroup(s, i); if (g) i = g.end; g = readGroup(s, i); if (g) i = g.end; }
                   else { o2 = readOpt(s, i); if (o2) i = o2.end; }
-                  if (!WRAP_ENVS[env] && !unknown['env:' + env]) { unknown['env:' + env] = 1; warnings.push('Môi trường \\begin{' + env + '} không được hỗ trợ — chỉ giữ lại nội dung.'); }
+                  if (!WRAP_ENVS[env] && !unknown['env:' + env]) { unknown['env:' + env] = 1; warnings.push('Environment \\begin{' + env + '} is not supported; only its content was kept.'); }
                 }
                 out += '\n';
               }
@@ -321,7 +323,7 @@
               g = readGroup(s, i); if (base === 'cline' || base === 'cmidrule') { if (g) i = g.end; }
               continue;
             default:
-              if (!unknown[base]) { unknown[base] = 1; warnings.push('Lệnh \\' + base + ' không được hỗ trợ — đã bỏ qua tên lệnh.'); }
+              if (!unknown[base]) { unknown[base] = 1; warnings.push('Command \\' + base + ' is not supported; it was removed and its text kept.'); }
               o2 = readOpt(s, i); if (o2) i = o2.end;
               g = readGroup(s, i);
               if (g) { i = g.end; out += conv(g.content); }
@@ -346,9 +348,9 @@
     return conv;
   }
 
-  /* ---------------- Bảng tabular -> bảng Markdown ---------------- */
+  /* ---------------- tabular -> Markdown table ---------------- */
   function splitTop(s, sepRe) {
-    // tách theo dấu phân cách ở độ sâu 0 (không nằm trong {...})
+    // split on separators at depth 0 (not inside {...})
     var parts = [], depth = 0, last = 0;
     for (var i = 0; i < s.length; i++) {
       var c = s[i];
@@ -409,7 +411,7 @@
     return out + s.slice(last);
   }
 
-  /* ---------------- Danh sách (enumerate...) ---------------- */
+  /* ---------------- Lists (enumerate...) ---------------- */
   function parseNodes(s) {
     var nodes = [];
     var re = /\\begin\s*\{([a-zA-Z]+\*?)\}/g;
@@ -474,17 +476,18 @@
     return node.items.length >= 2 && node.items.length <= 8;
   }
 
-  /* ---------------- Chuyển toàn bộ ---------------- */
+  /* ---------------- Whole document ---------------- */
   function convert(src) {
     var warnings = [];
     var s = String(src || '').replace(/\r\n?/g, '\n');
     s = stripComments(s);
-    var title = '', author = '';
+    var title = '', author = '', date = '';
     var conv = makeConverter(warnings);
     var mathStore = [];
 
     var tm = cmdArg(s, 'title'); if (tm) title = tm;
     var am = cmdArg(s, 'author'); if (am) author = am;
+    var dm = cmdArg(s, 'date'); if (dm && !/^\s*\\today\s*$/.test(dm)) date = dm;
 
     var defs = [];
     var bd = /\\begin\s*\{document\}/.exec(s);
@@ -507,16 +510,16 @@
       var endT = findEnvEnd(s, mm[1], mm.index + mm[0].length);
       var stop = endT ? endT.end : s.length;
       figCount++;
-      blocks.push('**[HÌNH VẼ ' + figCount + ' — hãy chèn ảnh tại đây bằng nút "Ảnh"]**');
+      blocks.push('**[Figure ' + figCount + ': insert an image of this drawing here]**');
       s = s.slice(0, mm.index) + '\n' + PH_BLK_O + (blocks.length - 1) + PH_BLK_C + '\n' + s.slice(stop);
     }
     s = s.replace(/\\includegraphics\s*(\[[^\]]*\])?\s*\{([^}]*)\}/g, function (m, opt, file) {
       imgCount++;
-      blocks.push('**[ẢNH "' + file.trim() + '" — hãy chèn ảnh tại đây bằng nút "Ảnh"]**');
+      blocks.push('**[Image "' + file.trim() + '": insert this image here]**');
       return '\n' + PH_BLK_O + (blocks.length - 1) + PH_BLK_C + '\n';
     });
-    if (figCount) warnings.push('Có ' + figCount + ' hình vẽ TikZ không thể chuyển tự động. Hãy chụp ảnh hình và chèn vào chỗ có ghi chú [HÌNH VẼ].');
-    if (imgCount) warnings.push('Có ' + imgCount + ' ảnh (\\includegraphics) cần tải lên lại bằng nút "Chèn ảnh".');
+    if (figCount) warnings.push(figCount + (figCount === 1 ? ' TikZ drawing' : ' TikZ drawings') + ' could not be converted. Take a screenshot of each one and insert it where the [Figure] note appears.');
+    if (imgCount) warnings.push(imgCount + (imgCount === 1 ? ' image' : ' images') + ' (\\includegraphics) must be uploaded again where the [Image] note appears.');
 
     s = convertTabulars(s, conv, blocks);
 
@@ -552,12 +555,73 @@
       }).join('');
     }
 
-    var ANSWER_LINE = /^\s*\**\s*(?:answer|đáp án|ans)\s*\**\s*[:：]\s*\**\s*(.*?)\s*$/i;
+    var ANSWER_LINE = /^\s*\**\s*(?:correct answer|answer|ans|đáp án)\s*\**\s*[:：]\s*\**\s*(.*?)\s*$/i;
+    var EXPLANATION_LINE = /^\s*\**\s*(?:explanation|solution|rationale|giải thích|lời giải)\s*\**\s*[:：]\s*\**\s*(.*?)\s*$/i;
+
+    /** Answer text without Markdown emphasis: "**B**" (from \textbf{B}) -> "B" */
+    function cleanAnswer(a) {
+      return String(a || '').replace(/[*_]+/g, '').trim();
+    }
+
+    /** Lines the parser would read as structure ("2. ...", "A. ...", "## ...", "Answer Key") are escaped with "\". */
+    function protectLine(l) {
+      var P = global.P;
+      var kind = P && P.lineKind ? P.lineKind(l)
+        : /^(\(?[A-H]\s*[.)]\s|\d{1,3}\s*[.):](\s|$)|##\s)/.test(l) ? 'question' : '';
+      return kind === 'question' || kind === 'choice' || kind === 'module' || kind === 'key' ? '\\' + l : l;
+    }
+
+    /** Choice marks typed by hand on one line: "C. 4 \quad D. 5" -> [{letter:'C', text:'4'}, {letter:'D', text:'5'}] */
+    function lineChoices(line) {
+      var first = /^\(?([A-H])[.)]\s+/.exec(line);
+      if (!first) return null;
+      var start = LETTERS.indexOf(first[1]);
+      var marks = [{ letter: first[1], at: 0, textAt: first[0].length }];
+      var re = /\s\(?([A-H])[.)]\s+/g, m;
+      re.lastIndex = first[0].length;
+      while ((m = re.exec(line))) {
+        if (m[1] === LETTERS[start + marks.length]) marks.push({ letter: m[1], at: m.index, textAt: m.index + m[0].length });
+      }
+      return marks.map(function (mk, i) {
+        return { letter: mk.letter, text: line.slice(mk.textAt, i + 1 < marks.length ? marks[i + 1].at : line.length).trim() };
+      });
+    }
+
+    /**
+     * Hand-typed choices at the end of an item ("A. 2\\ B. 3\\ C. 4\\ D. 5"): the last line must be a choice
+     * and the run must read A, B, C, ... Returns { prompt: lines, choices: [text] } or null.
+     */
+    function trailingChoices(lines) {
+      var k = lines.length - 1;
+      while (k >= 0 && !lines[k].trim()) k--;
+      if (k < 0 || !lineChoices(lines[k])) return null;
+      var groups = [], cont = [];
+      for (; k >= 0; k--) {
+        var l = lines[k];
+        if (!l.trim()) continue;
+        var lc = lineChoices(l);
+        if (!lc) {
+          if (cont.length >= 3) return null;
+          cont.unshift(l); // a wrapped line belongs to the choice above it
+          continue;
+        }
+        if (cont.length) { lc[lc.length - 1].text += ' ' + cont.join(' '); cont = []; }
+        groups.unshift(lc);
+        if (lc[0].letter === 'A') break;
+      }
+      if (k < 0 || cont.length) return null;
+      var flat = [].concat.apply([], groups);
+      if (flat.length < 2) return null;
+      for (var i = 0; i < flat.length; i++) if (flat[i].letter !== LETTERS[i]) return null;
+      return { prompt: lines.slice(0, k), choices: flat.map(function (c) { return c.text; }) };
+    }
 
     var out = [];
     out.push('---');
     out.push('title: ' + tidy(restore(conv(title), 'cell')).replace(/\n+/g, ' '));
     out.push('author: ' + tidy(restore(conv(author), 'cell')).replace(/\n+/g, ' '));
+    var dateText = date ? tidy(restore(conv(date), 'cell')).replace(/\n+/g, ' ') : '';
+    if (dateText) out.push('date: ' + dateText);
     out.push('---', '');
 
     var qn = 0;
@@ -573,11 +637,11 @@
         var plain = line.replace(/[*#_]/g, '').trim();
         var sec = /^\u0004SECTION:(.*)$/.exec(line);
         if (sec) plain = sec[1].replace(/[*#_]/g, '').trim();
-        if (/^(answer key|answers|đáp án|bảng đáp án|answer sheet)$/i.test(plain)) {
+        if (/^(answer key|answers|đáp án|bảng đáp án|answer sheet)\s*:?$/i.test(plain)) {
           out.push('', 'Answer Key'); keyHeaderOut = true; return;
         }
         if (sec) {
-          if (/\b(module|section|phần|part)\b/i.test(plain)) out.push('', '## ' + plain, '');
+          if (/\b(module|section|phần|part)\b/i.test(plain)) { out.push('', '## ' + plain, ''); keyHeaderOut = false; }
           return;
         }
         if (/^\|/.test(line)) {
@@ -591,8 +655,21 @@
       });
     }
 
+    /** A list after an "Answer Key" heading: one "n. value" key line per item. */
+    function keyList(node) {
+      node.items.forEach(function (it, k) {
+        var val = cleanAnswer(tidy(restore(convNodes(it.nodes, 'cell'), 'cell')).replace(/\s*\n+\s*/g, ' '));
+        var lm = /^\s*\(?(\d{1,3})/.exec(it.label || '');
+        var n = lm ? +lm[1] : k + 1;
+        var inner = /^(\d{1,3})\s*[.):]\s+(.+)$/.exec(val); // "\item 3. B"
+        if (inner) { n = +inner[1]; val = inner[2]; }
+        if (val) out.push(n + '. ' + val);
+      });
+    }
+
     nodes.forEach(function (node) {
       if (node.type === 'text') { topText(node.text); return; }
+      if (keyHeaderOut) { keyList(node); return; }
       if (node.env === 'itemize' && !started) { return; }
       started = true;
       node.items.forEach(function (item) {
@@ -604,38 +681,49 @@
         var promptText = tidy(restore(convNodes(before, 'prompt'), 'prompt'));
         var afterText = tidy(restore(convNodes(after, 'prompt'), 'prompt'));
         var answer = null;
+        var explanation = [];
+        var inExplanation = false;
         var promptLines = promptText.split('\n').filter(function (l) {
           var am2 = ANSWER_LINE.exec(l);
-          if (am2) { answer = am2[1].replace(/_+/g, '').trim(); return false; }
+          if (am2) { answer = cleanAnswer(am2[1]); return false; }
+          // A solution written inside the item is moved after the answer
+          var em = EXPLANATION_LINE.exec(l);
+          if (em) { inExplanation = true; if (em[1]) explanation.push(em[1]); return false; }
+          if (inExplanation) { if (l.trim()) explanation.push(l); return false; }
           return true;
         });
         var extra = afterText.split('\n').filter(function (l) {
           var am3 = ANSWER_LINE.exec(l);
-          if (am3) { answer = am3[1].replace(/_+/g, '').trim(); return false; }
+          if (am3) { answer = cleanAnswer(am3[1]); return false; }
+          var em3 = EXPLANATION_LINE.exec(l);
+          if (em3) { if (em3[1]) explanation.push(em3[1]); return false; }
           return l.trim() !== '';
         });
-        var promptFinal = promptLines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
-          // tránh dòng bắt đầu giống "A." hoặc "12." bị hiểu nhầm
-          .split('\n').map(function (l, li) { return li > 0 && /^(\(?[A-H][.)]\s|\d{1,3}[.)]\s|##\s|---$)/.test(l) ? '\u200B' + l : l; }).join('\n');
-        out.push(qn + '. ' + promptFinal);
+        var choices = null;
         if (idx !== -1) {
-          var list = item.nodes[idx];
-          list.items.forEach(function (ch, ci) {
-            var txt = tidy(restore(convNodes(ch.nodes, 'choice'), 'choice')).replace(/\s*\n+\s*/g, ' ');
-            out.push('ABCDEFGH'[ci] + '. ' + txt);
-            if (ch.correct) answer = 'ABCDEFGH'[ci];
+          choices = item.nodes[idx].items.map(function (ch, ci) {
+            if (ch.correct) answer = LETTERS[ci];
+            return tidy(restore(convNodes(ch.nodes, 'choice'), 'choice')).replace(/\s*\n+\s*/g, ' ');
           });
+        } else {
+          var tc = trailingChoices(promptLines);
+          if (tc) { promptLines = tc.prompt; choices = tc.choices; }
         }
+        var promptFinal = promptLines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+          .split('\n').map(function (l, li) { return li > 0 ? protectLine(l) : l; }).join('\n');
+        out.push(qn + '. ' + promptFinal);
+        if (choices) choices.forEach(function (txt, ci) { out.push(LETTERS[ci] + '. ' + txt); });
         if (extra.length) {
-          warnings.push('Câu ' + qn + ': có nội dung nằm sau các lựa chọn — đã chuyển vào lời giải.');
+          warnings.push('Question ' + qn + ': text after the choices was moved to the explanation.');
         }
         out.push('Answer: ' + (answer || ''));
-        if (extra.length) out.push('Explanation: ' + extra.join(' '));
+        var expl = explanation.concat(extra).join(' ').replace(/\s+/g, ' ').trim();
+        if (expl) out.push('Explanation: ' + expl);
         out.push('');
       });
     });
 
-    if (!qn) warnings.push('Không tìm thấy danh sách câu hỏi (\\begin{enumerate} ... \\item ...). Hãy kiểm tra file LaTeX.');
+    if (!qn) warnings.push('No question list found (\\begin{enumerate} ... \\item ...). Check the LaTeX file.');
 
     var text = out.join('\n').replace(/\n{3,}/g, '\n\n');
     return { text: text, warnings: warnings, questionCount: qn };

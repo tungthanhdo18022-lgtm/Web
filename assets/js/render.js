@@ -1,21 +1,24 @@
 /*
- * Hiển thị nội dung câu hỏi: công thức toán (KaTeX) + Markdown đơn giản + HTML an toàn.
+ * Renders question content: math (KaTeX) + simple Markdown + sanitized HTML.
  *
- * Cú pháp hỗ trợ:
- *   $...$  hoặc \(...\)     công thức trong dòng
- *   $$...$$ hoặc \[...\]    công thức riêng một dòng (căn giữa)
- *   \$                      ký hiệu đô-la thường (ví dụ: \$165)
- *   **đậm**, *nghiêng*, __gạch chân__
- *   ![mô tả](đường-dẫn-ảnh)   hoặc ![mô tả|300](asset:img-id)  (300 = chiều rộng px)
- *   | bảng | dạng | Markdown |
- *   HTML/SVG thông thường (được lọc bỏ mã nguy hiểm)
+ * Supported syntax:
+ *   $...$  or \(...\)       inline math
+ *   $$...$$ or \[...\]      display math (centered, on its own line)
+ *   \$                      a literal dollar sign (e.g. \$165)
+ *   **bold**, *italic*, __underline__
+ *   ![alt](image-url)   or ![alt|300](asset:img-id)  (300 = width in px)
+ *   | Markdown | tables |
+ *   Plain HTML/SVG (dangerous markup is removed)
  */
 (function (global) {
   'use strict';
 
   var U = global.U;
-  var M_OPEN = '', M_CLOSE = '';
-  var M_RE = /(\d+)/g;
+  // Math placeholders (Unicode private-use characters)
+  var M_OPEN = '\uE000', M_CLOSE = '\uE001';
+  var M_RE = /\uE000(\d+)\uE001/g;
+  // Placeholders protecting generated HTML tags from the emphasis rules
+  var T_RE = /\uE002(\d+)\uE003/g;
 
   var cache = new Map();
   var CACHE_MAX = 600;
@@ -37,7 +40,7 @@
     }
   }
 
-  /** Tách công thức ra khỏi văn bản, thay bằng ký hiệu giữ chỗ. */
+  /** Pull math out of the text and replace it with placeholders. */
   function extractMath(src, store) {
     var out = '';
     var i = 0, n = src.length;
@@ -66,7 +69,7 @@
           if (c === '\n' && src[j + 1] === '\n') break;
           j++;
         }
-        // "$165 ... $95": dấu $ đứng trước chữ số là tiền tệ nếu dấu $ đóng có khoảng trắng phía trước
+        // "$165 ... $95": a $ before a digit is currency when the closing $ follows whitespace
         var currency = found > i + 1 && /[0-9]/.test(src[i + 1]) &&
           (/\s/.test(src[found - 1]) || /[0-9]/.test(src[found + 1] || ''));
         if (found > i + 1 && !currency) { push(src.slice(i + 1, found), false); i = found + 1; continue; }
@@ -80,7 +83,7 @@
   var BLOCK_TAGS = 'svg|table|div|figure|center|p|ul|ol|blockquote|pre|h[1-6]|hr';
   var ALLOWED_TAG_RE = new RegExp('<(?!\\/?(?:' + INLINE_TAGS + '|' + BLOCK_TAGS + '|thead|tbody|tfoot|tr|td|th|caption|col|colgroup|li|figcaption)(?=[\\s/>]))', 'gi');
 
-  /** Chuyển "<" thường (vd: x<y viết ngoài công thức) thành &lt; nhưng giữ lại thẻ HTML hợp lệ. */
+  /** Turn a loose "<" (e.g. x<y outside math) into &lt; while keeping allowed HTML tags. */
   function escapeLooseLt(s) {
     return s.replace(ALLOWED_TAG_RE, '&lt;');
   }
@@ -97,21 +100,26 @@
 
   function inlineMd(s, opts) {
     s = escapeLooseLt(s);
-    // Ảnh: ![alt|width](src)
+    // HTML tags (generated images and the author's own tags) are swapped for placeholders while the
+    // emphasis rules run, so "**", "__" and "*" inside src/alt/href attributes are never rewritten.
+    var tags = [];
+    function keep(html) { tags.push(html); return '\uE002' + (tags.length - 1) + '\uE003'; }
+    // Images: ![alt|width](src)
     s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, function (_, alt, src, title) {
       var width = '';
       var mw = /^(.*?)\|\s*(\d{2,4})\s*$/.exec(alt);
       if (mw) { alt = mw[1]; width = mw[2]; }
       var url = resolveSrc(src, opts.assets);
-      if (!url) return '<span class="img-missing">[Thiếu ảnh: ' + U.esc(src) + ']</span>';
-      return '<img class="q-img" src="' + U.esc(url) + '" alt="' + U.esc(alt) + '"' +
+      if (!url) return keep('<span class="img-missing">[Missing image: ' + U.esc(src) + ']</span>');
+      return keep('<img class="q-img" src="' + U.esc(url) + '" alt="' + U.esc(alt) + '"' +
         (title ? ' title="' + U.esc(title) + '"' : '') +
-        (width ? ' style="width:' + width + 'px"' : '') + ' loading="lazy">';
+        (width ? ' style="width:' + width + 'px"' : '') + ' loading="lazy">');
     });
+    s = s.replace(/<\/?[a-zA-Z](?:"[^"]*"|'[^']*'|[^'">])*>/g, keep);
     s = s.replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, '<strong>$1</strong>');
     s = s.replace(/__(?=\S)([\s\S]*?\S)__/g, '<u>$1</u>');
     s = s.replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?!\*)/g, '$1<em>$2</em>');
-    return s;
+    return s.replace(T_RE, function (m, i) { return tags[+i] != null ? tags[+i] : ''; });
   }
 
   function splitRow(line) {
@@ -168,10 +176,12 @@
       var joined = para.join('\n').trim();
       para = [];
       if (!joined) return;
-      // Đoạn chỉ chứa một công thức display hoặc một ảnh -> không bọc <p>
-      if (/^\d+$/.test(joined)) { out.push('<div class="q-display">' + joined + '</div>'); return; }
+      // A paragraph holding only display math or only an image is not wrapped in <p>
+      if (/^\uE000\d+\uE001$/.test(joined)) { out.push('<div class="q-display">' + joined + '</div>'); return; }
       if (/^!\[[^\]]*\]\([^)]+\)$/.test(joined)) { out.push('<div class="q-figure">' + inlineMd(joined, opts) + '</div>'); return; }
-      out.push('<p>' + inlineMd(joined, opts).replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>') + '</p>');
+      out.push('<p>' + inlineMd(joined, opts).replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>')
+        // Numbered steps ("1. ...", "2) ...") and bullets on their own lines keep their line breaks
+        .replace(/\n(?=[ \t]*(?:\d{1,3}[.)]|[•‣◦])[ \t])/g, '<br>\n') + '</p>');
     }
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
@@ -210,7 +220,7 @@
     return out.join('\n');
   }
 
-  /* ---------------- Lọc HTML (sanitize) ---------------- */
+  /* ---------------- HTML sanitizer ---------------- */
   var ALLOWED = {};
   ('p br b i u em strong sub sup span div small mark s del ins code pre img figure figcaption table thead tbody tfoot tr td th caption colgroup col ul ol li center hr blockquote font big tt h1 h2 h3 h4 h5 h6 a ' +
     'svg g line polyline polygon path rect circle ellipse text tspan defs marker title desc lineargradient radialgradient stop pattern clippath mask textpath').split(' ').forEach(function (t) { ALLOWED[t] = true; });
@@ -222,45 +232,102 @@
     var compact = s.replace(/[\s\u0000-\u001f]/g, '').toLowerCase();
     if (/^data:/.test(compact)) return isImg && /^data:image\/(png|jpe?g|gif|webp|svg\+xml|bmp)/.test(compact) ? s : null;
     if (/^[a-z][a-z0-9+.-]*:/.test(compact)) return /^(https?|mailto):/.test(compact) ? s : null;
-    return s; // đường dẫn tương đối, #id
+    return s; // relative path or #fragment
+  }
+
+  var URL_ATTRS = { href: 1, src: 1, 'xlink:href': 1, action: 1, background: 1, poster: 1, formaction: 1 };
+  var BAD_ATTRS = { srcdoc: 1, srcset: 1, ping: 1, name: 1, is: 1 };
+  var BAD_STYLE_RE = /\\|url\s*\(|image-set\s*\(|expression\s*\(|javascript:|@import|behavior\s*:|-moz-binding/i;
+  var FRAG_URL_RE = /url\(\s*(['"]?)#([^'")\s]+)\1\s*\)/gi;
+
+  /**
+   * Ids from user content are namespaced ("u-" prefix) so they cannot clobber DOM/global names
+   * (e.g. id="katex" or id="App"); in-content references such as url(#arrow) are rewritten to match.
+   */
+  function nsId(id) {
+    return 'u-' + String(id).trim().replace(/[^A-Za-z0-9_:.-]/g, '-');
+  }
+
+  function sanitizeAttrs(el, tag) {
+    var attrs = Array.prototype.slice.call(el.attributes);
+    for (var a = 0; a < attrs.length; a++) {
+      var attrName = attrs[a].name;
+      var name = attrName.toLowerCase();
+      var val = attrs[a].value;
+      // Event handlers, and "name" (DOM clobbering, e.g. <img name="getElementById">)
+      if (name.indexOf('on') === 0 || BAD_ATTRS[name]) { el.removeAttribute(attrName); continue; }
+      if (name === 'id') {
+        if (val.trim()) el.setAttribute(attrName, nsId(val));
+        else el.removeAttribute(attrName);
+        continue;
+      }
+      if (URL_ATTRS[name]) {
+        var ok = safeUrl(val, tag === 'img');
+        if (ok === null || (tag !== 'a' && tag !== 'img') || name === 'action' || name === 'formaction') { el.removeAttribute(attrName); continue; }
+        if (tag === 'a' && /^#[A-Za-z][\w:.-]*$/.test(val.trim())) el.setAttribute(attrName, '#' + nsId(val.trim().slice(1)));
+        continue;
+      }
+      if (name === 'style') {
+        if (BAD_STYLE_RE.test(val)) el.removeAttribute(attrName);
+        continue;
+      }
+      if (/url\s*\(/i.test(val)) {
+        // SVG paint/marker/clip references: only local fragments are allowed
+        var local = val.replace(FRAG_URL_RE, function (m, q, id) { return 'url(#' + nsId(id) + ')'; });
+        if (/url\s*\((?!#u-)/i.test(local)) el.removeAttribute(attrName);
+        else el.setAttribute(attrName, local);
+      }
+    }
   }
 
   function sanitizeNode(root) {
     var walker = [root];
+    // Elements already sanitized: a parent is walked again after an unknown tag is unwrapped, and the
+    // attribute rules are not idempotent (ids would get a second "u-" prefix and break url(#id) references).
+    var seen = new Set();
     while (walker.length) {
       var node = walker.pop();
       var kids = Array.prototype.slice.call(node.childNodes);
       for (var k = 0; k < kids.length; k++) {
         var child = kids[k];
         if (child.nodeType === 8) { child.remove(); continue; } // comment
-        if (child.nodeType !== 1) continue;
+        if (child.nodeType !== 1 || seen.has(child)) continue;
         var tag = (child.localName || '').toLowerCase();
         if (DROP[tag]) { child.remove(); continue; }
         if (!ALLOWED[tag]) {
-          // Giữ nội dung, bỏ thẻ
+          // Keep the content, drop the tag
           while (child.firstChild) node.insertBefore(child.firstChild, child);
           child.remove();
-          // xử lý lại các node vừa chèn
+          // re-process the nodes that were just moved
           walker.push(node);
           break;
         }
-        var attrs = Array.prototype.slice.call(child.attributes);
-        for (var a = 0; a < attrs.length; a++) {
-          var name = attrs[a].name.toLowerCase();
-          var val = attrs[a].value;
-          if (name.indexOf('on') === 0 || name === 'srcdoc' || name === 'formaction' || name === 'srcset') { child.removeAttribute(attrs[a].name); continue; }
-          if (name === 'href' || name === 'src' || name === 'xlink:href' || name === 'action' || name === 'background' || name === 'poster') {
-            var ok = safeUrl(val, tag === 'img');
-            if (ok === null || (tag !== 'a' && tag !== 'img')) { child.removeAttribute(attrs[a].name); continue; }
-          }
-          if (name === 'style' && /url\s*\(|expression\s*\(|javascript:|@import|behavior\s*:/i.test(val)) { child.removeAttribute(attrs[a].name); continue; }
-        }
+        sanitizeAttrs(child, tag);
         if (tag === 'a') { child.setAttribute('target', '_blank'); child.setAttribute('rel', 'noopener noreferrer'); }
+        seen.add(child);
         walker.push(child);
       }
     }
   }
 
+  /**
+   * Put the original TeX back into attribute values (e.g. alt="$x^2$").
+   * This must run BEFORE sanitizeNode so the restored values are validated too
+   * (otherwise href="$javascript:...$" would slip past the URL check).
+   */
+  function restoreAttrMath(root, store) {
+    var all = root.querySelectorAll ? root.querySelectorAll('*') : [];
+    for (var i = 0; i < all.length; i++) {
+      var at = all[i].attributes;
+      for (var j = 0; j < at.length; j++) {
+        if (at[j].value.indexOf(M_OPEN) !== -1) {
+          at[j].value = at[j].value.replace(M_RE, function (m, idx) { return store[+idx] ? store[+idx].tex : ''; });
+        }
+      }
+    }
+  }
+
+  /** Replace math placeholders in text nodes with rendered KaTeX (runs after sanitizing; text nodes only). */
   function injectMath(root, store) {
     var texts = [];
     var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
@@ -288,22 +355,12 @@
       if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
       textNode.parentNode.replaceChild(frag, textNode);
     });
-    // Placeholder bên trong thuộc tính (vd alt="..."): thay bằng TeX gốc
-    var all = root.querySelectorAll ? root.querySelectorAll('*') : [];
-    for (var i = 0; i < all.length; i++) {
-      var at = all[i].attributes;
-      for (var j = 0; j < at.length; j++) {
-        if (at[j].value.indexOf(M_OPEN) !== -1) {
-          at[j].value = at[j].value.replace(M_RE, function (m, idx) { return store[+idx] ? store[+idx].tex : ''; });
-        }
-      }
-    }
   }
 
   /**
-   * Hiển thị nội dung thành HTML.
-   * opts.inline = true: không tạo đoạn văn (dùng cho đáp án lựa chọn).
-   * opts.assets: { id: dataURL } cho ảnh asset:id
+   * Render content to HTML.
+   * opts.inline = true: no paragraphs (used for answer choices).
+   * opts.assets: { id: dataURL } for asset:id images
    */
   function render(text, opts) {
     opts = opts || {};
@@ -315,7 +372,8 @@
     var withPh = extractMath(text, store);
     var html = opts.inline ? inlineMd(withPh.trim(), opts).replace(/\n/g, ' ') : blockMd(withPh, opts);
     var tpl = document.createElement('template');
-    tpl.innerHTML = html;
+    tpl.innerHTML = html; // template content is inert: nothing loads or runs before sanitizing
+    restoreAttrMath(tpl.content, store);
     sanitizeNode(tpl.content);
     injectMath(tpl.content, store);
     var result = tpl.innerHTML;
@@ -326,7 +384,7 @@
     return result;
   }
 
-  /** Hiển thị đáp án số của câu điền (vd 441/677 -> phân số). */
+  /** Preview a student-produced response (e.g. 441/677 -> a fraction). */
   function renderAnswerPreview(value) {
     var v = String(value || '').trim();
     if (!v) return '';
