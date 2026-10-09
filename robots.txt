@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tungthanhdo18022-lgtm.github.io/Web/sitemap.xml
