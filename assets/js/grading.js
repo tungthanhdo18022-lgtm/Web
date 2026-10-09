@@ -1,9 +1,9 @@
 /*
- * Chấm điểm.
- * Câu điền đáp án (SPR) được chấm theo quy tắc của Digital SAT:
- *  - Chấp nhận phân số, số thập phân, số nguyên tương đương (7/2 = 3.5 = 3.50).
- *  - Số thập phân dài: chấp nhận khi điền đủ ô (5 ký tự, hoặc 6 nếu là số âm)
- *    và được làm tròn HOẶC cắt bớt đúng (2/3 -> .6666, .6667, 0.666, 0.667).
+ * Scoring.
+ * Student-produced responses (SPR) are graded with the Digital SAT rules:
+ *  - Equivalent fractions, decimals and integers are accepted (7/2 = 3.5 = 3.50).
+ *  - Long decimals are accepted when they fill the entry box (5 characters, or 6 for a
+ *    negative answer) and are correctly rounded OR truncated (2/3 -> .6666, .6667, 0.666, 0.667).
  */
 (function (global) {
   'use strict';
@@ -11,11 +11,11 @@
   var G = {};
   var EPS = 1e-9;
 
-  /** Đọc một chuỗi số: "-3", "3.5", ".25", "7/2", "-1/3" -> { value, kind } hoặc null */
+  /** Parse a number: "-3", "3.5", ".25", "7/2", "-1/3" -> { value, kind } or null */
   G.parseNumber = function (str) {
     var s = String(str == null ? '' : str).trim().replace(/[−–]/g, '-').replace(/\s+/g, '');
     if (!s) return null;
-    s = s.replace(/,(?=\d{3}(\D|$))/g, ''); // 1,353 -> 1353 (chỉ dùng cho đáp án mẫu)
+    s = s.replace(/,(?=\d{3}(\D|$))/g, ''); // 1,353 -> 1353 (only used for answer keys)
     var m;
     if ((m = /^([+-]?)(\d+(?:\.\d*)?|\.\d+)\/(\d+(?:\.\d*)?|\.\d+)$/.exec(s))) {
       var den = parseFloat(m[3]);
@@ -45,22 +45,22 @@
     return sign * Math.floor(Math.abs(x) * p + 1e-9) / p;
   }
 
-  /** Giới hạn ký tự ô điền của SAT */
+  /** Character limit of the SAT answer box */
   G.maxLen = function (value) { return String(value || '').charAt(0) === '-' ? 6 : 5; };
 
-  /** Lọc ký tự người dùng nhập vào ô điền (giống Bluebook). */
+  /** Filter what the student types into the answer box (like Bluebook). */
   G.sanitizeSpr = function (raw) {
     var s = String(raw || '').replace(/[−–]/g, '-').replace(/[^0-9./-]/g, '');
-    // '-' chỉ ở đầu
+    // '-' only at the start
     s = s.charAt(0) + s.slice(1).replace(/-/g, '');
     if (s === '-') return s;
-    // chỉ 1 dấu '/'
+    // a single '/' only
     var firstSlash = s.indexOf('/');
     if (firstSlash !== -1) s = s.slice(0, firstSlash + 1) + s.slice(firstSlash + 1).replace(/\//g, '');
     return s.slice(0, G.maxLen(s));
   };
 
-  /** So sánh đáp án điền với một đáp án mẫu. */
+  /** Compare a student-produced response with one answer key. */
   function sprMatches(userRaw, keyRaw) {
     var user = String(userRaw || '').trim();
     var key = String(keyRaw || '').trim();
@@ -71,7 +71,7 @@
       return user.replace(/\s+/g, '').toLowerCase() === key.replace(/\s+/g, '').toLowerCase();
     }
     if (near(u.value, k.value)) return true;
-    // Số thập phân điền đủ ô: chấp nhận làm tròn / cắt bớt
+    // A decimal that fills the box: accept rounding or truncation
     if (u.kind === 'dec') {
       var full = user.replace(/^\+/, '').length >= G.maxLen(user);
       var dot = user.indexOf('.');
@@ -91,14 +91,14 @@
     return false;
   };
 
-  /** Chuỗi hiển thị đáp án đúng */
+  /** Display text for the correct answer */
   G.answerText = function (q) {
     if (q.type === 'mcq') return q.answer || '—';
-    return (q.answer || []).join(' hoặc ') || '—';
+    return (q.answer || []).join(' or ') || '—';
   };
 
-  /* ---------------- Ước tính điểm SAT Math (200–800) ---------------- */
-  // Đường cong tham khảo (tỉ lệ đúng -> điểm). Chỉ mang tính ước lượng.
+  /* ---------------- Estimated SAT Math score (200-800) ---------------- */
+  // Reference curve (fraction correct -> scaled score). An estimate only.
   var CURVE = [
     [0, 200], [0.05, 230], [0.1, 280], [0.2, 360], [0.3, 420], [0.4, 470], [0.5, 520],
     [0.6, 570], [0.7, 620], [0.8, 680], [0.9, 740], [0.95, 770], [1, 800]
@@ -115,7 +115,7 @@
     return 800;
   };
 
-  /** Chấm cả bài: trả về kết quả chi tiết */
+  /** Score a whole attempt and return a detailed result */
   G.scoreAttempt = function (test, attempt) {
     var per = [];
     var correct = 0, incorrect = 0, omitted = 0;
