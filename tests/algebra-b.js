@@ -66,14 +66,14 @@ Answer: C
 Domain: Advanced Math
 Explanation: After both discounts, each sweater costs $41\left(1 - \frac{n}{100}\right) - 4 = 37 - 0.41n$ dollars, so the total price is $n(37 - 0.41n) = 741$. Checking the choices: for $n = 30$, $30(37 - 12.3) = 30(24.7) = 741$. The other choices give $18(29.62) = 533.16$, $20(28.8) = 576$, and $44(18.96) = 834.24$.
 
-6. Lines $k$ and $l$ are perpendicular. If the points $(4, m)$ and $(9, m + 3)$ lie on line $k$ and lines $k$ and $l$ intersect at $(9, m + 3)$, which of the following can lie on line $l$?
+6. Lines $k$ and $l$ are perpendicular. If the points $(4, m)$ and $(9, m + 3)$ lie on line $k$ and lines $k$ and $l$ intersect at $(9, m + 3)$, which of the following must lie on line $l$?
 A. $(m - 6, -4)$
 B. $(m + 9, 24)$
 C. $(21, m - 17)$
 D. $(24, m + 12)$
 Answer: C
 Domain: Algebra
-Explanation: The slope of line $k$ is $\frac{(m + 3) - m}{9 - 4} = \frac{3}{5}$, so the slope of line $l$ is $-\frac{5}{3}$. Line $l$ passes through $(9, m + 3)$. From $(9, m + 3)$ to $(21, m - 17)$, the slope is $\frac{(m - 17) - (m + 3)}{21 - 9} = \frac{-20}{12} = -\frac{5}{3}$, so $(21, m - 17)$ lies on line $l$ for every value of $m$.
+Explanation: The slope of line $k$ is $\frac{(m + 3) - m}{9 - 4} = \frac{3}{5}$, so the slope of line $l$ is $-\frac{5}{3}$. Line $l$ passes through $(9, m + 3)$. From $(9, m + 3)$ to $(21, m - 17)$, the slope is $\frac{(m - 17) - (m + 3)}{21 - 9} = \frac{-20}{12} = -\frac{5}{3}$, so $(21, m - 17)$ lies on line $l$ for every value of $m$. The points in choices A and B lie on line $l$ only for one particular value of $m$ ($m = 48$ and $m = -31.5$), and the point in choice D never does, because its slope from $(9, m + 3)$ is $\frac{3}{5}$.
 
 7.
 
