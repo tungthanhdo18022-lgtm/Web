@@ -9,6 +9,8 @@
  *    date: September 12, 2026   (optional test date)
  *    time: 40                   (minutes; applies to every module that does not set its own)
  *    section: advanced          (optional: list the test under "Advanced Tests" on the home page)
+ *    category: Algebra          (optional: Advanced Tests filter — Algebra, Advanced Math,
+ *                                Problem-Solving and Data Analysis, or Geometry and Trigonometry)
  *    ---
  *
  *    ## Module 1 | 35    (optional; "| 35" = 35 minutes)
@@ -32,7 +34,7 @@
  *    "Answer: ...") can be kept as plain text by starting it with a backslash: "\2. ...".
  *    Vietnamese keywords (Câu, Đáp án, Giải thích, Lời giải, tiêu đề, ...) are still accepted.
  *
- * 2) JSON: { id, title, author, date, description, section, modules: [{ title, time, questions: [{ type, prompt, choices, answer, explanation, domain }] }] }
+ * 2) JSON: { id, title, author, date, description, section, category, modules: [{ title, time, questions: [{ type, prompt, choices, answer, explanation, domain }] }] }
  */
 (function (global) {
   'use strict';
@@ -51,7 +53,7 @@
     keyHeader: /^\s*(?:#+\s*)?(?:(?:answer key|answers|bảng đáp án)\s*:?|đáp án|dap an)\s*$/i,
     keyLine: /^\s*(?:(?:câu|question|q)\s*)?(\d{1,3})(?:\s*[.):–]\s*|\s*-\s+|\s+)(\S.*?)\s*$/i,
     keyPair: /(?:^|\s)(\d{1,3})\s*[.):\-–]\s*(\S+)/g,
-    meta: /^\s*(title|tiêu đề|tieu de|tên đề|author|tác giả|tac gia|test date|date|ngày thi|ngay thi|time|thời gian|thoi gian|description|mô tả|mo ta|section|category|phần|id)\s*[:：]\s*(.*)$/i
+    meta: /^\s*(title|tiêu đề|tieu de|tên đề|author|tác giả|tac gia|test date|date|ngày thi|ngay thi|time|thời gian|thoi gian|description|mô tả|mo ta|section|phần|category|danh mục|id)\s*[:：]\s*(.*)$/i
   };
 
   var META_KEYS = {
@@ -60,7 +62,8 @@
     'date': 'date', 'test date': 'date', 'ngày thi': 'date', 'ngay thi': 'date',
     'time': 'time', 'thời gian': 'time', 'thoi gian': 'time',
     'description': 'description', 'mô tả': 'description', 'mo ta': 'description',
-    'section': 'section', 'category': 'section', 'phần': 'section',
+    'section': 'section', 'phần': 'section',
+    'category': 'category', 'danh mục': 'category',
     'id': 'id'
   };
 
@@ -81,6 +84,12 @@
   /** Home page section: 'advanced' (Advanced Tests) or '' (Practice Tests). */
   function normalizeSection(v) {
     return /^\s*(advanced|adv|nâng cao|nang cao)\b/i.test(String(v || '')) ? 'advanced' : '';
+  }
+
+  /** Test category (one of the four SAT Math domains) or '' when not set or not recognized. */
+  function normalizeCategory(v) {
+    var d = normalizeDomain(v);
+    return DOMAINS.some(function (x) { return x.key === d; }) ? d : '';
   }
 
   function parseMinutes(v) {
@@ -439,6 +448,7 @@
       date: oneLine(meta.date || base.date || ''),
       description: String(meta.description || base.description || '').trim(),
       section: normalizeSection(meta.section || base.section),
+      category: normalizeCategory(meta.category || base.category),
       source: text,
       assets: base.assets || {},
       modules: modules.map(function (mod, mi) {
@@ -543,6 +553,7 @@
       date: oneLine(obj.date || ''),
       description: String(obj.description || '').trim(),
       section: normalizeSection(obj.section),
+      category: normalizeCategory(obj.category),
       source: typeof obj.source === 'string' ? obj.source : '',
       assets: obj.assets && typeof obj.assets === 'object' ? obj.assets : {},
       modules: []
@@ -624,6 +635,7 @@
     if (test.date) out.push('date: ' + oneLine(test.date));
     if (test.description) out.push('description: ' + oneLine(test.description));
     if (test.section) out.push('section: ' + test.section);
+    if (test.category) out.push('category: ' + test.category);
     // Times computed automatically by the library (m.autoTime) are not written back.
     var times = test.modules.map(function (m) { return m.autoTime ? null : m.time; });
     var sameTime = times.every(function (t) { return t === times[0]; });
@@ -716,6 +728,7 @@
     toText: toText,
     parseAny: parseAny,
     normalizeDomain: normalizeDomain,
+    normalizeCategory: normalizeCategory,
     cleanSprAnswer: cleanSprAnswer,
     lineKind: lineKind,
     escapeLine: escapeLine,

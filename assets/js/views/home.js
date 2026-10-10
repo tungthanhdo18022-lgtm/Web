@@ -1,10 +1,18 @@
-/* Home: notice, SAT countdown, practice test grid with filters, advanced tests, recent results. */
+/* Home: notice, SAT countdown, practice test grid with filters, advanced tests by category, recent results. */
 (function (global) {
   'use strict';
 
   var U = global.U;
   var SEASONS = ['spring', 'summer', 'fall', 'winter'];
   var DISMISS_KEY = 'satmath.noticeDismissed';
+  var CATEGORY_KEY = 'satmath.advancedCategory';
+  // Advanced Tests filter: the four SAT Math domains, in this order
+  var CATEGORIES = [
+    { key: 'Algebra', label: 'Algebra' },
+    { key: 'Advanced Math', label: 'Advanced Math' },
+    { key: 'Problem-Solving and Data Analysis', label: 'Problem-Solving & Data Analysis' },
+    { key: 'Geometry and Trigonometry', label: 'Geometry & Trigonometry' }
+  ];
 
   function parseDay(s) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || ''));
@@ -28,6 +36,29 @@
   }
 
   function isAdvanced(t) { return t.section === 'advanced'; }
+
+  /** "Algebra A1" -> { base: "Algebra A", round: 1 }; a title without a trailing number is round 0. */
+  function roundOf(title) {
+    var s = String(title || '').trim();
+    var m = /^(.*?)\s*(\d+)$/.exec(s);
+    return m && m[1] ? { base: m[1], round: +m[2] } : { base: s, round: 0 };
+  }
+
+  /**
+   * Advanced Tests order: by category, then by round, then by name. So Algebra A, B, C … come
+   * first, then Algebra A1, B1, C1 …, then A2, B2 …, however many tests are added later.
+   */
+  function advancedOrder(a, b) {
+    var Lib = global.SATLibrary;
+    var keys = CATEGORIES.map(function (c) { return c.key; });
+    var ca = keys.indexOf(Lib.categoryOf(a)), cb = keys.indexOf(Lib.categoryOf(b));
+    if (ca === -1) ca = keys.length;
+    if (cb === -1) cb = keys.length;
+    var ra = roundOf(a.title), rb = roundOf(b.title);
+    return (ca - cb) || (ra.round - rb.round) ||
+      ra.base.localeCompare(rb.base, undefined, { numeric: true, sensitivity: 'base' }) ||
+      String(a.id).localeCompare(String(b.id));
+  }
 
   function scoreClass(p) { return p >= 80 ? 'is-good' : p >= 50 ? 'is-mid' : 'is-low'; }
 
@@ -81,14 +112,17 @@
   function HomeView(root) {
     var Lib = global.SATLibrary;
     var filter = { year: 'all', season: 'all' };
+    var savedCategory = U.lsGet(CATEGORY_KEY, 'all');
+    var category = CATEGORIES.some(function (c) { return c.key === savedCategory; }) ? savedCategory : 'all';
     var timer = null;
 
     function practiceTests() { return Lib.published().filter(function (t) { return !isAdvanced(t); }); }
+    function advancedTests() { return Lib.published().filter(isAdvanced).sort(advancedOrder); }
 
     function render() {
       var cfg = global.APP_CONFIG;
       var tests = practiceTests();
-      var advanced = Lib.published().filter(isAdvanced);
+      var advanced = advancedTests();
       var errs = Lib.errors();
       var note = String(cfg.announcement || '').trim();
       var dismissed = U.lsGet(DISMISS_KEY, '') === note;
@@ -129,12 +163,34 @@
         '</section>' +
         (advanced.length ? '<section class="section">' +
           '<div class="section-head"><div><h2>Advanced Tests</h2><p class="muted">Harder question sets that focus on one topic.</p></div></div>' +
-          '<div class="exam-grid">' + advanced.map(examCard).join('') + '</div>' +
+          '<div class="cat-bar" role="group" aria-label="Filter advanced tests by category">' +
+          catChip('all', 'All', advanced.length) +
+          CATEGORIES.map(function (c) {
+            return catChip(c.key, c.label, advanced.filter(function (t) { return Lib.categoryOf(t) === c.key; }).length);
+          }).join('') +
+          '</div>' +
+          '<div class="exam-grid" id="adv-grid"></div>' +
           '</section>' : '') +
         recentResults() +
         '</div>';
       renderGrid();
+      renderAdvanced();
       startCountdown(next);
+    }
+
+    function catChip(key, label, n) {
+      var on = category === key;
+      return '<button type="button" class="chip' + (on ? ' is-on' : '') + '" data-cat="' + U.esc(key) + '" aria-pressed="' + on + '">' +
+        U.esc(label) + ' <span>' + n + '</span></button>';
+    }
+
+    function renderAdvanced() {
+      var grid = document.getElementById('adv-grid');
+      if (!grid) return;
+      var tests = advancedTests().filter(function (t) { return category === 'all' || Lib.categoryOf(t) === category; });
+      var cat = CATEGORIES.filter(function (c) { return c.key === category; })[0];
+      grid.innerHTML = tests.length ? tests.map(examCard).join('')
+        : '<div class="empty-mini grid-span">No ' + U.esc(cat ? cat.label : 'advanced') + ' tests yet. Check back soon!</div>';
     }
 
     function seg(kind, value, label) {
@@ -182,6 +238,18 @@
           b.setAttribute('aria-pressed', String(on));
         });
         renderGrid();
+        return;
+      }
+      var c = e.target.closest('[data-cat]');
+      if (c) {
+        category = c.getAttribute('data-cat');
+        U.lsSet(CATEGORY_KEY, category);
+        U.$$('[data-cat]', root).forEach(function (b) {
+          var on = b.getAttribute('data-cat') === category;
+          b.classList.toggle('is-on', on);
+          b.setAttribute('aria-pressed', String(on));
+        });
+        renderAdvanced();
         return;
       }
       var d = e.target.closest('[data-act="dismiss"]');

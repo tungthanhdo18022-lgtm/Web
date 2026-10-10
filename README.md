@@ -54,7 +54,10 @@ Explanation: $3x = 15$, so $x = 5$.
 Answer: 441/677 | .6514
 ```
 
-- Add `section: advanced` to the front matter to list a test under **Advanced Tests** on the home page.
+- Add `section: advanced` to the front matter to list a test under **Advanced Tests** on the home page, and
+  `category: Algebra` (or `Advanced Math`, `Problem-Solving and Data Analysis`, `Geometry and Trigonometry`) to
+  choose its filter; without it the test goes under the domain most of its questions belong to. Advanced Tests
+  are ordered by round: titles without a number (Algebra A, B, C …) first, then A1, B1 …, then A2, B2 ….
 - Math: `$...$` inline, `$$...$$` or `\[...\]` display. A literal dollar sign: `\$165`.
 - Tables: Markdown `| a | b |`. Images: the **Image** button or paste (Ctrl+V) in the builder.
 - Modules: `## Module 1 | 35` (35 = minutes). Answer key at the end: an `Answer Key` line, then `1. B`, `2. 14`, …

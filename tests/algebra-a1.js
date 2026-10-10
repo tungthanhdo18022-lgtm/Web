@@ -1,7 +1,7 @@
 /*
  * Advanced test: Algebra A1 (74 questions, from "SAT Math Practice Set · Mixed Review").
  * Written in the same text format as the admin builder (see the "Syntax" guide there).
- * "section: advanced" lists it under "Advanced Tests" on the home page.
+ * "section: advanced" lists it under "Advanced Tests" on the home page; "category" sets its filter.
  * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
  */
 SATLibrary.register({
@@ -12,6 +12,7 @@ title: Algebra A1
 author: tungtks18022
 description: 74 mixed SAT Math questions on linear equations, systems and inequalities, equivalent expressions, rearranging formulas and nonlinear functions, with an explanation for every question.
 section: advanced
+category: Algebra
 time: 118
 ---
 
@@ -481,9 +482,11 @@ Explanation: Line $k$ is $y = -\frac{5}{6}\left(x - \frac{p}{2}\right)$. At $x =
 
 49. The table below shows several values of $x$ and their corresponding values of $y$, where $k$ is a nonzero constant. If the relationship between $x$ and $y$ is linear, which of the following defines this relationship?
 
-| $x$ | $-1$ | $1$ | $2$ |
-|:---:|:---:|:---:|:---:|
-| $y$ | $-3k - 6$ | $3k + 6$ | $6k + 12$ |
+| $x$ | $y$ |
+|:---:|:---:|
+| $-1$ | $-3k - 6$ |
+| $1$ | $3k + 6$ |
+| $2$ | $6k + 12$ |
 A. $y = 3(kx - 2)$
 B. $y = 3(kx + 2x)$
 C. $y = 3kx + 6$
@@ -582,9 +585,11 @@ Explanation: The given lines are perpendicular, so $\left(-\frac{7}{11}\right)\l
 
 58. For the quadratic function $f$, the table shows three values of $x$ and their corresponding values of $f(x)$. Which equation defines $f$?
 
-| $x$ | $-1$ | $0$ | $1$ |
-|:---:|:---:|:---:|:---:|
-| $f(x)$ | $7$ | $13$ | $21$ |
+| $x$ | $f(x)$ |
+|:---:|:---:|
+| $-1$ | $7$ |
+| $0$ | $13$ |
+| $1$ | $21$ |
 A. $f(x) = 7x^2 + x + 13$
 B. $f(x) = 11x^2 - 3x + 13$
 C. $f(x) = 5x^2 + 3x + 13$
@@ -703,9 +708,9 @@ Explanation: Wind erosion and overgrazing together caused $1.37 - 0.63 = 0.74$ b
 
 71. The table below shows the list price, discount, and installation fee for a window company. The window company's total expenses for selling and installing $5$ windows is \$250. Which function represents the profit $p$, in dollars, from selling and installing $5$ windows to which the company's discount is applied? (Note: profit $=$ total amount of money received $-$ expenses)
 
-| List price (\$) | Discount | Installation fee |
-|:---:|:---:|:---:|
-| $x$ per window | Buy $4$ windows at list price and get the 5th free | \$150 for $5$ windows |
+| **List price** | \$$x$ per window |
+| **Discount** | Buy $4$ windows at list price and get the 5th free |
+| **Installation fee** | \$150 for $5$ windows |
 A. $p(x) = 5x + 150$
 B. $p(x) = 5x - 100$
 C. $p(x) = 4x + 150$

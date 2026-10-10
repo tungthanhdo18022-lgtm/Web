@@ -1,7 +1,7 @@
 /*
  * Advanced test: Algebra B (69 questions).
  * Written in the same text format as the admin builder (see the "Syntax" guide there).
- * "section: advanced" lists it under "Advanced Tests" on the home page.
+ * "section: advanced" lists it under "Advanced Tests" on the home page; "category" sets its filter.
  * Question 57 was missing from the source file (only its answer, B, was given); the
  * question below is a replacement written for this test with the same answer.
  * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
@@ -14,6 +14,7 @@ title: Algebra B
 author: tungtks18022
 description: 69 harder Algebra questions on linear equations, linear functions, systems of equations and linear inequalities, with an explanation for every question.
 section: advanced
+category: Algebra
 time: 110
 ---
 
