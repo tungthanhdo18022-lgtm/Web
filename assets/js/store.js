@@ -423,14 +423,15 @@
     /**
      * Saves an attempt. Returns false when storage is full.
      * Refuses (returns 'stale') to overwrite an attempt that another tab already submitted.
+     * opts.keepTime: leave updatedAt as it is (redo progress should not reorder attempts).
      */
-    save: function (a) {
+    save: function (a, opts) {
       var stored = readStored()[a.id];
       if (stored && stored.status === 'completed' && a.status !== 'completed') {
         attemptsCache = null;
         return 'stale';
       }
-      a.updatedAt = Date.now();
+      if (!(opts && opts.keepTime)) a.updatedAt = Date.now();
       attemptsCache = readStored();
       attemptsCache[a.id] = a;
       return persistAttempts();
@@ -453,7 +454,11 @@
     best: function (testId) {
       var done = Attempts.forTest(testId).filter(function (a) { return a.status === 'completed' && a.result; });
       if (!done.length) return null;
-      return done.reduce(function (b, a) { return a.result.correct > b.result.correct ? a : b; });
+      return done.reduce(function (b, a) {
+        var better = a.result.correct > b.result.correct ||
+          (a.result.correct === b.result.correct && (a.finishedAt || 0) > (b.finishedAt || 0));
+        return better ? a : b;
+      });
     },
     create: function (test, opts) {
       var a = {

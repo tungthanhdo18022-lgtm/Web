@@ -17,7 +17,8 @@
 
     function render() {
       var prog = A.inProgress(test.id);
-      var done = A.forTest(test.id).filter(function (a) { return a.status === 'completed' && a.result; });
+      var done = A.forTest(test.id).filter(function (a) { return a.status === 'completed' && a.result; })
+        .sort(function (a, b) { return (b.finishedAt || 0) - (a.finishedAt || 0); });
 
       var progInfo = '';
       if (prog) {
