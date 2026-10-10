@@ -125,17 +125,7 @@ Explanation: From $\frac{y}{8} > 9$, $y > 72$. So $72 < y < 24 - 8x$, which requ
 
 12. In triangle $ABC$ shown, $DE$ is parallel to $AC$, $BD = AD$, $BE = 5$, and $AC = 9$. What is the length of $BC$?
 
-<svg class="q-fig" viewBox="0 0 260 205" width="260" height="205" role="img" aria-label="Triangle ABC with segment DE parallel to AC">
-  <polygon points="40,180 130,25 225,180" fill="none" stroke="#1a1a1a" stroke-width="1.4" stroke-linejoin="round"/>
-  <line x1="85" y1="102.5" x2="177.5" y2="102.5" stroke="#1a1a1a" stroke-width="1.3" stroke-dasharray="5 4"/>
-  <g font-family="Georgia, 'Times New Roman', serif" font-size="15" fill="#1a1a1a">
-    <text x="130" y="16" text-anchor="middle">B</text>
-    <text x="28" y="196" text-anchor="middle">A</text>
-    <text x="237" y="196" text-anchor="middle">C</text>
-    <text x="80" y="107" text-anchor="end">D</text>
-    <text x="183" y="107">E</text>
-  </g>
-</svg>
+![Triangle ABC. Point D lies on side AB and point E lies on side BC; dashed segment DE is parallel to AC.](tests/images/september-2026/q12.svg)
 
 *Note: Figure not drawn to scale.*
 A. $45$
@@ -146,29 +136,20 @@ Answer: D
 Domain: Geometry and Trigonometry
 Explanation: Since $BD = AD$, point $D$ is the midpoint of $\overline{AB}$. Because $DE \parallel AC$, point $E$ is the midpoint of $\overline{BC}$. So $BC = 2(BE) = 10$.
 
-13. In triangle $QRS$ shown, $QR < RS$. Which expression represents the length of $QS$?
+13. In triangle $QRS$ shown, which expression represents the length of $QR$?
 
-<svg class="q-fig" viewBox="0 0 250 165" width="250" height="165" role="img" aria-label="Right triangle QRS with the right angle at S">
-  <polygon points="30,138 212,138 212,24" fill="none" stroke="#1a1a1a" stroke-width="1.4" stroke-linejoin="round"/>
-  <polyline points="200,138 200,126 212,126" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
-  <g font-family="Georgia, 'Times New Roman', serif" font-size="15" fill="#1a1a1a">
-    <text x="20" y="154" text-anchor="middle">Q</text>
-    <text x="222" y="154" text-anchor="middle">S</text>
-    <text x="222" y="22" text-anchor="middle">R</text>
-    <text x="121" y="156" text-anchor="middle">18</text>
-  </g>
-</svg>
+![Right triangle QRS with the right angle at S. Side QS is labeled 18.](tests/images/september-2026/q13.svg)
 
 *Note: Figure not drawn to scale.*
 A. $18\cos Q$
 B. $18\sin Q$
 C. $\dfrac{18}{\cos Q}$
 D. $\dfrac{18}{\sin Q}$
-Answer: A
+Answer: C
 Domain: Geometry and Trigonometry
-Explanation: In right triangle $QRS$ with the right angle at $S$, $\cos Q = \dfrac{QS}{QR}$, so $QS = QR\cos Q$. The answer key uses $18$ as the length of the hypotenuse $QR$, which gives $QS = 18\cos Q$.
+Explanation: Angle $S$ is a right angle, so $\overline{QR}$ is the hypotenuse and $QS = 18$ is the leg adjacent to angle $Q$. Then $\cos Q = \dfrac{QS}{QR} = \dfrac{18}{QR}$, so $QR = \dfrac{18}{\cos Q}$.
 
-14. In isosceles triangle $PQR$, $PQ = PR$. The length of base $QR$ is $48$, and $\tan R = \frac{7}{24}$. What is the area of triangle $PQR$?
+14. In isosceles triangle $PQR$, $PQ = PR$. The length of base $QR$ is $48$, and $\tan R = \dfrac{7}{24}$. What is the area of triangle $PQR$?
 Answer: 168
 Domain: Geometry and Trigonometry
 Explanation: The altitude from $P$ bisects $QR$, so it meets $QR$ $24$ units from $R$. Then $\tan R = \frac{h}{24} = \frac{7}{24}$ gives $h = 7$. The area is $\frac{1}{2}(48)(7) = 168$.
@@ -214,7 +195,7 @@ Answer: 17.9
 Domain: Problem-Solving and Data Analysis
 Explanation: $p = 0.520(21.5) + 0.480(14.0) = 11.18 + 6.72 = 17.9$.
 
-20. The function $r$ is defined by $r(x) = \frac{9}{x^2} - 8$. In the $xy$-plane, the graph of $y = t(x)$ is the result of shifting the graph of $y = r(x)$ to the right $a$ units and down $b$ units, where $a$ and $b$ are positive constants. Which equation defines function $t$?
+20. The function $r$ is defined by $r(x) = \dfrac{9}{x^2} - 8$. In the $xy$-plane, the graph of $y = t(x)$ is the result of shifting the graph of $y = r(x)$ to the right $a$ units and down $b$ units, where $a$ and $b$ are positive constants. Which equation defines function $t$?
 A. $t(x) = \dfrac{9}{x^2 - a} - (8 - b)$
 B. $t(x) = \dfrac{9}{x^2 - a} - (8 + b)$
 C. $t(x) = \dfrac{9}{(x - a)^2} - (8 - b)$
@@ -236,7 +217,7 @@ Answer: 441/677
 Domain: Problem-Solving and Data Analysis
 Explanation: There are $352 + 325 = 677$ students in grade $10$ or $11$, and $285 + 156 = 441$ of them stayed on campus. The probability is $\frac{441}{677}$ (or $.6514$).
 
-22. The solutions to $x^2 - 3x - 7 = 0$ are $\frac{3 - \sqrt{p}}{2}$ and $\frac{3 + \sqrt{p}}{2}$. If the solutions to $x^2 - 17x + c = 0$, where $c$ is a constant, are $\frac{17 - \sqrt{p}}{2}$ and $\frac{17 + \sqrt{p}}{2}$, what is the value of $c$?
+22. The solutions to $x^2 - 3x - 7 = 0$ are $\dfrac{3 - \sqrt{p}}{2}$ and $\dfrac{3 + \sqrt{p}}{2}$. If the solutions to $x^2 - 17x + c = 0$, where $c$ is a constant, are $\dfrac{17 - \sqrt{p}}{2}$ and $\dfrac{17 + \sqrt{p}}{2}$, what is the value of $c$?
 A. $2$
 B. $49$
 C. $63$
@@ -250,25 +231,11 @@ Answer: 42
 Domain: Problem-Solving and Data Analysis
 Explanation: X has mass $38(180) = 6{,}840$ grams and Y has mass $\frac{180}{0.25} = 720$ grams. Then $6{,}840 + 720 = 7{,}560 = 180w$, so $w = 42$.
 
-24. <svg class="q-fig" viewBox="0 0 330 222" width="330" height="222" role="img" aria-label="Triangle ABC with segment DE parallel to AC; BD = x and DA = y">
-  <polygon points="30,192 170,22 302,192" fill="none" stroke="#1a1a1a" stroke-width="1.4" stroke-linejoin="round"/>
-  <line x1="86" y1="124" x2="249.2" y2="124" stroke="#1a1a1a" stroke-width="1.4"/>
-  <line x1="131.8" y1="76.2" x2="124.2" y2="69.8" stroke="#1a1a1a" stroke-width="1.3"/>
-  <line x1="61.8" y1="161.2" x2="54.2" y2="154.8" stroke="#1a1a1a" stroke-width="1.3"/>
-  <g font-family="Georgia, 'Times New Roman', serif" font-size="15" fill="#1a1a1a">
-    <text x="170" y="14" text-anchor="middle">B</text>
-    <text x="80" y="129" text-anchor="end">D</text>
-    <text x="256" y="129">E</text>
-    <text x="20" y="208" text-anchor="middle">A</text>
-    <text x="312" y="208" text-anchor="middle">C</text>
-    <text x="113" y="68" font-style="italic" text-anchor="middle">x</text>
-    <text x="44" y="152" font-style="italic" text-anchor="middle">y</text>
-  </g>
-</svg>
+24. ![Triangle ABC. Point D lies on side AB and point E lies on side BC, with segment DE parallel to AC. Segment BD is labeled x and segment DA is labeled y.](tests/images/september-2026/q24.svg)
 
 *Note: Figure not drawn to scale.*
 
-In triangle $ABC$, point $D$ lies on $\overline{AB}$ and point $E$ lies on $\overline{BC}$ such that $\overline{DE}$ is parallel to $\overline{AC}$. If $\frac{x}{y} = \frac{3}{2}$ and $DE = 57$, what is the length of $\overline{AC}$?
+In triangle $ABC$, point $D$ lies on $\overline{AB}$ and point $E$ lies on $\overline{BC}$ such that $\overline{DE}$ is parallel to $\overline{AC}$. If $\dfrac{x}{y} = \dfrac{3}{2}$ and $DE = 57$, what is the length of $\overline{AC}$?
 A. $114$
 B. $95$
 C. $90$

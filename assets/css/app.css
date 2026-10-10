@@ -527,7 +527,7 @@ body.is-wide .site-footer { display: none; }
 
 /* ---------------- Question content (shared with the exam) ---------------- */
 .content { font-family: var(--font-serif); font-size: 18px; line-height: 1.65; color: #1a1a1a; overflow-wrap: break-word; }
-.content p { margin: 0 0 .85em; }
+.content p { margin: 0 0 .85em; text-wrap: pretty; }
 .content p:last-child { margin-bottom: 0; }
 .content .katex { font-size: 1.08em; }
 .content .katex-display { margin: .7em 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
@@ -537,10 +537,20 @@ body.is-wide .site-footer { display: none; }
 .content .q-table { border-collapse: collapse; margin: 0 auto; font-size: .94em; }
 .content .q-table th, .content .q-table td { border: 1px solid #1a1a1a; padding: 5px 14px; text-align: center; }
 .content .q-table th { font-weight: 600; }
+.content .q-tables { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 14px 36px; margin: .6em 0 1em; }
+.content .q-tables .q-table { margin: 0; }
+.content .q-stmt { padding-left: 3.2em; text-indent: -1.6em; margin-bottom: .4em; }
+.content .q-stmt .katex { text-indent: 0; }
+.m-nb { white-space: nowrap; }
+.content .q-note { text-align: center; font-size: .86em; color: #333; margin-top: -.4em; }
+.content .q-note em { font-style: normal; }
+.content .q-stmt + p:not(.q-stmt) { margin-top: .85em; }
 .content .q-fig { display: block; margin: .6em auto 1em; max-width: 100%; height: auto; }
 .content .q-figure { text-align: center; margin: .6em 0 1em; }
 .content .q-img { max-width: 100%; height: auto; vertical-align: middle; }
 .content svg { max-width: 100%; height: auto; }
+/* KaTeX draws radicals and stretchy symbols with inline SVGs sized by the parent: keep its own sizing */
+.content .katex svg { max-width: none; height: inherit; }
 .img-missing { display: inline-block; padding: 6px 10px; border: 1px dashed var(--bad); color: var(--bad); border-radius: 8px; font-family: var(--font-ui); font-size: 13px; }
 .math-error { color: var(--bad); font-family: var(--font-mono); font-size: .85em; }
 .math-fallback { font-family: var(--font-mono); font-size: .9em; }

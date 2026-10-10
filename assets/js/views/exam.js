@@ -178,7 +178,10 @@
     /* ---------------- Render ---------------- */
     function renderHeader() {
       var multi = test.modules.length > 1;
-      els.title.textContent = multi ? moduleName() : (test.title || 'Practice Test') + ': ' + mod.title;
+      var title = test.title || 'Practice Test';
+      // "SAT Math June 2025" already names the "Math" module: don't repeat it
+      var named = new RegExp('\\b' + String(mod.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(title);
+      els.title.textContent = multi ? moduleName() : named ? title : title + ': ' + mod.title;
       document.title = (test.title || 'SAT Math') + ' – ' + global.APP_CONFIG.siteName;
       els.student.textContent = attempt.name || 'Student';
       renderTimer();

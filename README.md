@@ -83,6 +83,7 @@ assets/js/admin.js       Owner sign-in and publishing through the GitHub API
 assets/js/views/         Pages: home, intro, exam, results, help, admin, builder
 tests/manifest.js        List of published tests
 tests/*.js               Published tests
+tests/images/            Figures used by the tests (vector SVG)
 vendor/katex/            KaTeX 0.16.22
 ```
 

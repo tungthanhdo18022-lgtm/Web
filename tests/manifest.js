@@ -4,5 +4,9 @@
  * Each entry: { file: 'name.js', v: 'version' } — "v" changes on every publish so browsers fetch the new file.
  */
 SATLibrary.manifest([
-  { file: 'september-2026.js', v: '2' }
+  { file: 'september-2026.js', v: '4' },
+  { file: 'october-2025.js', v: '2' },
+  { file: 'september-2025.js', v: '2' },
+  { file: 'august-2025.js', v: '2' },
+  { file: 'june-2025.js', v: '2' }
 ]);
