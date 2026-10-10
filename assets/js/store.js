@@ -279,6 +279,7 @@
       var record = {
         id: safeId(test.id),
         title: test.title, author: test.author, description: test.description, date: test.date || '',
+        section: test.section || '',
         source: test.source || '',
         assets: test.assets || {},
         publishedFile: test.publishedFile || '',
@@ -334,6 +335,7 @@
         id: test.id, title: test.title, author: test.author,
         date: test.date || undefined,
         description: test.description || undefined,
+        section: test.section || undefined,
         modules: test.modules.map(function (m) {
           return {
             title: m.title, time: m.time,
