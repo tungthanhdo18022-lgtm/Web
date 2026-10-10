@@ -303,7 +303,7 @@ Answer: D
 Domain: Advanced Math
 Explanation: Setting the expressions for $y$ equal gives $x - c = -4x^2 + 48x - 144$, or $4x^2 - 47x + (144 - c) = 0$. The system has two distinct real solutions when the discriminant is positive: $47^2 - 16(144 - c) > 0$, so $2{,}209 - 2{,}304 + 16c > 0$ and $c > \frac{95}{16} = 5.9375$. Of the choices, only $11$ is greater than $\frac{95}{16}$. When $c = \frac{95}{16}$, the system has exactly one solution.
 
-32. The functions $f$ and $g$ are defined by the equations shown, where $a$ and $b$ are integer constants, $a < b$, and $b < 0$. If $y = f(x)$ and $y = g(x)$ are graphed in the $xy$-plane, which of the following equations displays, as a constant or coefficient, the $y$-coordinate of the $y$-intercept of the graph of the corresponding function?
+32. The functions $f$ and $g$ are defined by the equations shown, where $a$ and $b$ are integer constants, $a < b$ and $b < 0$. If $y = f(x)$ and $y = g(x)$ are graphed in the $xy$-plane, which of the following equations displays, as a constant or coefficient, the $y$-coordinate of the $y$-intercept of the graph of the corresponding function?
 
 I. $f(x) = a(4.2)^{x + b}$
 
@@ -319,7 +319,7 @@ Explanation: The $y$-coordinate of the $y$-intercept of the graph of $f$ is $f(0
 33. For the polynomial function $f$, a solution to the equation $f(x) = 0$ is $x = 7$, and one of the factors of $f(x)$ is $x + 5$. Which of the following could be the graph of $y = f(x)$ in the $xy$-plane?
 A. ![Graph of a cubic curve in the xy-plane, with both axes labeled from -8 to 8 in steps of 2. The curve comes down from the upper left, crosses the x-axis at x = -5, reaches a low point near (-2.5, -3.6), rises through the y-axis between -2 and -1, crosses the x-axis at x = 1, reaches a high point near (4.5, 3.6), crosses the x-axis at x = 7, and falls steeply to the lower right.](tests/images/advanced-math-b/q33a.svg)
 B. ![Graph of a cubic curve in the xy-plane, with both axes labeled from -8 to 8 in steps of 2. The curve comes down from the upper left, crosses the x-axis at x = -7, reaches a low point near (-4.5, -3.6), rises to cross the x-axis at x = -1 and the y-axis between 1 and 2, reaches a high point near (2.5, 3.6), crosses the x-axis at x = 5, and falls steeply to the lower right.](tests/images/advanced-math-b/q33b.svg)
-C. ![Graph of a cubic curve in the xy-plane, with both axes labeled from -8 to 8 in steps of 2. The curve comes down from the upper left, touches the x-axis at x = -1 without crossing it (a low point at (-1, 0)), rises through the y-axis slightly above 0 to a high point near (4.3, 3.2), crosses the x-axis at x = 7, and falls steeply to the lower right.](tests/images/advanced-math-b/q33c.svg)
+C. ![Graph of a cubic curve in the xy-plane, with both axes labeled from -8 to 8 in steps of 2. The curve comes down from the upper left, touches the x-axis at x = -1 without crossing it (a low point at (-1, 0)), rises through the y-axis slightly above 0 to a high point near (4.3, 3.3), crosses the x-axis at x = 7, and falls steeply to the lower right.](tests/images/advanced-math-b/q33c.svg)
 D. ![Graph of a cubic curve in the xy-plane, with both axes labeled from -8 to 8 in steps of 2. The curve comes down steeply from the upper left, crosses the x-axis at the origin, reaches a low point near (2.3, -2), rises to touch the x-axis at x = 7 without crossing it (a high point at (7, 0)), and then falls to the lower right.](tests/images/advanced-math-b/q33d.svg)
 Answer: A
 Domain: Advanced Math
@@ -396,7 +396,7 @@ Explanation: Comparing $K = \frac{1}{2}mv^2$ with $K = 34v^2$ gives $\frac{1}{2}
 
 41.
 
-![Graph in the xy-plane of a cubic curve. Both axes are labeled from -8 to 8 in steps of 2, with lighter grid lines every 0.5 unit. The curve comes down steeply from the top of the grid near x = -1.7, crosses the x-axis near x = -1, reaches a low point near (-0.1, -2.8), rises to cross the x-axis near x = 1, reaches a high point near (1.6, 0.6) just above the x-axis, crosses the x-axis again near x = 2, and then falls steeply, leaving the bottom of the grid near x = 2.9.](tests/images/advanced-math-b/q41.svg)
+![Graph in the xy-plane of a cubic curve. Both axes are labeled from -8 to 8 in steps of 2, with lighter grid lines every 0.5 unit. The curve comes down steeply from the top of the grid near x = -1.7, crosses the x-axis near x = -1, reaches a low point near (-0.2, -2.7), rises to cross the x-axis near x = 1.1, reaches a high point near (1.6, 0.6) just above the x-axis, crosses the x-axis again near x = 2, and then falls steeply, leaving the bottom of the grid near x = 2.9.](tests/images/advanced-math-b/q41.svg)
 
 The graph of $y = f(x)$ is shown, where the function $f$ is defined by $f(x) = ax^3 + bx^2 + cx + d$ and $a$, $b$, $c$, and $d$ are constants. For how many values of $x$ does $f(x) = 0$?
 A. One

@@ -56,7 +56,7 @@ Explanation: The vertex is below the $x$-axis and the parabola crosses the $x$-a
 
 $$\begin{gathered} f(x) = x^2 + 5x - 6 \\[4pt] g(x) = x^2 + 2x - 35 \end{gathered}$$
 
-The quadratic function $f$ has $2$ zeros, $j$ and $k$, where $j < k$. The quadratic function $g$ has $2$ zeros, $l$ and $m$, where $l < m$. The quadratic function $h(x) = x^2 + 7x + c$ has zeros $k + l$ and $m + j$ and can be rewritten as $(x + a)(x + b)$, where $a$ and $b$ are constants. What is the value of $c$?
+The quadratic function $f(x)$ has $2$ zeros, $j$ and $k$, where $j < k$. The quadratic function $g(x)$ has $2$ zeros, $l$ and $m$, where $l < m$. The quadratic function $h(x) = x^2 + 7x + c$ has zeros $k + l$ and $m + j$ and can be rewritten as $(x + a)(x + b)$, where $a$ and $b$ are constants. What is the value of $c$?
 Answer: 6
 Domain: Advanced Math
 Explanation: Since $f(x) = (x + 6)(x - 1)$, its zeros are $j = -6$ and $k = 1$. Since $g(x) = (x + 7)(x - 5)$, its zeros are $l = -7$ and $m = 5$. So the zeros of $h$ are $k + l = 1 + (-7) = -6$ and $m + j = 5 + (-6) = -1$, and $h(x) = (x + 6)(x + 1) = x^2 + 7x + 6$. Therefore $c = 6$.
@@ -280,7 +280,7 @@ Answer: 12
 Domain: Advanced Math
 Explanation: For a quadratic equation $Ax^2 + Bx + C = 0$, the product of the solutions is $\frac{C}{A}$. Here the product is $\frac{-st}{\frac{1}{24}} = -24st$. Setting $-24st = -2kst$ gives $k = 12$.
 
-28. A savings account is opened with an initial deposit of \$9,000. The amount of money in the account $t$ years after the initial deposit is given by the function $f(t) = 9{,}000(1.02)^{2t}$. Which of the following is the best interpretation of the statement "$f(9)$ is approximately equal to $12{,}854.22$" in this context?
+28. A savings account is opened with an initial deposit of \$9,000. The amount of money in the account $t$ years after the initial deposit is given by the function $f(t) = 9{,}000(1.02)^{2t}$. Which of the following is the best interpretation of the statement “$f(9)$ is approximately equal to $12{,}854.22$” in this context?
 A. Every $9$ years, the amount of money, in dollars, in the account increases by $12{,}854.22$.
 B. $9$ years after the initial deposit, the amount of money, in dollars, in the account is $12{,}854.22$.
 C. $9$ years after the initial deposit, the amount of money, in dollars, in the account has increased by $12{,}854.22$.
@@ -381,7 +381,7 @@ Answer: B
 Domain: Advanced Math
 Explanation: When $d = 0$, $B = a = 24{,}000$. When $d = 14$, $24{,}000(2)^{14x} = 96{,}000$, so $2^{14x} = 4 = 2^2$. Then $14x = 2$ and $x = \frac{1}{7}$. (The population doubles every $7$ days.)
 
-37. The equation below relates distinct positive real numbers $a$, $b$, and $c$. Which equation correctly expresses $c$ in terms of $a$ and $b$?
+37. The equation below relates distinct positive real numbers $a$, $b$ and $c$. Which equation correctly expresses $c$ in terms of $a$ and $b$?
 
 $$a = 19b \cdot \sqrt[5]{\left(\dfrac{c}{20}\right)^4}$$
 A. $c = \dfrac{20}{19b}(a)^{\frac{5}{4}}$
@@ -532,7 +532,7 @@ Explanation: Rewriting gives $kx^2 - 40x + 8 = 0$. If $k = 0$, there is only one
 
 52.
 
-![Graph of a decreasing exponential curve in the xy-plane. The x-axis is labeled from -10 to 10 and runs along the top of the grid; the y-axis is labeled from 0 down to -10, with grid lines every 1 unit. On the left the curve is nearly flat just below the horizontal line y = -7. It bends downward, crosses the y-axis at (0, -8), passes through about (1, -9), and ends near (1.6, -10). The whole curve lies below the x-axis.](tests/images/advanced-math-a/q52.svg)
+![Graph of a decreasing exponential curve in the xy-plane. The x-axis is labeled from -10 to 10 and runs along the top of the grid; the y-axis is labeled from 0 down to -10, with grid lines every 1 unit. On the left the curve is nearly flat just below the horizontal line y = -7. It bends downward, crosses the y-axis at (0, -8), passes through about (1, -9) and (1.6, -10), and leaves the bottom of the grid. The whole curve lies below the x-axis.](tests/images/advanced-math-a/q52.svg)
 
 The graph of $y = f(x)$ is shown, where $f(x) = ab^x + c$, and $a$, $b$, and $c$ are constants. For how many values of $x$ does $f(x) = 0$?
 A. Three
@@ -572,7 +572,7 @@ C. I and II
 D. Neither I nor II
 Answer: D
 Domain: Advanced Math
-Explanation: For I, $f(0) = a(3.3)^b$. Since $b < 0$, $(3.3)^b$ is between $0$ and $1$, so $f(0)$ is not $a$, and it is not displayed in the equation. For II, $g(0) = a(3.3)^0 + b = a + b$. Since $a$ and $b$ are both negative, $a + b$ is less than both $a$ and $b$, so it is not displayed either. Neither equation displays the $y$-coordinate of its $y$-intercept.
+Explanation: For I, $f(0) = a(3.3)^b$. Since $b < 0$, $(3.3)^b$ is between $0$ and $1$, so $f(0)$ is between $a$ and $0$ and is not $a$. It is not $b$ either, because $a(3.3)^b = b$ would require $a = b(3.3)^{-b}$, which is not an integer. So $f(0)$ is not displayed in the equation. For II, $g(0) = a(3.3)^0 + b = a + b$. Since $a$ and $b$ are both negative, $a + b$ is less than both $a$ and $b$, so it is not displayed either. Neither equation displays the $y$-coordinate of its $y$-intercept.
 
 56.
 

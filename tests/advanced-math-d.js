@@ -56,7 +56,7 @@ Answer: A
 Domain: Advanced Math
 Explanation: The ratio $\frac{f(s + 1)}{f(s)} = \frac{ab^{s + 1}}{ab^s} = b$. Also, $\frac{f(s + 1)}{f(s)} = \frac{t - 0.87t}{t} = \frac{0.13t}{t} = 0.13$. So $b = 0.13$. (The value $0.87$ in choice B is the decrease, $87\%$, not the factor.)
 
-5. The function $p$ is defined by $p(x) = a\big((x + 5)^2 - b\big)\big((x + 5)^2 - c\big)$, where $a$, $b$, and $c$ are constants. In the $xy$-plane, the graph of $y = p(x)$ passes through the points $(-6, 30)$ and $(0, 342)$. What is the value of $p(-10) + p(-4)$?
+5. The function $p$ is defined by $p(x) = {a\big((x + 5)^2 - b\big)\big((x + 5)^2 - c\big)}$, where $a$, $b$, and $c$ are constants. In the $xy$-plane, the graph of $y = p(x)$ passes through the points $(-6, 30)$ and $(0, 342)$. What is the value of $p(-10) + p(-4)$?
 Answer: 372
 Domain: Advanced Math
 Explanation: The value of $p(x)$ depends only on $(x + 5)^2$. For $x = -4$ and $x = -6$, $(x + 5)^2 = 1$, so $p(-4) = p(-6) = 30$. For $x = -10$ and $x = 0$, $(x + 5)^2 = 25$, so $p(-10) = p(0) = 342$. Therefore $p(-10) + p(-4) = 342 + 30 = 372$.
@@ -74,10 +74,10 @@ Which of the following equivalent forms of the given function $f$ displays, as t
 A. $f(x) = \dfrac{1}{20{,}736}\left(\dfrac{1}{12}\right)^{4x}$
 B. $f(x) = \left(\dfrac{1}{12}\right)^{4x + 4}$
 C. $f(x) = 12^{-4x - 4}$
-D. $f(x) = 20{,}736^{-x + 1}$
+D. $f(x) = 20{,}736^{-x - 1}$
 Answer: A
 Domain: Advanced Math
-Explanation: The $y$-coordinate of the $y$-intercept is $f(0) = 12^{-4} = \frac{1}{20{,}736}$. Since $12^{-4(x + 1)} = 12^{-4} \cdot 12^{-4x} = \frac{1}{20{,}736}\left(\frac{1}{12}\right)^{4x}$, choice A is equivalent to $f$ and shows $\frac{1}{20{,}736}$ as its coefficient. Choices B and C are also equivalent, but their only base is $\frac{1}{12}$ or $12$. Choice D equals $12^{4(-x + 1)} = 12^{-4x + 4}$, which is not equivalent to $f$.
+Explanation: The $y$-coordinate of the $y$-intercept is $f(0) = 12^{-4} = \frac{1}{20{,}736}$. Since $12^{-4(x + 1)} = 12^{-4} \cdot 12^{-4x} = \frac{1}{20{,}736}\left(\frac{1}{12}\right)^{4x}$, choice A is equivalent to $f$ and shows $\frac{1}{20{,}736}$ as its coefficient. Choices B, C, and D are also equivalent to $f$ (for D, $20{,}736^{-x - 1} = 12^{4(-x - 1)} = 12^{-4(x + 1)}$), but they display only the base $\frac{1}{12}$, $12$, or $20{,}736$, not $\frac{1}{20{,}736}$.
 
 8.
 
@@ -276,7 +276,7 @@ Explanation: Substituting $y = -0.5$ gives $x^2 + 8x + a = -0.5$, or $x^2 + 8x +
 
 29.
 
-![Graph of an increasing exponential curve in the xy-plane. The x-axis is labeled from -4 to 4 and the y-axis from -6 to 10, with grid lines every 1 unit. On the left the curve is nearly flat just above the horizontal line y = -4. It passes through the marked points (0, -3) and (1, 1), then rises steeply and leaves the top of the grid near (1.7, 11).](tests/images/advanced-math-d/q29.svg)
+![Graph of an increasing exponential curve in the xy-plane. The x-axis is labeled from -4 to 4 and the y-axis from -6 to 10, with grid lines every 1 unit. On the left the curve is nearly flat just above y = -4. It passes through the marked points (0, -3) and (1, 1), then rises steeply and leaves the top of the grid near (1.7, 11).](tests/images/advanced-math-d/q29.svg)
 
 The equation of the graph shown is $y = a^x + b$, where $a$ and $b$ are constants. What is the value of $a - b$?
 Answer: 9

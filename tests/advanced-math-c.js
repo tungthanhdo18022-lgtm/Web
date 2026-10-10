@@ -113,7 +113,7 @@ C. $40$
 D. $64$
 Answer: B
 Domain: Advanced Math
-Explanation: Since $a^0 = 1$, $h(0) = 1 + b = 8$, so $b = 7$. Then $h(2) = a^2 + 7 = 32$, so $a^2 = 25$ and $a = 5$ (because $a > 0$). So $ab = 5 \cdot 7 = 35$. Choice C comes from mistakenly taking $b = 8$.
+Explanation: Since $a^0 = 1$, $h(0) = 1 + b = 8$, so $b = 7$. Then $h(2) = a^2 + 7 = 32$, so $a^2 = 25$ and $a = 5$ (because $a > 0$). So $ab = 5 \cdot 7 = 35$. Choice C, $40 = 5 \cdot 8$, comes from using the $y$-intercept $8$ in place of $b$.
 
 12. The function $g$ is a quadratic function. In the $xy$-plane, the graph of $y = g(x)$ has a vertex at $(-1, -4)$ and passes through the points $(-2, -43)$ and $(1, -160)$. What is the value of $g(0) - g(2)$?
 A. $-121$
@@ -258,14 +258,14 @@ Answer: A
 Domain: Advanced Math
 Explanation: The $y$-intercept is $f(0) = 4^{-5} = \frac{1}{1{,}024}$. In choice A, $\frac{1}{1{,}024}\left(\frac{1}{4}\right)^{5x} = 4^{-5} \cdot 4^{-5x} = 4^{-5x - 5}$, so it is equivalent and it displays $\frac{1}{1{,}024}$ as the coefficient. Choices B, C, and D are also equivalent, but their bases are $\frac{1}{4}$, $4$, and $1{,}024$, and their coefficients are $1$.
 
-27. Which expression is a factor of $x^4 + 14ax^2 + 49a^2 - 64$, where $a$ is a positive constant?
+27. Which expression must be a factor of $x^4 + 14ax^2 + 49a^2 - 64$, where $a$ is a positive constant?
 A. $x^2 + 7a + 8$
 B. $x^2 - 7a - 8$
 C. $x^2 + 14a$
 D. $x^2 - 8a$
 Answer: A
 Domain: Advanced Math
-Explanation: The first three terms form a perfect square: $x^4 + 14ax^2 + 49a^2 = (x^2 + 7a)^2$. So the expression is a difference of squares, $(x^2 + 7a)^2 - 8^2 = (x^2 + 7a - 8)(x^2 + 7a + 8)$, and $x^2 + 7a + 8$ is a factor.
+Explanation: The first three terms form a perfect square: $x^4 + 14ax^2 + 49a^2 = (x^2 + 7a)^2$. So the expression is a difference of squares, $(x^2 + 7a)^2 - 8^2 = (x^2 + 7a - 8)(x^2 + 7a + 8)$, and $x^2 + 7a + 8$ is a factor for every value of $a$. Choice C equals $x^2 + 7a + 8$ only when $a = \frac{8}{7}$, and choice D equals $x^2 + 7a - 8$ only when $a = \frac{8}{15}$, so neither must be a factor.
 
 28.
 
@@ -336,7 +336,7 @@ C. $A(t) = 94{,}072.38(1.09)^t$
 D. $A(t) = 94{,}072.38(0.09)^t$
 Answer: A
 Domain: Advanced Math
-Explanation: The initial balance is $A(0) = 35{,}600.00$, so the coefficient is $35{,}600.00$ (this rules out choices C and D). The balance grows, so the base must be greater than $1$ (choice B would shrink the balance). Check choice A: $35{,}600(1.09)^{15} \approx 35{,}600(3.6425) \approx 129{,}672.38$.
+Explanation: The initial balance is $A(0) = 35{,}600.00$, so the coefficient is $35{,}600.00$ (this rules out choices C and D). The balance grows, so the base must be greater than $1$ (choice B would shrink the balance). Check choice A: $35{,}600(1.09)^{15} \approx 129{,}672.38$.
 
 35. The function $k$ is defined by
 
