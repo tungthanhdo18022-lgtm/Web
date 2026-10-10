@@ -247,7 +247,7 @@ body.is-exam { overflow: hidden; background: #fff; }
 /* Advanced Tests category filter: one row of chips that scrolls sideways when it does not fit */
 .cat-bar {
   display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
-  margin: -6px 0 16px; padding: 2px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+  margin: -9px -5px 16px; padding: 5px 5px 8px; scroll-padding-inline: 5px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
 }
 .cat-bar::-webkit-scrollbar { height: 6px; }
 .cat-bar::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; }
@@ -463,7 +463,7 @@ body.is-wide .site-footer { display: none; }
 .save-state { font-size: 12.5px; color: var(--muted); }
 .builder-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .builder-note { margin: 0; }
-.builder-meta { display: grid; grid-template-columns: 1.4fr 1fr 140px 100px 120px 200px; gap: 10px; }
+.builder-meta { display: grid; grid-template-columns: 1.4fr 1fr 140px 100px 120px minmax(200px, 1.3fr); gap: 10px; }
 .builder-meta .field--wide { grid-column: 1 / -1; }
 .builder-meta .field input, .builder-meta .field select { height: 38px; }
 .builder-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

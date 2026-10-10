@@ -284,8 +284,11 @@
 
     get: function (id) { return user.get(id) || builtin.get(id) || null; },
 
-    /** Category used by the Advanced Tests filter: the test's "category:" or, if unset, its main domain. */
-    categoryOf: function (t) { return (t && (t.category || t.mainDomain)) || ''; },
+    /**
+     * Category used by the Advanced Tests filter: the test's "category:", else the domain its title
+     * starts with ("Algebra C" -> Algebra), else the domain most of its questions belong to.
+     */
+    categoryOf: function (t) { return (t && (t.category || P.normalizeCategory(t.title) || t.mainDomain)) || ''; },
 
     getPublished: function (id) { return builtin.get(id) || null; },
 

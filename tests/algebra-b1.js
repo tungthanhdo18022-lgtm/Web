@@ -11,8 +11,8 @@ SATLibrary.register({
 title: Algebra B1
 author: tungtks18022
 description: 56 mixed SAT Math questions on linear systems, absolute value equations and inequalities, quadratic and rational equations, and linear models, with an explanation for every question.
-section: advanced
 category: Algebra
+section: advanced
 time: 90
 ---
 

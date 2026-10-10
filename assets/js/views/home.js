@@ -114,6 +114,7 @@
     var filter = { year: 'all', season: 'all' };
     var savedCategory = U.lsGet(CATEGORY_KEY, 'all');
     var category = CATEGORIES.some(function (c) { return c.key === savedCategory; }) ? savedCategory : 'all';
+    var restored = category !== 'all';
     var timer = null;
 
     function practiceTests() { return Lib.published().filter(function (t) { return !isAdvanced(t); }); }
@@ -123,6 +124,9 @@
       var cfg = global.APP_CONFIG;
       var tests = practiceTests();
       var advanced = advancedTests();
+      // A remembered category that has no tests right now falls back to All
+      if (restored && !advanced.some(function (t) { return Lib.categoryOf(t) === category; })) category = 'all';
+      restored = false;
       var errs = Lib.errors();
       var note = String(cfg.announcement || '').trim();
       var dismissed = U.lsGet(DISMISS_KEY, '') === note;
@@ -175,7 +179,14 @@
         '</div>';
       renderGrid();
       renderAdvanced();
+      showActiveChip();
       startCountdown(next);
+    }
+
+    /** Scroll the chip bar (not the page) so the selected chip is visible on narrow screens. */
+    function showActiveChip() {
+      var on = root.querySelector('.cat-bar .chip.is-on');
+      if (on) on.parentNode.scrollLeft = Math.max(0, on.offsetLeft - on.parentNode.offsetLeft - 8);
     }
 
     function catChip(key, label, n) {

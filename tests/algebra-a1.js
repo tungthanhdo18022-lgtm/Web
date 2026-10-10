@@ -11,8 +11,8 @@ SATLibrary.register({
 title: Algebra A1
 author: tungtks18022
 description: 74 mixed SAT Math questions on linear equations, systems and inequalities, equivalent expressions, rearranging formulas and nonlinear functions, with an explanation for every question.
-section: advanced
 category: Algebra
+section: advanced
 time: 118
 ---
 

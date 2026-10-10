@@ -634,8 +634,9 @@
     var out = ['---', 'title: ' + oneLine(test.title), 'author: ' + oneLine(test.author)];
     if (test.date) out.push('date: ' + oneLine(test.date));
     if (test.description) out.push('description: ' + oneLine(test.description));
-    if (test.section) out.push('section: ' + test.section);
+    // category before section: parsers older than 2.4.0 read "category:" as the section
     if (test.category) out.push('category: ' + test.category);
+    if (test.section) out.push('section: ' + test.section);
     // Times computed automatically by the library (m.autoTime) are not written back.
     var times = test.modules.map(function (m) { return m.autoTime ? null : m.time; });
     var sameTime = times.every(function (t) { return t === times[0]; });

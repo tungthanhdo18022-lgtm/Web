@@ -133,8 +133,9 @@
       if (String(state.date).trim()) fm.push('date: ' + String(state.date).trim());
       if (state.description.trim()) fm.push('description: ' + state.description.replace(/\n/g, ' '));
       if (String(state.time).trim()) fm.push('time: ' + String(state.time).trim());
-      if (state.section) fm.push('section: ' + state.section);
+      // category before section: parsers older than 2.4.0 read "category:" as the section
       if (state.category) fm.push('category: ' + state.category);
+      if (state.section) fm.push('section: ' + state.section);
       fm.push('---', '');
       // The body starts on line fm.length (1-based), so body line n = file line n + offset
       return { text: fm.join('\n') + state.body, offset: fm.length - 1 };
@@ -176,7 +177,7 @@
       '<label class="field field--sm"><span class="field-label">Time (min)</span><input id="bd-time" type="number" min="1" max="600" step="1" placeholder="Auto"></label>' +
       '<label class="field field--sm"><span class="field-label">Section</span><select id="bd-section"><option value="">Practice</option><option value="advanced">Advanced</option></select></label>' +
       '<label class="field field--cat"><span class="field-label">Category</span><select id="bd-category" title="Advanced Tests filter">' +
-      '<option value="">Auto (most questions)</option>' +
+      '<option value="">Auto (title or questions)</option>' +
       P.DOMAINS.map(function (d) { return '<option value="' + U.esc(d) + '">' + U.esc(d) + '</option>'; }).join('') +
       '</select></label>' +
       '<label class="field field--wide"><span class="field-label">Description</span><input id="bd-desc" type="text" maxlength="300" placeholder="Optional short description"></label>' +

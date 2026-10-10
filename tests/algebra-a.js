@@ -11,8 +11,8 @@ SATLibrary.register({
 title: Algebra A
 author: tungtks18022
 description: 72 harder Algebra questions on linear equations, linear functions, systems of equations and linear inequalities, with an explanation for every question.
-section: advanced
 category: Algebra
+section: advanced
 time: 115
 ---
 
