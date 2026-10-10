@@ -149,7 +149,7 @@ Answer: D
 Domain: Algebra
 Explanation: We have $x + y = 108$ and $x = 4y + 8$. Substituting gives $5y + 8 = 108$, so $y = 20$ and $x = 4(20) + 8 = 88$.
 
-16. A circle in the $xy$-plane has its center at $(2, 9)$. Line $t$ is tangent to this circle at the point $(a, -4)$, where $a$ is a constant. The slope of line $t$ is $\frac{6}{5}$. What is the value of $a$?
+16. A circle in the $xy$-plane has its center at $(2, 9)$. Line $t$ is tangent to this circle at the point $(a, -4)$, where $a$ is a constant. The slope of line $t$ is $\dfrac{6}{5}$. What is the value of $a$?
 A. $-\dfrac{68}{5}$
 B. $-\dfrac{53}{6}$
 C. $\dfrac{77}{6}$
@@ -223,7 +223,7 @@ Explanation: Factoring gives $7{,}290x^4 - 56{,}250 = 90(81x^4 - 625) = 90(9x^2 
 
 23.
 
-<div class="q-table-wrap"><table class="q-table"><thead><tr><th rowspan="2">Classification</th><th colspan="3">Cell body diameter (micrometers)</th></tr><tr><th>Less than $20$</th><th>$20$ to $30$</th><th>Greater than $30$</th></tr></thead><tbody><tr><td><b>Sensory neuron</b></td><td>13</td><td>7</td><td>2</td></tr><tr><td><b>Motor neuron</b></td><td>0</td><td>17</td><td>18</td></tr><tr><td><b>Interneuron</b></td><td>10</td><td>33</td><td>0</td></tr></tbody></table></div>
+<div class="q-table-wrap"><table class="q-table"><thead><tr><th rowspan="2">Classification</th><th colspan="3">Cell body diameter (micrometers)</th></tr><tr><th>Less than 20</th><th>20 to 30</th><th>Greater than 30</th></tr></thead><tbody><tr><td><b>Sensory neuron</b></td><td>13</td><td>7</td><td>2</td></tr><tr><td><b>Motor neuron</b></td><td>0</td><td>17</td><td>18</td></tr><tr><td><b>Interneuron</b></td><td>10</td><td>33</td><td>0</td></tr></tbody></table></div>
 
 For $100$ neurons, the table summarizes the distribution of classification and cell body diameter. One of these neurons will be selected at random. What is the probability of selecting a neuron with a cell body diameter that is less than or equal to $30$ micrometers, given that it is **not** classified as a motor neuron? (Express your answer as a decimal or fraction, not as a percent.)
 Answer: 63/65

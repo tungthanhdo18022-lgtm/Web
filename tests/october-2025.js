@@ -141,7 +141,7 @@ Answer: B
 Domain: Advanced Math
 Explanation: Subtracting $x - a$ from both sides gives $(x - a)(x - 24) - (x - a) = 0$, or $(x - a)(x - 25) = 0$. So the solutions are $x = a$ and $x = 25$. For $x = 24$, the left side is $24 - a \ne 0$ but the right side is $0$, so $24$ is not a solution.
 
-13. A giant panda is predicted to have a mass between $\frac{1}{950}$ and $\frac{1}{850}$ times its mother's mass when it is born. If its mother is predicted to have a mass of $95{,}950$ grams when the giant panda is born, which inequality best represents the prediction of the giant panda's mass $p$, in grams, when it is born?
+13. A giant panda is predicted to have a mass between $\dfrac{1}{950}$ and $\dfrac{1}{850}$ times its mother's mass when it is born. If its mother is predicted to have a mass of $95{,}950$ grams when the giant panda is born, which inequality best represents the prediction of the giant panda's mass $p$, in grams, when it is born?
 A. $10.1 \le p < 11.289$
 B. $101 \le p < 112.89$
 C. $1{,}010 \le p < 1{,}128.9$
@@ -163,7 +163,7 @@ Explanation: The total height of all $570$ penguins is $380(87) + 190(93) = 33{,
 
 $$18qrt - 2qrs + 10rst = 0$$
 
-In the given equation, $q$, $r$, $s$, and $t$ are positive, and $\frac{q}{t}$ is greater than $5$. Which expression is equivalent to $s$?
+In the given equation, $q$, $r$, $s$, and $t$ are positive, and $\dfrac{q}{t}$ is greater than $5$. Which expression is equivalent to $s$?
 A. $\dfrac{-9qt}{q - 5t}$
 B. $\dfrac{9qt}{q - 5t}$
 C. $18qrt$

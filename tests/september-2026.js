@@ -149,7 +149,7 @@ Answer: C
 Domain: Geometry and Trigonometry
 Explanation: Angle $S$ is a right angle, so $\overline{QR}$ is the hypotenuse and $QS = 18$ is the leg adjacent to angle $Q$. Then $\cos Q = \dfrac{QS}{QR} = \dfrac{18}{QR}$, so $QR = \dfrac{18}{\cos Q}$.
 
-14. In isosceles triangle $PQR$, $PQ = PR$. The length of base $QR$ is $48$, and $\tan R = \frac{7}{24}$. What is the area of triangle $PQR$?
+14. In isosceles triangle $PQR$, $PQ = PR$. The length of base $QR$ is $48$, and $\tan R = \dfrac{7}{24}$. What is the area of triangle $PQR$?
 Answer: 168
 Domain: Geometry and Trigonometry
 Explanation: The altitude from $P$ bisects $QR$, so it meets $QR$ $24$ units from $R$. Then $\tan R = \frac{h}{24} = \frac{7}{24}$ gives $h = 7$. The area is $\frac{1}{2}(48)(7) = 168$.
@@ -195,7 +195,7 @@ Answer: 17.9
 Domain: Problem-Solving and Data Analysis
 Explanation: $p = 0.520(21.5) + 0.480(14.0) = 11.18 + 6.72 = 17.9$.
 
-20. The function $r$ is defined by $r(x) = \frac{9}{x^2} - 8$. In the $xy$-plane, the graph of $y = t(x)$ is the result of shifting the graph of $y = r(x)$ to the right $a$ units and down $b$ units, where $a$ and $b$ are positive constants. Which equation defines function $t$?
+20. The function $r$ is defined by $r(x) = \dfrac{9}{x^2} - 8$. In the $xy$-plane, the graph of $y = t(x)$ is the result of shifting the graph of $y = r(x)$ to the right $a$ units and down $b$ units, where $a$ and $b$ are positive constants. Which equation defines function $t$?
 A. $t(x) = \dfrac{9}{x^2 - a} - (8 - b)$
 B. $t(x) = \dfrac{9}{x^2 - a} - (8 + b)$
 C. $t(x) = \dfrac{9}{(x - a)^2} - (8 - b)$
@@ -217,7 +217,7 @@ Answer: 441/677
 Domain: Problem-Solving and Data Analysis
 Explanation: There are $352 + 325 = 677$ students in grade $10$ or $11$, and $285 + 156 = 441$ of them stayed on campus. The probability is $\frac{441}{677}$ (or $.6514$).
 
-22. The solutions to $x^2 - 3x - 7 = 0$ are $\frac{3 - \sqrt{p}}{2}$ and $\frac{3 + \sqrt{p}}{2}$. If the solutions to $x^2 - 17x + c = 0$, where $c$ is a constant, are $\frac{17 - \sqrt{p}}{2}$ and $\frac{17 + \sqrt{p}}{2}$, what is the value of $c$?
+22. The solutions to $x^2 - 3x - 7 = 0$ are $\dfrac{3 - \sqrt{p}}{2}$ and $\dfrac{3 + \sqrt{p}}{2}$. If the solutions to $x^2 - 17x + c = 0$, where $c$ is a constant, are $\dfrac{17 - \sqrt{p}}{2}$ and $\dfrac{17 + \sqrt{p}}{2}$, what is the value of $c$?
 A. $2$
 B. $49$
 C. $63$
@@ -235,7 +235,7 @@ Explanation: X has mass $38(180) = 6{,}840$ grams and Y has mass $\frac{180}{0.2
 
 *Note: Figure not drawn to scale.*
 
-In triangle $ABC$, point $D$ lies on $\overline{AB}$ and point $E$ lies on $\overline{BC}$ such that $\overline{DE}$ is parallel to $\overline{AC}$. If $\frac{x}{y} = \frac{3}{2}$ and $DE = 57$, what is the length of $\overline{AC}$?
+In triangle $ABC$, point $D$ lies on $\overline{AB}$ and point $E$ lies on $\overline{BC}$ such that $\overline{DE}$ is parallel to $\overline{AC}$. If $\dfrac{x}{y} = \dfrac{3}{2}$ and $DE = 57$, what is the length of $\overline{AC}$?
 A. $114$
 B. $95$
 C. $90$

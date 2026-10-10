@@ -19,7 +19,7 @@ Answer: 24
 Domain: Problem-Solving and Data Analysis
 Explanation: The Chicago values have a sum of $31 + 13 + 44 + 32 + 53 + 22 + 44 = 239$. Both data sets have seven values, so equal means require equal sums: $46 + 31 + 19 + 33 + 48 + x + 38 = 215 + x = 239$, which gives $x = 24$.
 
-2. In isosceles triangle $ABC$, sides $AB$ and $AC$ are congruent. Point $D$ divides side $BC$ such that the length of $BD$ is $\frac{2}{7}$ of the length of $BC$. Point $E$ lies on side $AB$ and point $F$ lies on side $AC$ such that when segments $DE$ and $DF$ are drawn, angle $BED$ is congruent to angle $CFD$. If the length of $BE$ is $14$, what is the length of $CF$?
+2. In isosceles triangle $ABC$, sides $AB$ and $AC$ are congruent. Point $D$ divides side $BC$ such that the length of $BD$ is $\dfrac{2}{7}$ of the length of $BC$. Point $E$ lies on side $AB$ and point $F$ lies on side $AC$ such that when segments $DE$ and $DF$ are drawn, angle $BED$ is congruent to angle $CFD$. If the length of $BE$ is $14$, what is the length of $CF$?
 A. $28$
 B. $35$
 C. $49$
@@ -105,7 +105,7 @@ Explanation: If there were $z$ zebras in 2014, there were $1.27z$ zebras in 2018
 
 12.
 
-![Circle A drawn on a grid in the xy-plane, with tick marks labeled every 2 units (from -6 to 2 on the x-axis and from -6 to 6 on the y-axis). The center (-2, 0) is marked with a point, and the circle passes through (-5, 0), (1, 0), (-2, 3), and (-2, -3).](tests/images/june-2025/q12.svg)
+![Circle A drawn on a grid in the xy-plane, with tick marks labeled every 2 units (from -6 to 2 on the x-axis and from -6 to 6 on the y-axis). The center (-2, 0) is marked with a point, and the circle passes through (-5, 0), (1, 0), (-2, 3), and (-2, -3).|360](tests/images/june-2025/q12.svg)
 
 Circle $A$ (shown) is defined by the equation $(x + 2)^2 + y^2 = 9$. Circle $B$ (not shown) is the result of shifting circle $A$ down $6$ units and increasing the radius so that the radius of circle $B$ is $2$ times the radius of circle $A$. Which equation defines circle $B$?
 A. $(x + 2)^2 + (y + 6)^2 = 36$
@@ -121,7 +121,7 @@ Answer: 66
 Domain: Geometry and Trigonometry
 Explanation: Let the shortest side be $s$, so the diagonal is $2s$ and the other side is $\sqrt{(2s)^2 - s^2} = s\sqrt{3}$. The area is $s^2\sqrt{3} = 1{,}089\sqrt{3}$, so $s = 33$. The diagonal of an inscribed rectangle is a diameter of the circle, so the diameter is $2(33) = 66$.
 
-14. In the $xy$-plane, a unit circle with center at the origin $O$ contains point $A$ with coordinates $(1, 0)$ and point $B$ with coordinates $\left(-\frac{5}{\sqrt{89}}, \frac{8}{\sqrt{89}}\right)$. If the measure of angle $AOB$ is $w$ radians, what is the value of $\tan w$?
+14. In the $xy$-plane, a unit circle with center at the origin $O$ contains point $A$ with coordinates $(1, 0)$ and point $B$ with coordinates $\left(-\dfrac{5}{\sqrt{89}}, \dfrac{8}{\sqrt{89}}\right)$. If the measure of angle $AOB$ is $w$ radians, what is the value of $\tan w$?
 Answer: -8/5 | -1.6
 Domain: Geometry and Trigonometry
 Explanation: Angle $AOB$ is in standard position with point $B$ on its terminal side, so $\tan w = \dfrac{8/\sqrt{89}}{-5/\sqrt{89}} = -\dfrac{8}{5}$.
@@ -192,7 +192,7 @@ Explanation: Since $b = 0.83c$, $c = \frac{b}{0.83}$, so $b + c = b + \frac{b}{0
 
 22.
 
-$$\begin{gathered} \dfrac{7}{8}y - \dfrac{5}{8}x = \dfrac{4}{7} - \dfrac{7}{8}y \\[4pt] \dfrac{5}{4}x + \dfrac{7}{4} = py + \dfrac{15}{4} \end{gathered}$$
+$$\begin{gathered} \dfrac{7}{8}y - \dfrac{5}{8}x = \dfrac{4}{7} - \dfrac{7}{8}y \\[10pt] \dfrac{5}{4}x + \dfrac{7}{4} = py + \dfrac{15}{4} \end{gathered}$$
 
 In the given system of equations, $p$ is a constant. If the system has no solution, what is the value of $p$?
 Answer: 7/2 | 3.5

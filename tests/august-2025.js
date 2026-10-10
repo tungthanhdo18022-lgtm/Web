@@ -206,7 +206,7 @@ Explanation: Completing the square gives $7x^2 - bx - 6 = 7\left(x^2 - \frac{b}{
 
 21.
 
-![Graphs of the lines y = -3x + 7 and y = x - 5 in the xy-plane, intersecting at the point (3, -2). The region below both lines, beneath their intersection point, is shaded.](tests/images/august-2025/q21.svg)
+![Graphs of the lines y = -3x + 7 and y = x - 5 in the xy-plane, intersecting at the point (3, -2). The region below both lines, beneath their intersection point, is shaded.|480](tests/images/august-2025/q21.svg)
 
 The graphs of $y = -3x + 7$ and $y = x - 5$ are shown. Point $P$ (not shown) has coordinates $(3, -5)$ and lies in the shaded region. The coordinates of $P$ satisfy which of the following inequalities?
 
@@ -248,7 +248,7 @@ Explanation: The slope is $-\frac{3}{8}$, so $y = -\frac{3}{8}x + b$. Substituti
 
 24. The points $(0, 15)$, $(10, 8)$, and $(10, 3)$ are shown in the $xy$-plane, where the $x$-axis and $y$-axis are measured in units.
 
-![The points (0, 15), (10, 8), and (10, 3) plotted on a grid in the xy-plane, with the x-axis labeled from 1 to 10 and the y-axis labeled from 2 to 16.](tests/images/august-2025/q24.svg)
+![The points (0, 15), (10, 8), and (10, 3) plotted on a grid in the xy-plane, with the x-axis labeled from 1 to 10 and the y-axis labeled from 2 to 16.|400](tests/images/august-2025/q24.svg)
 
 These points define one of the bases of a triangular prism. The distance between the two bases of the prism is $20$ units. What is the volume, in cubic units, of the prism?
 Answer: 500
@@ -336,7 +336,7 @@ Explanation: In the similarity, $Q$, $P$, and $R$ correspond to $S$, $T$, and $R
 
 *Note: Figure not drawn to scale.*
 
-In the figure, a hollow steel pipe is in the shape of a right circular cylinder. The steel pipe has an outside diameter of $48$ inches, a wall thickness of $\frac{3}{8}$ inches, and a height of $138$ inches. Which of the following is closest to the volume, in cubic inches, of the wall of this steel pipe?
+In the figure, a hollow steel pipe is in the shape of a right circular cylinder. The steel pipe has an outside diameter of $48$ inches, a wall thickness of $\dfrac{3}{8}$ inches, and a height of $138$ inches. Which of the following is closest to the volume, in cubic inches, of the wall of this steel pipe?
 A. $61$
 B. $325$
 C. $1{,}242$

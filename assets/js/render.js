@@ -332,6 +332,18 @@
   }
 
   /** Replace math placeholders in text nodes with rendered KaTeX (runs after sanitizing; text nodes only). */
+  /** Typewriter apostrophes in words ("buffalo's") become typographic ones (math is still a placeholder here). */
+  function smartApostrophes(root) {
+    var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var n;
+    while ((n = tw.nextNode())) {
+      if (n.nodeValue.indexOf("'") === -1) continue;
+      var p = n.parentNode;
+      if (p && p.closest && p.closest('code, pre, svg, script, style')) continue;
+      n.nodeValue = n.nodeValue.replace(/([A-Za-z])'(?=[A-Za-z])/g, '$1\u2019');
+    }
+  }
+
   function injectMath(root, store) {
     var texts = [];
     var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
@@ -350,14 +362,29 @@
         if (inSvg) {
           frag.appendChild(document.createTextNode(item ? item.tex : ''));
         } else {
-          // Punctuation right after inline math ("$x = 0$,") is set inside the formula so a line
-          // can never start with it
           var tex = item ? item.tex : '';
-          var punct = item && !item.display ? /^[,.;?!]+/.exec(val.slice(last)) : null;
-          if (punct && /\S/.test(tex)) { tex += '{' + punct[0] + '}'; last += punct[0].length; }
+          var inline = item && !item.display && /\S/.test(tex);
+          // A short inline formula ("$x^2 - 17x + c = 0$") is one unbreakable group, so a line never
+          // ends at its "=" or "+"; longer ones may still wrap at their operators
+          if (inline && tex.replace(/\s+/g, '').length <= 30) tex = '{' + tex + '}';
+          // Punctuation right after inline math ("$x = 0$,") is set inside the formula so a line can
+          // never start with it (\mathclose adds no space, even after \right)
+          var punct = inline ? /^[,.;?!]+/.exec(val.slice(last)) : null;
+          if (punct) { tex += '\\mathclose{' + punct[0] + '}'; last += punct[0].length; }
+          // A hyphenated compound ("$128$-gram") stays on one line with its number
+          var compound = inline && !punct && tex.length <= 32 ? /^-[A-Za-z]+/.exec(val.slice(last)) : null;
           var tpl = document.createElement('template');
           tpl.innerHTML = item ? renderTex(tex, item.display) : '';
-          frag.appendChild(tpl.content);
+          if (compound) {
+            var nb = document.createElement('span');
+            nb.className = 'm-nb';
+            nb.appendChild(tpl.content);
+            nb.appendChild(document.createTextNode(compound[0]));
+            frag.appendChild(nb);
+            last += compound[0].length;
+          } else {
+            frag.appendChild(tpl.content);
+          }
         }
         return m;
       });
@@ -384,6 +411,7 @@
     tpl.innerHTML = html; // template content is inert: nothing loads or runs before sanitizing
     restoreAttrMath(tpl.content, store);
     sanitizeNode(tpl.content);
+    smartApostrophes(tpl.content);
     injectMath(tpl.content, store);
     var result = tpl.innerHTML;
     if (cacheable) {
