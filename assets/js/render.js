@@ -346,14 +346,19 @@
       val.replace(M_RE, function (m, idx, offset) {
         if (offset > last) frag.appendChild(document.createTextNode(val.slice(last, offset)));
         var item = store[+idx];
+        last = offset + m.length;
         if (inSvg) {
           frag.appendChild(document.createTextNode(item ? item.tex : ''));
         } else {
+          // Punctuation right after inline math ("$x = 0$,") is set inside the formula so a line
+          // can never start with it
+          var tex = item ? item.tex : '';
+          var punct = item && !item.display ? /^[,.;?!]+/.exec(val.slice(last)) : null;
+          if (punct && /\S/.test(tex)) { tex += '{' + punct[0] + '}'; last += punct[0].length; }
           var tpl = document.createElement('template');
-          tpl.innerHTML = item ? renderTex(item.tex, item.display) : '';
+          tpl.innerHTML = item ? renderTex(tex, item.display) : '';
           frag.appendChild(tpl.content);
         }
-        last = offset + m.length;
         return m;
       });
       if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));

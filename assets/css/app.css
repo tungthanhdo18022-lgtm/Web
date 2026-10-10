@@ -547,6 +547,8 @@ body.is-wide .site-footer { display: none; }
 .content .q-figure { text-align: center; margin: .6em 0 1em; }
 .content .q-img { max-width: 100%; height: auto; vertical-align: middle; }
 .content svg { max-width: 100%; height: auto; }
+/* KaTeX draws radicals and stretchy symbols with inline SVGs sized by the parent: keep its own sizing */
+.content .katex svg { max-width: none; height: inherit; }
 .img-missing { display: inline-block; padding: 6px 10px; border: 1px dashed var(--bad); color: var(--bad); border-radius: 8px; font-family: var(--font-ui); font-size: 13px; }
 .math-error { color: var(--bad); font-family: var(--font-mono); font-size: .85em; }
 .math-fallback { font-family: var(--font-mono); font-size: .9em; }
