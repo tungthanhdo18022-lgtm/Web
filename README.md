@@ -9,7 +9,9 @@ Live site: **https://tungthanhdo18022-lgtm.github.io/Web/**
 ## How it works
 
 - Plain HTML/CSS/JavaScript — **no build step**. GitHub Pages serves the `main` branch as is.
-- Published tests live in `tests/` and are listed in `tests/manifest.js`.
+- Published tests live in `tests/` and are listed in `tests/manifest.js`. The home page shows them in two
+  groups: **Practice Tests** (full tests, filterable by year and season) and **Advanced Tests** (tests whose
+  front matter has `section: advanced`; the builder's *Section* field sets it).
 - Students' progress and results are stored in their own browser (`localStorage`).
 - Math is rendered with KaTeX (bundled in `vendor/katex`, works offline).
 
@@ -52,6 +54,7 @@ Explanation: $3x = 15$, so $x = 5$.
 Answer: 441/677 | .6514
 ```
 
+- Add `section: advanced` to the front matter to list a test under **Advanced Tests** on the home page.
 - Math: `$...$` inline, `$$...$$` or `\[...\]` display. A literal dollar sign: `\$165`.
 - Tables: Markdown `| a | b |`. Images: the **Image** button or paste (Ctrl+V) in the builder.
 - Modules: `## Module 1 | 35` (35 = minutes). Answer key at the end: an `Answer Key` line, then `1. B`, `2. 14`, …

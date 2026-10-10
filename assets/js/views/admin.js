@@ -123,7 +123,7 @@
                     opened = true;
                     var t = r.test;
                     global.App.pendingDraft = {
-                      source: t.source || P.toText(t), title: t.title, author: t.author, description: t.description, date: t.date, assets: t.assets,
+                      source: t.source || P.toText(t), title: t.title, author: t.author, description: t.description, date: t.date, section: t.section, assets: t.assets,
                       importNotes: r.importNotes || [],
                       note: r.fromLatex ? 'Converted "' + f.name + '" from LaTeX. Check the preview, add images for any figures, then save or publish.'
                         : r.errors.length ? '"' + f.name + '" has ' + r.errors.length + ' error(s) to fix (see the Check tab).'

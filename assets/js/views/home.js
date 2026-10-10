@@ -1,4 +1,4 @@
-/* Home: notice, SAT countdown, practice test grid with filters, recent results. */
+/* Home: notice, SAT countdown, practice test grid with filters, advanced tests, recent results. */
 (function (global) {
   'use strict';
 
@@ -26,6 +26,8 @@
       .sort(function (a, b) { return a.date - b.date; });
     return list[0] || null;
   }
+
+  function isAdvanced(t) { return t.section === 'advanced'; }
 
   function scoreClass(p) { return p >= 80 ? 'is-good' : p >= 50 ? 'is-mid' : 'is-low'; }
 
@@ -81,9 +83,12 @@
     var filter = { year: 'all', season: 'all' };
     var timer = null;
 
+    function practiceTests() { return Lib.published().filter(function (t) { return !isAdvanced(t); }); }
+
     function render() {
       var cfg = global.APP_CONFIG;
-      var tests = Lib.published();
+      var tests = practiceTests();
+      var advanced = Lib.published().filter(isAdvanced);
       var errs = Lib.errors();
       var note = String(cfg.announcement || '').trim();
       var dismissed = U.lsGet(DISMISS_KEY, '') === note;
@@ -122,6 +127,10 @@
         '</div>' +
         '<div class="exam-grid" id="exam-grid"></div>' +
         '</section>' +
+        (advanced.length ? '<section class="section">' +
+          '<div class="section-head"><div><h2>Advanced Tests</h2><p class="muted">Harder question sets that focus on one topic.</p></div></div>' +
+          '<div class="exam-grid">' + advanced.map(examCard).join('') + '</div>' +
+          '</section>' : '') +
         recentResults() +
         '</div>';
       renderGrid();
@@ -135,12 +144,13 @@
     function renderGrid() {
       var grid = document.getElementById('exam-grid');
       if (!grid) return;
-      var tests = Lib.published().filter(function (t) {
+      var all = practiceTests();
+      var tests = all.filter(function (t) {
         return (filter.year === 'all' || String(t.year) === filter.year) &&
           (filter.season === 'all' || t.season === filter.season);
       });
       grid.innerHTML = tests.length ? tests.map(examCard).join('')
-        : '<div class="empty-mini grid-span">' + (Lib.published().length ? 'No tests match this filter.' : 'No practice tests have been published yet. Check back soon!') + '</div>';
+        : '<div class="empty-mini grid-span">' + (all.length ? 'No tests match this filter.' : 'No practice tests have been published yet. Check back soon!') + '</div>';
     }
 
     function startCountdown(next) {

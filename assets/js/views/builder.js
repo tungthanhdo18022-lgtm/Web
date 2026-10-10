@@ -39,6 +39,11 @@
     return '';
   }
 
+  /** 'advanced' or '' (same rule as the parser). */
+  function sectionValue(v) {
+    return /^\s*(advanced|adv|nâng cao|nang cao)\b/i.test(String(v || '')) ? 'advanced' : '';
+  }
+
   function isBlankBody(body) { return !String(body || '').trim() || body === STARTER; }
 
   function BuilderView(root, params) {
@@ -54,7 +59,7 @@
     var publishedFile = editing ? (editing.builtin ? editing.file : (editing.publishedFile || (Lib.getPublished(editing.id) || {}).file || '')) : '';
 
     var state = {
-      title: '', author: '', description: '', date: '', time: '',
+      title: '', author: '', description: '', date: '', time: '', section: '',
       body: '', assets: {},
       createdAt: null,
       lastResult: null,
@@ -71,6 +76,7 @@
       state.author = base.author ? base.author : metaValue(fm.meta, ['author', 'tác giả']);
       state.description = base.description ? base.description : metaValue(fm.meta, ['description', 'mô tả']);
       state.date = base.date ? base.date : metaValue(fm.meta, ['date', 'test date', 'ngày thi']);
+      state.section = sectionValue(base.section || metaValue(fm.meta, ['section', 'category', 'phần']));
       var t = metaValue(fm.meta, ['time', 'thời gian']);
       state.time = base.time != null ? String(base.time) : (t ? String(parseFloat(t) || '') : '');
       state.assets = base.assets || {};
@@ -78,14 +84,15 @@
 
     function applySnapshot(d) {
       state.title = d.title || ''; state.author = d.author || ''; state.description = d.description || '';
-      state.date = d.date || ''; state.time = d.time || ''; state.body = d.body || ''; state.assets = d.assets || {};
+      state.date = d.date || ''; state.time = d.time || ''; state.section = sectionValue(d.section);
+      state.body = d.body || ''; state.assets = d.assets || {};
     }
 
     var notes = [];
     if (editing) {
       loadFromSource(editing.source || P.toText(editing), {
         title: editing.title, author: editing.author, description: editing.description, date: editing.date,
-        assets: Object.assign({}, editing.assets || {})
+        section: editing.section, assets: Object.assign({}, editing.assets || {})
       });
       var times = editing.modules.map(function (m) { return m.time; });
       var anyAuto = editing.modules.some(function (m) { return m.autoTime; });
@@ -103,7 +110,7 @@
       global.App.pendingDraft = null;
       var prev = U.lsGet(DRAFT_KEY, null);
       if (prev && !isBlankBody(prev.body)) U.lsSet(DRAFT_KEY + '.prev', prev);
-      loadFromSource(pd.source || '', { title: pd.title, author: pd.author, description: pd.description, date: pd.date, assets: Object.assign({}, pd.assets || {}) });
+      loadFromSource(pd.source || '', { title: pd.title, author: pd.author, description: pd.description, date: pd.date, section: pd.section, assets: Object.assign({}, pd.assets || {}) });
       state.dirty = true;
       state.importNotes = pd.importNotes || [];
       if (pd.note) notes.push({ text: pd.note });
@@ -124,6 +131,7 @@
       if (String(state.date).trim()) fm.push('date: ' + String(state.date).trim());
       if (state.description.trim()) fm.push('description: ' + state.description.replace(/\n/g, ' '));
       if (String(state.time).trim()) fm.push('time: ' + String(state.time).trim());
+      if (state.section) fm.push('section: ' + state.section);
       fm.push('---', '');
       // The body starts on line fm.length (1-based), so body line n = file line n + offset
       return { text: fm.join('\n') + state.body, offset: fm.length - 1 };
@@ -163,6 +171,7 @@
       '<label class="field"><span class="field-label">Author</span><input id="bd-author" type="text" maxlength="80" placeholder="Your name"></label>' +
       '<label class="field"><span class="field-label">Test date</span><input id="bd-date" type="text" maxlength="40" placeholder="2026-09-12"></label>' +
       '<label class="field field--sm"><span class="field-label">Time (min)</span><input id="bd-time" type="number" min="1" max="600" step="1" placeholder="Auto"></label>' +
+      '<label class="field field--sm"><span class="field-label">Section</span><select id="bd-section"><option value="">Practice</option><option value="advanced">Advanced</option></select></label>' +
       '<label class="field field--wide"><span class="field-label">Description</span><input id="bd-desc" type="text" maxlength="300" placeholder="Optional short description"></label>' +
       '</div>' +
       '<div class="builder-main">' +
@@ -195,7 +204,7 @@
 
     var $ = function (id) { return document.getElementById(id); };
     var el = {
-      title: $('bd-title'), author: $('bd-author'), date: $('bd-date'), time: $('bd-time'), desc: $('bd-desc'),
+      title: $('bd-title'), author: $('bd-author'), date: $('bd-date'), time: $('bd-time'), desc: $('bd-desc'), section: $('bd-section'),
       src: $('bd-src'), status: $('bd-status'), preview: $('bd-preview'), issues: $('bd-issues'),
       sum: $('bd-sum'), issueCount: $('bd-issue-count'), state: $('bd-state'), heading: $('bd-heading'),
       exportMenu: $('bd-export'), importMenu: $('bd-import'), notes: $('bd-notes'), publish: $('bd-publish')
@@ -203,7 +212,7 @@
 
     function fillInputs() {
       el.title.value = state.title; el.author.value = state.author; el.date.value = state.date;
-      el.time.value = state.time; el.desc.value = state.description; el.src.value = state.body;
+      el.time.value = state.time; el.desc.value = state.description; el.section.value = state.section; el.src.value = state.body;
     }
     fillInputs();
 
@@ -307,7 +316,7 @@
     function snapshot(withAssets) {
       return {
         title: state.title, author: state.author, description: state.description, date: state.date, time: state.time,
-        body: state.body, assets: withAssets ? state.assets : {}, savedAt: Date.now()
+        section: state.section, body: state.body, assets: withAssets ? state.assets : {}, savedAt: Date.now()
       };
     }
     var autosave = U.debounce(function () {
@@ -604,7 +613,7 @@
       }
       var t = res.test;
       state.importNotes = res.importNotes || [];
-      loadFromSource(t.source || P.toText(t), { title: t.title, author: t.author, description: t.description, date: t.date, assets: Object.assign({}, t.assets || {}) });
+      loadFromSource(t.source || P.toText(t), { title: t.title, author: t.author, description: t.description, date: t.date, section: t.section, assets: Object.assign({}, t.assets || {}) });
       fillInputs();
       markDirty();
       renderPreview();
@@ -705,6 +714,7 @@
       state.date = el.date.value;
       state.time = el.time.value;
       state.description = el.desc.value;
+      state.section = el.section.value;
       markDirty();
       schedulePreview();
     }
@@ -734,7 +744,7 @@
         U.confirm('Start a new test?', 'Your unsaved draft will be discarded.', 'Start new', { danger: true }).then(function (ok) {
           if (!ok) return;
           U.lsDel(DRAFT_KEY);
-          state.title = ''; state.description = ''; state.date = ''; state.time = ''; state.body = STARTER; state.assets = {}; state.importNotes = [];
+          state.title = ''; state.description = ''; state.date = ''; state.time = ''; state.section = ''; state.body = STARTER; state.assets = {}; state.importNotes = [];
           fillInputs();
           notes.splice(0, notes.length);
           renderNotes();
@@ -829,6 +839,7 @@
     el.src.addEventListener('dragover', function (e) { e.preventDefault(); });
     el.src.addEventListener('drop', onDrop);
     [el.title, el.author, el.date, el.time, el.desc].forEach(function (i) { i.addEventListener('input', onMetaInput); });
+    el.section.addEventListener('change', onMetaInput);
     document.addEventListener('keydown', onDocKey);
     window.addEventListener('beforeunload', onBeforeUnload);
 

@@ -8,6 +8,7 @@
  *    author: Author name
  *    date: September 12, 2026   (optional test date)
  *    time: 40                   (minutes; applies to every module that does not set its own)
+ *    section: advanced          (optional: list the test under "Advanced Tests" on the home page)
  *    ---
  *
  *    ## Module 1 | 35    (optional; "| 35" = 35 minutes)
@@ -31,7 +32,7 @@
  *    "Answer: ...") can be kept as plain text by starting it with a backslash: "\2. ...".
  *    Vietnamese keywords (Câu, Đáp án, Giải thích, Lời giải, tiêu đề, ...) are still accepted.
  *
- * 2) JSON: { id, title, author, date, description, modules: [{ title, time, questions: [{ type, prompt, choices, answer, explanation, domain }] }] }
+ * 2) JSON: { id, title, author, date, description, section, modules: [{ title, time, questions: [{ type, prompt, choices, answer, explanation, domain }] }] }
  */
 (function (global) {
   'use strict';
@@ -50,7 +51,7 @@
     keyHeader: /^\s*(?:#+\s*)?(?:(?:answer key|answers|bảng đáp án)\s*:?|đáp án|dap an)\s*$/i,
     keyLine: /^\s*(?:(?:câu|question|q)\s*)?(\d{1,3})(?:\s*[.):–]\s*|\s*-\s+|\s+)(\S.*?)\s*$/i,
     keyPair: /(?:^|\s)(\d{1,3})\s*[.):\-–]\s*(\S+)/g,
-    meta: /^\s*(title|tiêu đề|tieu de|tên đề|author|tác giả|tac gia|test date|date|ngày thi|ngay thi|time|thời gian|thoi gian|description|mô tả|mo ta|id)\s*[:：]\s*(.*)$/i
+    meta: /^\s*(title|tiêu đề|tieu de|tên đề|author|tác giả|tac gia|test date|date|ngày thi|ngay thi|time|thời gian|thoi gian|description|mô tả|mo ta|section|category|phần|id)\s*[:：]\s*(.*)$/i
   };
 
   var META_KEYS = {
@@ -59,6 +60,7 @@
     'date': 'date', 'test date': 'date', 'ngày thi': 'date', 'ngay thi': 'date',
     'time': 'time', 'thời gian': 'time', 'thoi gian': 'time',
     'description': 'description', 'mô tả': 'description', 'mo ta': 'description',
+    'section': 'section', 'category': 'section', 'phần': 'section',
     'id': 'id'
   };
 
@@ -74,6 +76,11 @@
     if (!d) return '';
     for (var i = 0; i < DOMAINS.length; i++) if (DOMAINS[i].re.test(d)) return DOMAINS[i].key;
     return d;
+  }
+
+  /** Home page section: 'advanced' (Advanced Tests) or '' (Practice Tests). */
+  function normalizeSection(v) {
+    return /^\s*(advanced|adv|nâng cao|nang cao)\b/i.test(String(v || '')) ? 'advanced' : '';
   }
 
   function parseMinutes(v) {
@@ -431,6 +438,7 @@
       author: oneLine(meta.author || base.author || ''),
       date: oneLine(meta.date || base.date || ''),
       description: String(meta.description || base.description || '').trim(),
+      section: normalizeSection(meta.section || base.section),
       source: text,
       assets: base.assets || {},
       modules: modules.map(function (mod, mi) {
@@ -534,6 +542,7 @@
       author: oneLine(obj.author || ''),
       date: oneLine(obj.date || ''),
       description: String(obj.description || '').trim(),
+      section: normalizeSection(obj.section),
       source: typeof obj.source === 'string' ? obj.source : '',
       assets: obj.assets && typeof obj.assets === 'object' ? obj.assets : {},
       modules: []
@@ -614,6 +623,7 @@
     var out = ['---', 'title: ' + oneLine(test.title), 'author: ' + oneLine(test.author)];
     if (test.date) out.push('date: ' + oneLine(test.date));
     if (test.description) out.push('description: ' + oneLine(test.description));
+    if (test.section) out.push('section: ' + test.section);
     // Times computed automatically by the library (m.autoTime) are not written back.
     var times = test.modules.map(function (m) { return m.autoTime ? null : m.time; });
     var sameTime = times.every(function (t) { return t === times[0]; });
