@@ -1,7 +1,7 @@
 /*
  * Advanced test: Algebra A (72 questions).
  * Written in the same text format as the admin builder (see the "Syntax" guide there).
- * "section: advanced" lists it under "Advanced Tests" on the home page.
+ * "section: advanced" lists it under "Advanced Tests" on the home page; "category" sets its filter.
  * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
  */
 SATLibrary.register({
@@ -11,6 +11,7 @@ SATLibrary.register({
 title: Algebra A
 author: tungtks18022
 description: 72 harder Algebra questions on linear equations, linear functions, systems of equations and linear inequalities, with an explanation for every question.
+category: Algebra
 section: advanced
 time: 115
 ---

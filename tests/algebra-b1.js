@@ -1,7 +1,7 @@
 /*
  * Advanced test: Algebra B1 (56 questions, from "SAT Math Practice Set 2 · Mixed Review").
  * Written in the same text format as the admin builder (see the "Syntax" guide there).
- * "section: advanced" lists it under "Advanced Tests" on the home page.
+ * "section: advanced" lists it under "Advanced Tests" on the home page; "category" sets its filter.
  * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
  */
 SATLibrary.register({
@@ -11,6 +11,7 @@ SATLibrary.register({
 title: Algebra B1
 author: tungtks18022
 description: 56 mixed SAT Math questions on linear systems, absolute value equations and inequalities, quadratic and rational equations, and linear models, with an explanation for every question.
+category: Algebra
 section: advanced
 time: 90
 ---

@@ -142,7 +142,22 @@
     test.season = d ? seasonOf(d.month) : '';
     test.sortKey = d ? d.year * 10000 + d.month * 100 + (d.day || 0) : 0;
     test.fingerprint = fingerprint(test);
+    test.mainDomain = mainDomain(test);
     return test;
+  }
+
+  /** The SAT Math domain that most of the test's questions belong to ('' if none are tagged). */
+  function mainDomain(test) {
+    var count = {}, best = '', bestN = 0;
+    var known = (P && P.DOMAINS) || [];
+    test.modules.forEach(function (m) {
+      m.questions.forEach(function (q) {
+        if (known.indexOf(q.domain) === -1) return;
+        count[q.domain] = (count[q.domain] || 0) + 1;
+        if (count[q.domain] > bestN) { best = q.domain; bestN = count[q.domain]; }
+      });
+    });
+    return best;
   }
 
   function normalizeEntry(e) {
@@ -269,6 +284,12 @@
 
     get: function (id) { return user.get(id) || builtin.get(id) || null; },
 
+    /**
+     * Category used by the Advanced Tests filter: the test's "category:", else the domain its title
+     * starts with ("Algebra C" -> Algebra), else the domain most of its questions belong to.
+     */
+    categoryOf: function (t) { return (t && (t.category || P.normalizeCategory(t.title) || t.mainDomain)) || ''; },
+
     getPublished: function (id) { return builtin.get(id) || null; },
 
     isBuiltin: function (id) { return builtin.has(id) && !user.has(id); },
@@ -280,6 +301,7 @@
         id: safeId(test.id),
         title: test.title, author: test.author, description: test.description, date: test.date || '',
         section: test.section || '',
+        category: test.category || '',
         source: test.source || '',
         assets: test.assets || {},
         publishedFile: test.publishedFile || '',
@@ -336,6 +358,7 @@
         date: test.date || undefined,
         description: test.description || undefined,
         section: test.section || undefined,
+        category: test.category || undefined,
         modules: test.modules.map(function (m) {
           return {
             title: m.title, time: m.time,
