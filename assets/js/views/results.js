@@ -339,6 +339,12 @@
     var items = redoItems(attempt);
     var base = '#/redo/' + encodeURIComponent(attempt.id);
     var saveWarned = false;
+    var ended = false;
+    // Feedback is announced from a live region outside the re-rendered page
+    var live = document.createElement('div');
+    live.className = 'sr-only';
+    live.setAttribute('aria-live', 'polite');
+    document.body.appendChild(live);
 
     function itemOf(i) { return items[flat[i].q.id] || null; }
     function stOf(i) { var it = itemOf(i); return it ? it.status : ''; }
@@ -363,9 +369,25 @@
       return c;
     }
 
-    function save() {
-      attempt.redo.updatedAt = Date.now();
-      var ok = global.Attempts.save(attempt);
+    /**
+     * Saves only what this action changed (ids: questions to write from `items`, or to delete when
+     * missing there) into the stored copy of the attempt, so another tab's redo progress is kept.
+     */
+    function save(ids) {
+      var stored = global.Attempts.getStored(attempt.id);
+      if (!stored) {
+        // The result was deleted in another tab: do not bring it back
+        ended = true;
+        U.toast('This result was deleted in another tab.', 'error', 5000);
+        location.replace('#/results');
+        return;
+      }
+      var into = redoItems(stored);
+      ids.forEach(function (id) { if (items[id]) into[id] = items[id]; else delete into[id]; });
+      stored.redo.updatedAt = Date.now();
+      var ok = global.Attempts.save(stored, { keepTime: true });
+      attempt = stored;
+      items = into;
       if (ok !== true && !saveWarned) { saveWarned = true; U.toast('Your redo progress could not be saved in this browser.', 'error', 5000); }
     }
 
@@ -384,7 +406,8 @@
     function stripHtml() {
       return '<div class="answer-strip answer-strip--compact rd-strip">' + list.map(function (i, k) {
         var st = stOf(i) || 'pending';
-        return '<a class="as-cell as-' + st + (k === pos ? ' is-current' : '') + '" href="' + base + '/' + k + '" title="Question ' + label(i) + '"' +
+        var name = 'Question ' + label(i) + ': ' + ({ correct: 'fixed', revealed: 'answer shown', incorrect: 'not fixed yet' }[st] || 'not done yet');
+        return '<a class="as-cell as-' + st + (k === pos ? ' is-current' : '') + '" href="' + base + '/' + k + '" title="' + name + '" aria-label="' + name + '"' +
           (k === pos ? ' aria-current="true"' : '') + '>' + label(i) + '</a>';
       }).join('') +
         '<a class="as-cell as-summary' + (pos === list.length ? ' is-current' : '') + '" href="' + base + '/done" title="Summary" aria-label="Summary">' + U.icon('check') + '</a>' +
@@ -399,7 +422,7 @@
         '<div class="rv-title"><b>Redo Mistakes</b><span>' + U.esc(test.title) + '</span></div>' +
         '</div>' +
         '<div class="rd-progress"><span>Fixed <b>' + c.fixed + '</b> of ' + list.length + ' missed questions</span>' +
-        '<div class="rd-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + list.length + '" aria-valuenow="' + c.fixed + '"><span style="width:' + pct + '%"></span></div></div>' +
+        '<div class="rd-bar" role="progressbar" aria-label="Redo progress" aria-valuemin="0" aria-valuemax="' + list.length + '" aria-valuenow="' + c.fixed + '" aria-valuetext="' + c.fixed + ' of ' + list.length + ' fixed"><span style="width:' + pct + '%"></span></div></div>' +
         stripHtml();
     }
 
@@ -410,7 +433,7 @@
 
     function choicesHtml(q, it) {
       var wrong = (it && it.wrong) || [];
-      return '<div class="bb-choices rd-choices" role="radiogroup" aria-label="Answer choices">' + q.choices.map(function (c, i) {
+      return '<div class="bb-choices rd-choices"' + (phase === 'answer' ? ' role="radiogroup" aria-label="Answer choices"' : '') + '>' + q.choices.map(function (c, i) {
         var L = LETTERS[i];
         var text = '<span class="bb-letter">' + L + '</span><span class="bb-choice-text">' + R.render(c, Object.assign({ inline: true }, renderOpts)) + '</span>';
         if (phase === 'answer') {
@@ -437,7 +460,7 @@
           '</div>';
       }
       return '<div class="bb-spr rd-spr">' +
-        '<input class="bb-spr-input' + (phase === 'wrong' ? ' is-wrong' : '') + '" id="rd-input" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="' + G.maxLen(sel) + '" aria-label="Your answer" value="' + U.esc(sel) + '"' + (phase === 'wrong' ? ' disabled' : '') + '>' +
+        '<input class="bb-spr-input' + (phase === 'wrong' ? ' is-wrong' : '') + '" id="rd-input" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="6" aria-label="Your answer" value="' + U.esc(sel) + '"' + (phase === 'wrong' ? ' disabled' : '') + '>' +
         '<div class="bb-spr-preview" id="rd-preview">Answer Preview: <span class="bb-spr-preview-val">' + (sel ? R.answerPreview(sel) : '') + '</span></div>' +
         '</div>';
     }
@@ -466,7 +489,8 @@
         : '<div class="rd-feedback rd-feedback--info" role="status">' + U.icon('info') + '<div><b>Answer shown.</b> Read the explanation, then redo this question again later.</div></div>') +
         '<p class="rd-orig">On the test you answered: ' + answerText(q, orig) + '</p>' +
         (q.explanation ? '<div class="rv-expl"><h4>' + U.icon('book') + 'Explanation</h4><div class="content">' + R.render(q.explanation, renderOpts) + '</div></div>' : '') +
-        '<div class="rd-actions">' + nextBtn + '</div>';
+        '<div class="rd-actions">' + nextBtn +
+        '<button type="button" class="btn btn--ghost" data-act="again">' + U.icon('refresh') + (ok ? 'Do It Again' : 'Try Again') + '</button></div>';
     }
 
     function questionHtml() {
@@ -529,11 +553,17 @@
     /** Re-render the same question after Check / Try Again / Show Answer and bring the feedback into view. */
     function update() {
       render();
-      var fb = root.querySelector('.rd-feedback') || root.querySelector('.rd-actions');
-      if (fb) {
-        var r = fb.getBoundingClientRect();
-        if (r.bottom > window.innerHeight || r.top < 0) fb.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      var fb = root.querySelector('.rd-feedback');
+      live.textContent = fb ? fb.textContent.trim() : '';
+      var box = fb || root.querySelector('.rd-actions');
+      if (box) {
+        var r = box.getBoundingClientRect();
+        if (r.bottom > window.innerHeight || r.top < 0) box.scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
+      // Keyboard users continue from the next useful control
+      var next = phase === 'answer' ? (root.querySelector('#rd-input') || root.querySelector('[data-pick]:not([disabled])'))
+        : root.querySelector('[data-act="retry"], [data-act="next"]');
+      if (next) next.focus({ preventScroll: true });
     }
 
     function go(newPos) {
@@ -554,7 +584,8 @@
         if (q.type === 'mcq') { it.wrong = it.wrong || []; if (it.wrong.indexOf(sel) === -1) it.wrong.push(sel); }
         phase = 'wrong';
       }
-      save();
+      save([q.id]);
+      if (ended) return;
       update();
     }
 
@@ -565,16 +596,19 @@
       if (it.status !== 'correct') it.status = 'revealed';
       if (q.type === 'mcq' && phase === 'wrong' && sel && (it.wrong || []).indexOf(sel) === -1) (it.wrong = it.wrong || []).push(sel);
       phase = 'done';
-      save();
+      save([q.id]);
+      if (ended) return;
       update();
     }
 
     function resetItems(onlyUnfixed) {
+      var ids = [];
       list.forEach(function (i) {
         var id = flat[i].q.id;
-        if (!onlyUnfixed || (items[id] && items[id].status !== 'correct')) delete items[id];
+        if (!onlyUnfixed || (items[id] && items[id].status !== 'correct')) { delete items[id]; ids.push(id); }
       });
-      save();
+      save(ids);
+      if (ended) return;
       go(firstOpen());
     }
 
@@ -601,6 +635,13 @@
           update();
           var inp = document.getElementById('rd-input');
           if (inp) inp.focus();
+        } else if (act === 'again') {
+          var qid = flat[list[pos]].q.id;
+          delete items[qid];
+          save([qid]);
+          if (ended) return;
+          enter(pos);
+          update();
         } else if (act === 'next') go(pos + 1);
         else if (act === 'redo-left') resetItems(true);
         else if (act === 'restart') {
@@ -631,17 +672,28 @@
 
     function onKey(e) {
       if (document.querySelector('.modal-overlay') || e.altKey || e.ctrlKey || e.metaKey) return;
-      var tag = (e.target.tagName || '').toLowerCase();
-      if (e.key === 'Enter' && phase === 'answer' && sel && (tag === 'input' || tag === 'body' || tag === 'button' && e.target.hasAttribute('data-pick'))) {
-        e.preventDefault();
-        check();
-        return;
+      var t = e.target;
+      var tag = (t.tagName || '').toLowerCase();
+      if (e.key === 'Enter' && phase === 'answer' && sel) {
+        // Enter checks from the answer box, the selected choice, or anywhere that is not a control;
+        // on another choice it keeps its normal job of selecting that choice.
+        var control = t.closest && t.closest('a, button, input, textarea, select');
+        if (t.id === 'rd-input' || (control && control.getAttribute('data-pick') === sel) || !control) {
+          e.preventDefault();
+          check();
+          return;
+        }
       }
       if (tag === 'input' || tag === 'textarea') return;
+      if (t.closest && t.closest('.rd-choices')) return;
       if (e.key === 'ArrowRight') go(pos + 1);
       if (e.key === 'ArrowLeft' && pos > 0) go(pos - 1);
     }
 
+    // Give the history entry an explicit position so Back returns to this question
+    if (params.n == null && list.length) {
+      try { history.replaceState(history.state, '', base + '/' + (pos >= list.length ? 'done' : pos)); } catch (e) { /* ignore */ }
+    }
     enter(pos);
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
@@ -652,6 +704,7 @@
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       document.removeEventListener('keydown', onKey);
+      if (live.parentNode) live.parentNode.removeChild(live);
     };
   }
 
