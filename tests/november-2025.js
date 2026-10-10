@@ -112,7 +112,7 @@ Answer: C
 Domain: Problem-Solving and Data Analysis
 Explanation: If Aster earned $E$ dollars in 2004, then Aster earned $1.12E$ dollars in 2005 and $1.06(1.12E) = 1.1872E$ dollars in 2006. So $y = \frac{E}{1.1872E} = \frac{1}{1.1872} \approx 0.8423$.
 
-9. The function $h$ is defined by $h(x) = \dfrac{10x^2}{x^2 - 9k^2} - \dfrac{5x}{x + 3k}$, where $k$ is a positive constant. What is the value of $h\left(\frac{21k}{8}\right)$?
+9. The function $h$ is defined by $h(x) = \dfrac{10x^2}{x^2 - 9k^2} - \dfrac{5x}{x + 3k}$, where $k$ is a positive constant. What is the value of $h\!\left(\dfrac{21k}{8}\right)$?
 A. $-\dfrac{5}{3}$
 B. $-\dfrac{35}{12}$
 C. $-14$
@@ -136,7 +136,7 @@ Explanation: Since $1 < a < b$, $b$ is positive. In I, $f(x) = a\left(\frac{1}{0
 
 11.
 
-$$\begin{gathered} \text{Circle } A: (x - 7)^2 + (y - p)^2 = 21 \\[4pt] \text{Circle } B: (x + 7)^2 + (y - p)^2 = 21 \end{gathered}$$
+$$\begin{gathered} \text{Circle } A\colon (x - 7)^2 + (y - p)^2 = 21 \\[4pt] \text{Circle } B\colon (x + 7)^2 + (y - p)^2 = 21 \end{gathered}$$
 
 In the given equations, $p$ is a positive constant. Which statement correctly compares the graphs of circles $A$ and $B$ in the $xy$-plane?
 A. Circle $B$ is the reflection of circle $A$ across the $x$-axis.

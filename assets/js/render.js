@@ -183,7 +183,10 @@
       var stmt = /^(?:I{1,3}|IV|VI{0,3})\.\s/.test(joined);
       // "Note: Figure not drawn to scale." sits centered under the figure
       var note = /^[*_]?Note:\s+Figures?\s+(?:are\s+)?not\s+drawn\s+to\s+scale\.?[*_]?$/i.test(joined);
-      out.push((note ? '<p class="q-note">' : stmt ? '<p class="q-stmt">' : '<p>') + inlineMd(joined, opts).replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>')
+      var html = inlineMd(joined, opts);
+      // The numeral sits in a fixed-width box so the statements line up like on the SAT
+      if (stmt) html = html.replace(/^(I{1,3}|IV|VI{0,3})\.\s+/, '<span class="q-stmt-n">$1.</span>');
+      out.push((note ? '<p class="q-note">' : stmt ? '<p class="q-stmt">' : '<p>') + html.replace(/ {2,}\n/g, '<br>').replace(/\\\n/g, '<br>')
         // Numbered steps ("1. ...", "2) ...") and bullets on their own lines keep their line breaks
         .replace(/\n(?=[ \t]*(?:\d{1,3}[.)]|[•‣◦])[ \t])/g, '<br>\n') + '</p>');
     }
@@ -371,8 +374,11 @@
           // never start with it (\mathclose adds no space, even after \right)
           var punct = inline ? /^[,.;?!]+/.exec(val.slice(last)) : null;
           if (punct) { tex += '\\mathclose{' + punct[0] + '}'; last += punct[0].length; }
-          // A hyphenated compound ("$128$-gram") stays on one line with its number
-          var compound = inline && !punct && tex.length <= 32 ? /^-[A-Za-z]+/.exec(val.slice(last)) : null;
+          // A hyphenated compound ("$128$-gram") or a number and its unit ("$6$ weeks") stay on one line
+          var rest = val.slice(last);
+          var compound = inline && !punct && tex.length <= 32
+            ? /^-[A-Za-z]+/.exec(rest) || (/^-?[\d.]+$/.test(item.tex.replace(/\{,\}/g, '')) ? /^ [A-Za-z]+/.exec(rest) : null)
+            : null;
           var tpl = document.createElement('template');
           tpl.innerHTML = item ? renderTex(tex, item.display) : '';
           if (compound) {

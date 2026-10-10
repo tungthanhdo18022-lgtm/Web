@@ -94,7 +94,7 @@ Answer: A
 Domain: Advanced Math
 Explanation: Factoring by grouping gives $2x^2 + 5x + 18rx + 45r = x(2x + 5) + 9r(2x + 5) = (x + 9r)(2x + 5)$. So $x + 9r$ is a factor for every nonzero value of $r$. The other factor, $2x + 5$, is the same as $2x + 5r$ only when $r = 1$, so $2x + 5r$ is not a factor in general.
 
-9. The equation $5|x - 8| = k$, where $k$ is a constant, has exactly one solution. Which of the following could be the value of $\frac{k}{5}$?
+9. The equation $5|x - 8| = k$, where $k$ is a constant, has exactly one solution. Which of the following could be the value of $\dfrac{k}{5}$?
 A. $-8$ or $8$
 B. $-8$ only
 C. $0$ only

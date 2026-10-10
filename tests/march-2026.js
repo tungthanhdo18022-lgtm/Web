@@ -92,7 +92,7 @@ Explanation: The line has the form $y = mx - 14$. Using $(-12, 46)$, $46 = -12m 
 
 7.
 
-![Two horizontal parallel lines, line m above line n, crossed by two transversals that intersect at point B between them. One transversal rises from point A on line n through B to point E on line m; the other falls from point D on line m through B to point C on line n. D is to the left of E on line m, and A is to the left of C on line n.|300](tests/images/march-2026/q7.png)
+![Two horizontal parallel lines, line m above line n, crossed by two transversals that intersect at point B between them. One transversal rises from point A on line n through B to point E on line m; the other falls from point D on line m through B to point C on line n. D is to the left of E on line m, and A is to the left of C on line n.|400](tests/images/march-2026/q7.png)
 
 In the figure, line $m$ is parallel to line $n$, and lines $AE$ and $CD$ intersect at point $B$. Which additional piece of information is sufficient to prove that triangle $ABC$ is congruent to triangle $EBD$?
 A. $AB = 12$ and $DB = 12$
@@ -141,7 +141,7 @@ Answer: D
 Domain: Problem-Solving and Data Analysis
 Explanation: A cause-and-effect conclusion requires random assignment of participants to treatment groups. Random selection from the community center only allows the results to be generalized to the adults at that center.
 
-12. In triangle $JKL$, the measure of angle $J$ is $(90b)^\circ$, the measure of angle $K$ is $(69a)^\circ$ and the measure of angle $L$ is $(21a)^\circ$, where $a$ and $b$ are constants. Which of the following must be true?
+12. In triangle $JKL$, the measure of angle $J$ is $(90b)^\circ$, the measure of angle $K$ is $(69a)^\circ$, and the measure of angle $L$ is $(21a)^\circ$, where $a$ and $b$ are constants. Which of the following must be true?
 A. $\cos L > \sin K$
 B. $\cos L = \sin K$
 C. $\cos L < \sin K$
@@ -166,14 +166,14 @@ Explanation: Expanding, $(3x^2 + a)(2x^2 + b) = 6x^4 + (2a + 3b)x^2 + ab$, so $a
 
 15.
 
-![Graph in the xy-plane of an upward-opening parabola on a grid with lines every 1 unit; the axes are labeled at -5, 0, and 5 horizontally and at -5 and -10 vertically. The vertex is at (-1, -9), the parabola crosses the y-axis at (0, -3), and it crosses the x-axis at about x = -2.2 and x = 0.2.|400](tests/images/march-2026/q15.png)
+![Graph in the xy-plane of an upward-opening parabola on a grid with lines every 1 unit; the axes are labeled at -5, 0, and 5 horizontally and at -5 and -10 vertically. The vertex is at (-1, -9), the parabola crosses the y-axis at (0, -3), and it crosses the x-axis at about x = -2.2 and x = 0.2.|480](tests/images/march-2026/q15.png)
 
 The graph of $y = 6x^2 + bx + c$ is shown in the $xy$-plane. What is the value of $bc$?
 Answer: -36
 Domain: Advanced Math
 Explanation: The vertex of the parabola is $(-1, -9)$, so $y = 6(x + 1)^2 - 9 = 6x^2 + 12x - 3$. Thus $b = 12$ and $c = -3$ (consistent with the $y$-intercept $(0, -3)$), and $bc = -36$.
 
-16. A model estimates that in a particular forest, the number of trees with any given diameter measured at shoulder height is $21\%$ less for each $1$-inch increase in tree diameter measured at shoulder height. The model can be written in the form $f(x) = ab^x$ where $a$ and $b$ are constants and $x$ is the tree's diameter, in inches, measured at shoulder height, and $x \ge 5$. The model estimates that $3{,}100$ trees in this forest have a diameter of $13$ inches measured at shoulder height. Which function best represents this model?
+16. A model estimates that in a particular forest, the number of trees with any given diameter measured at shoulder height is $21\%$ less for each $1$-inch increase in tree diameter measured at shoulder height. The model can be written in the form $f(x) = ab^x$, where $a$ and $b$ are constants and $x$ is the tree's diameter, in inches, measured at shoulder height, and $x \ge 5$. The model estimates that $3{,}100$ trees in this forest have a diameter of $13$ inches measured at shoulder height. Which function best represents this model?
 A. $f(x) = 3{,}100(0.21)^x$
 B. $f(x) = 3{,}100(0.79)^x$
 C. $f(x) = 66{,}000(0.21)^x$
@@ -269,9 +269,9 @@ Explanation: When margins of error are calculated the same way, a larger sample 
 
 26.
 
-Data set X: 13, 16, 19, 21, 24, 25, 25, 26, 38
+$$\text{Data set X: } 13, 16, 19, 21, 24, 25, 25, 26, 38$$
 
-Data set Y: 13, 16, 19, 21, 24, 25, 25, 26, 33
+$$\text{Data set Y: } 13, 16, 19, 21, 24, 25, 25, 26, 33$$
 
 Data set Y is created by replacing the number $38$ in data set X with the number $33$. Which of the following statements is true about the means and medians of data set X and data set Y?
 A. The mean of data set X is greater than the mean of data set Y, and the median of data set X equals the median of data set Y.

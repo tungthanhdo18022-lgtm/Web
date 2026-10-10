@@ -43,7 +43,7 @@ Domain: Algebra
 Explanation: Collecting the $x$-terms gives $(6 - 6k)x = 8k - 8$, or $6(1 - k)x = 8(k - 1)$. If $k = 1$, both sides equal $0$ for every value of $x$, so the equation has infinitely many solutions; for any other value of $k$, the only solution is $x = -\frac{4}{3}$. So $k$ cannot be $1$.
 
 3. Line $j$ is defined by $4x + 5y = 25$. Line $k$ is parallel to line $j$ in the $xy$-plane. An equation of line $k$ is $16x + ry = 15$, where $r$ is a constant. If line $k$ passes through the point $(0, b)$, what is the value of $b$?
-Answer: 3/4 | 0.75
+Answer: 3/4 | .75
 Domain: Algebra
 Explanation: Parallel lines have equal slopes, so $-\frac{4}{5} = -\frac{16}{r}$, which gives $r = 20$. Substituting $(0, b)$ into $16x + 20y = 15$ gives $20b = 15$, so $b = \frac{3}{4}$.
 

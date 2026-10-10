@@ -539,7 +539,8 @@ body.is-wide .site-footer { display: none; }
 .content .q-table th { font-weight: 600; }
 .content .q-tables { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 14px 36px; margin: .6em 0 1em; }
 .content .q-tables .q-table { margin: 0; }
-.content .q-stmt { padding-left: 3.2em; text-indent: -1.6em; margin-bottom: .4em; }
+.content .q-stmt { padding-left: 3.4em; text-indent: -2.1em; margin-bottom: .4em; }
+.content .q-stmt-n { display: inline-block; width: 1.7em; margin-right: .4em; text-align: right; text-indent: 0; }
 .content .q-stmt .katex { text-indent: 0; }
 .m-nb { white-space: nowrap; }
 .content .q-note { text-align: center; font-size: .86em; color: #333; margin-top: -.4em; }
