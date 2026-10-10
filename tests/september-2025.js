@@ -7,7 +7,7 @@ SATLibrary.register({
   id: 'september-2025',
   source: String.raw`
 ---
-title: SAT Math September 2025
+title: September 2025
 author: tungtks18022
 date: 2025-09
 description: A 27-question SAT Math practice set mixing multiple-choice and student-produced response questions.

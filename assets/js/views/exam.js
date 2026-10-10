@@ -179,7 +179,7 @@
     function renderHeader() {
       var multi = test.modules.length > 1;
       var title = test.title || 'Practice Test';
-      // "SAT Math June 2025" already names the "Math" module: don't repeat it
+      // A title that already names the module ("Math Review") is not repeated
       var named = new RegExp('\\b' + String(mod.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(title);
       els.title.textContent = multi ? moduleName() : named ? title : title + ': ' + mod.title;
       document.title = (test.title || 'SAT Math') + ' – ' + global.APP_CONFIG.siteName;
