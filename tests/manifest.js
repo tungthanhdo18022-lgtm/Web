@@ -6,6 +6,8 @@
 SATLibrary.manifest([
   { file: 'algebra-a.js', v: '1' },
   { file: 'algebra-b.js', v: '1' },
+  { file: 'algebra-a1.js', v: '1' },
+  { file: 'algebra-b1.js', v: '1' },
   { file: 'october-2026.js', v: '1' },
   { file: 'august-2026.js', v: '1' },
   { file: 'june-2026.js', v: '1' },
