@@ -20,7 +20,7 @@ SATLibrary.manifest([
   { file: 'data-analysis-b.js', v: '1' },
   { file: 'october-2026.js', v: '1' },
   { file: 'august-2026.js', v: '1' },
-  { file: 'june-2026.js', v: '1' },
+  { file: 'june-2026.js', v: '2' },
   { file: 'may-2026.js', v: '2' },
   { file: 'march-2026.js', v: '2' },
   { file: 'september-2026.js', v: '5' },

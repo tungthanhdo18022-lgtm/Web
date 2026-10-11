@@ -55,7 +55,7 @@ Explanation: Since $1$ meter $= 100$ centimeters, $1$ square meter $= 100 \times
 
 4. An object's speed is increasing at a rate of $4.9$ meters per second squared. What is this rate, in miles per minute squared, rounded to the nearest tenth? (Use $1$ mile $= 1{,}609$ meters.)
 A. $0.2$
-B. $11$
+B. $11.0$
 C. $131.4$
 D. $328.4$
 Answer: B
