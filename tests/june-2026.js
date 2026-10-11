@@ -28,14 +28,14 @@ Answer: C
 Domain: Advanced Math
 Explanation: After both discounts, each sweater costs $32\left(1 - \frac{n}{100}\right) - 2 = 30 - 0.32n$ dollars, so $n(30 - 0.32n) = 612$. Multiplying by $25$ and rearranging gives $8n^2 - 750n + 15{,}300 = 0$, which factors as $2(n - 30)(4n - 255) = 0$, so $n = 30$ or $n = 63.75$. Only $n = 30$ satisfies $10 < n < 50$ (check: $30(30 - 9.6) = 612$).
 
-3. Which expression is a factor of $x^4 + 14ax^2 + 49a^2 - 64$, where $a$ is a positive constant?
+3. Which expression must be a factor of $x^4 + 14ax^2 + 49a^2 - 64$, where $a$ is a positive constant?
 A. $x^2 + 7a + 8$
 B. $x^2 - 7a - 8$
 C. $x^2 + 14a$
 D. $x^2 - 8a$
 Answer: A
 Domain: Advanced Math
-Explanation: Since $x^4 + 14ax^2 + 49a^2 = (x^2 + 7a)^2$, the expression is a difference of squares: $(x^2 + 7a)^2 - 8^2 = (x^2 + 7a - 8)(x^2 + 7a + 8)$.
+Explanation: Since $x^4 + 14ax^2 + 49a^2 = (x^2 + 7a)^2$, the expression is a difference of squares: $(x^2 + 7a)^2 - 8^2 = (x^2 + 7a - 8)(x^2 + 7a + 8)$, so $x^2 + 7a + 8$ is a factor for every value of $a$. Choice C equals $x^2 + 7a + 8$ only when $a = \frac{8}{7}$, and choice D equals $x^2 + 7a - 8$ only when $a = \frac{8}{15}$, so neither must be a factor. Choice B is never a factor for a positive $a$.
 
 4. As the size of a firework's shell increases, the height above the ground when the firework bursts increases. For a firework to burst $858$ feet above the ground, a firework's shell in the shape of a sphere with a volume of $282.40$ cubic inches could be used. To the nearest whole number, what is the volume of this firework's shell in cubic centimeters? ($1$ inch $= 2.54$ centimeters)
 Answer: 4628
