@@ -16,6 +16,8 @@ SATLibrary.manifest([
   { file: 'geometry-b.js', v: '1' },
   { file: 'geometry-c.js', v: '1' },
   { file: 'geometry-d.js', v: '1' },
+  { file: 'data-analysis-a.js', v: '1' },
+  { file: 'data-analysis-b.js', v: '1' },
   { file: 'october-2026.js', v: '1' },
   { file: 'august-2026.js', v: '1' },
   { file: 'june-2026.js', v: '1' },
