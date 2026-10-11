@@ -392,7 +392,7 @@ C. $81$
 D. $91$
 Answer: D
 Domain: Algebra
-Explanation: December 2014 is $12$ months after December 2013, so the estimate is $s(12)$. The graph passes through $(0, 120)$ and $(30, 48)$, so its slope is $\frac{48 - 120}{30} = -2.4$ and $s(x) = 120 - 2.4x$. Then $s(12) = 120 - 2.4(12) = 91.2$, so the best estimate is $91$. Choice B, about $72$, is the value at $x = 20$ (August 2015).
+Explanation: December 2014 is $12$ months after December 2013, so the estimate is $s(12)$. The graph passes through $(0, 120)$ and $(30, 48)$, so its slope is $\frac{48 - 120}{30} = -2.4$ and $s(x) = 120 - 2.4x$. Then $s(12) = 120 - 2.4(12) = 91.2$, so the best estimate is $91$. Choice B, $71$, is close to $s(20) = 72$, which is the estimate for August 2015, not December 2014.
 
 32. $0.0036$ is $0.6\%$ of $a$, and $84$ is $350\%$ of $b$, where $a$ and $b$ are positive numbers. What percentage of $a$ is $b$?
 A. $40\%$
@@ -637,7 +637,7 @@ C. The standard deviation of scores for team A is equal to the standard deviatio
 D. There is not enough information to compare the standard deviations.
 Answer: A
 Domain: Problem-Solving and Data Analysis
-Explanation: Both distributions are symmetric about a score of $32.5$, so both means are about $32.5$. All of team A's scores are between $25$ and $40$, within $7.5$ points of the mean. Most of team B's scores are in the outer intervals, from $15$ to $25$ and from $40$ to $50$, far from the mean, and only $2$ scores are in the middle interval. Team B's scores are much more spread out from the mean, so the standard deviation for team A is less than the standard deviation for team B.
+Explanation: Both histograms are symmetric about a score of $32.5$, so both means are about $32.5$. All of team A's scores are between $25$ and $40$, within about $7.5$ points of the mean. Most of team B's scores are in the outer intervals, from $15$ to $25$ and from $40$ to $50$, far from the mean, and only $2$ scores are in the middle interval. Team B's scores are much more spread out from the mean, so the standard deviation for team A is less than the standard deviation for team B.
 
 61.
 

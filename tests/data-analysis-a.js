@@ -115,7 +115,7 @@ C. The sleep efficiency of each participant was measured again at the end of $10
 D. Each participant was randomly assigned to take a magnesium supplement or a placebo.
 Answer: D
 Domain: Problem-Solving and Data Analysis
-Explanation: A cause-and-effect conclusion requires random assignment of the treatments: because chance alone decided who took the supplement and who took the placebo, the two groups were alike except for the treatment. Random selection (choice B) allows the results to be generalized to the adults at the community center, but it does not establish cause and effect. The sample size (choice A) and the second measurement (choice C) do not establish cause and effect either.
+Explanation: A cause-and-effect conclusion requires random assignment of the treatments: because chance alone decided who took the supplement and who took the placebo, the two groups can be expected to be alike except for the treatment. Random selection (choice B) allows the results to be generalized to the adults at the community center, but it does not establish cause and effect. The sample size (choice A) and the second measurement (choice C) do not establish cause and effect either.
 
 10.
 
@@ -416,7 +416,7 @@ C. Sample A had a smaller number of votes that could not be recorded.
 D. Sample A had a lower percent of favorable responses.
 Answer: B
 Domain: Problem-Solving and Data Analysis
-Explanation: For random samples from the same population with margins of error calculated using the same method, the margin of error depends mainly on the sample size: the smaller the sample, the larger the margin of error. So the most appropriate reason that sample A has the greater margin of error ($7.8\%$ compared with $4.5\%$) is that sample A had a smaller sample size. Choice A has the relationship backward, and neither unrecorded votes (choice C) nor the slightly lower percent in favor (choice D) explains the larger margin of error.
+Explanation: For random samples from the same population with margins of error calculated using the same method, the margin of error depends mainly on the sample size: the smaller the sample, the larger the margin of error. So the most appropriate reason that sample A has the greater margin of error ($7.8\%$ compared with $4.5\%$) is that sample A had a smaller sample size. Choice A has the relationship backward, and neither unrecorded votes (choice C) nor a percent in favor that is only slightly lower (choice D) can account for a margin of error that is so much larger.
 
 40.
 
@@ -499,7 +499,7 @@ C. I and II
 D. Neither I nor II
 Answer: B
 Domain: Problem-Solving and Data Analysis
-Explanation: Every value in the original data set is at least $30$, so $17$ is less than every original value. Statement II: adding a value that is less than the original mean lowers the mean, so II must be true. Statement I: the original median is the average of the 25th and 26th values in order, which both lie in the $50$ to $60$ interval (the first $2 + 7 = 9$ values are below $50$). With $17$ added as the smallest value, the new median is the 26th of $51$ values, which is the original 25th value. If the original 25th and 26th values are equal (for example, both $55$), the median does not change, so I need not be true.
+Explanation: Every value in the original data set is at least $30$, so $17$ is less than every original value. Statement II: adding a value that is less than the original mean lowers the mean, so II must be true. Statement I: the original median is the average of the 25th and 26th values in order, which both lie in the $50$ to $60$ interval (only $2 + 7 = 9$ values are in the bars to the left of that interval). With $17$ added as the smallest value, the new median is the 26th of $51$ values, which is the original 25th value. If the original 25th and 26th values are equal (for example, both $55$), the median does not change, so I need not be true.
 
 47.
 
@@ -516,7 +516,7 @@ C. Neither I nor II
 D. I only
 Answer: D
 Domain: Problem-Solving and Data Analysis
-Explanation: The temperature $77.9^{\circ}\text{F}$ is the only value in the $75$ to $80$ interval, and every other value is less than $65$, so it is the largest value and is greater than the mean. Statement I: removing a value greater than the mean lowers the mean, so I must be true. Statement II: the original median is the 6th of the $11$ values in order. Removing the largest value leaves the first $10$ values unchanged, so the new median is the average of the 5th and 6th values. Both of these values are in the $50$ to $55$ interval (the first $1 + 2 = 3$ values are below $50$), and if they are equal, the median does not change. So II need not be true, and the answer is I only.
+Explanation: The temperature $77.9^{\circ}\text{F}$ is the only value in the $75$ to $80$ interval, and every other value is at most $65$, so it is the largest value and is greater than the mean. Statement I: removing a value greater than the mean lowers the mean, so I must be true. Statement II: the original median is the 6th of the $11$ values in order. Removing the largest value leaves the first $10$ values unchanged, so the new median is the average of the 5th and 6th values. Both of these values are in the $50$ to $55$ interval (only $1 + 2 = 3$ values are in the bars to the left of that interval), and if they are equal, the median does not change. So II need not be true, and the answer is I only.
 
 48.
 
@@ -718,6 +718,6 @@ C. I and II
 D. Neither I nor II
 Answer: A
 Domain: Problem-Solving and Data Analysis
-Explanation: The temperature $78.2^{\circ}\text{F}$ is the only value in the $75$ to $80$ interval, and every other value is less than $65$, so it is the largest value and is greater than the mean. Statement I: removing a value greater than the mean lowers the mean, so I must be true. Statement II: the original median is the 6th of the $11$ values in order. Removing the largest value leaves the first $10$ values unchanged, so the new median is the average of the 5th and 6th values. Both of these values are in the $50$ to $55$ interval, and if they are equal, the median does not change. So II need not be true, and the answer is I only.
+Explanation: The temperature $78.2^{\circ}\text{F}$ is the only value in the $75$ to $80$ interval, and every other value is at most $65$, so it is the largest value and is greater than the mean. Statement I: removing a value greater than the mean lowers the mean, so I must be true. Statement II: the original median is the 6th of the $11$ values in order. Removing the largest value leaves the first $10$ values unchanged, so the new median is the average of the 5th and 6th values. Both of these values are in the $50$ to $55$ interval, and if they are equal, the median does not change. So II need not be true, and the answer is I only.
 `
 });
