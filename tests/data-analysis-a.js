@@ -301,7 +301,7 @@ Explanation: The table shows $52$ even integers in all, and $12$ of them are in 
 
 28.
 
-![Scatterplot in the xy-plane with origin O, an x-axis from 0 to 50 labeled at 15, 30, and 45, and a y-axis from 0 to 65 labeled at 15, 30, 45, and 60, with grid lines every 5 units. Twelve data points trend downward, at approximately (10.3, 45), (12.3, 44.9), (13.8, 43.3), (15.3, 38.8), (15.6, 40.1), (21.5, 33.1), (25.9, 30.4), (30, 30.4), (32.4, 24.1), (34.4, 24.6), (35.8, 29), and (38.6, 20.3). A line of best fit is drawn from about (8, 47.6) to about (40.6, 19.4); it passes through approximately (10, 45.9) and (40, 20) and is not extended to the y-axis.](tests/images/data-analysis-a/q28.svg)
+![Scatterplot in the xy-plane with origin O, an x-axis labeled at 15, 30, and 45, and a y-axis labeled at 15, 30, 45, and 60, with grid lines every 5 units covering x from 0 to about 52 and y from 0 to 65. Twelve data points trend downward, at approximately (10.3, 44.9), (12.4, 44.9), (13.9, 43.3), (15.3, 38.8), (15.6, 40), (21.5, 33.1), (25.9, 30.4), (30, 30.4), (32.4, 24.1), (34.5, 24.5), (35.8, 29), and (38.6, 20.2). A line of best fit is drawn from about (8, 47.6) to about (40.6, 19.4); it passes through approximately (10, 45.9) and (40, 20) and is not extended to the y-axis.](tests/images/data-analysis-a/q28.svg)
 
 The scatterplot shows the relationship between two variables, $x$ and $y$, for data set A. A line of best fit for the data is also shown. Data set B is created by subtracting $11$ units from the value of $y$ for each data point from data set A. Which of the following is closest to the $y$-coordinate of the $y$-intercept of the line of best fit for data set B?
 A. $43.57$
@@ -599,7 +599,7 @@ Answer: D
 Domain: Problem-Solving and Data Analysis
 Explanation: The tree grows $\frac{39}{m}$ centimeters per month, on average. Since $k$ years is $12k$ months, the tree grows $\frac{39}{m} \cdot 12k = \frac{468k}{m}$ centimeters every $k$ years. Choice B divides by $12$ instead of multiplying ($\frac{39k}{12m} = \frac{13k}{4m}$), and choices A and C have $m$ and $k$ in the wrong places.
 
-57. The function $g$ is defined as $g(x) = \dfrac{2x - 4}{(2x + 11)(x - 6)}$. If $g(a + 5) = 0$, where $a$ is a constant, what is the value of $a$?
+57. The function $g$ is defined as $g(x) = \nobreak \dfrac{2x - 4}{(2x + 11)(x - 6)}$. If $g(a + 5) = 0$, where $a$ is a constant, what is the value of $a$?
 Answer: -3
 Domain: Advanced Math
 Explanation: A rational function equals $0$ where its numerator equals $0$ and its denominator does not. The numerator $2x - 4$ equals $0$ only when $x = 2$, and the denominator at $x = 2$ is $(4 + 11)(2 - 6) = -60 \ne 0$, so $g(x) = 0$ only when $x = 2$. Therefore $a + 5 = 2$, and $a = -3$.
@@ -684,10 +684,10 @@ Explanation: Let $A$, $B$, and $C$ be the masses of the three objects. Then $A =
 | 30°F | 19°F | 12°F |
 | 34°F | 24°F | 18°F |
 
-According to the table, what is the wind chill temperature, in degrees Fahrenheit (°F), when the air temperature is 26°F and the wind speed is $15$ miles per hour (mph)? (Disregard the degree symbol when entering your answer.)
+According to the table, what is the wind chill temperature, in degrees Fahrenheit (°F), when the air temperature is $26^{\circ}\text{F}$ and the wind speed is $15$ miles per hour (mph)? (Disregard the degree symbol when entering your answer.)
 Answer: 14
 Domain: Problem-Solving and Data Analysis
-Explanation: In the row for an air temperature of 26°F, the column for a wind speed of $15$ mph gives a wind chill temperature of 14°F. (The value 7°F in that row is for a wind speed of $45$ mph.)
+Explanation: In the row for an air temperature of $26^{\circ}\text{F}$, the column for a wind speed of $15$ mph gives a wind chill temperature of $14^{\circ}\text{F}$. (The value $7^{\circ}\text{F}$ in that row is for a wind speed of $45$ mph.)
 
 66. On a plot of land, $52.0\%$ of the square footage is farmland and the remaining square footage is pasture. There are buildings on exactly $21.5\%$ of the square footage of the farmland, and there are buildings on exactly $14.0\%$ of the square footage of the pasture. If there are buildings on exactly $p\%$ of the square footage of the plot of land, what is the value of $p$?
 Answer: 17.9

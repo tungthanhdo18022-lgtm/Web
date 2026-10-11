@@ -118,7 +118,7 @@ Explanation: There are $168 + 344 = 512$ horses in all. With a male-to-female ra
 
 10.
 
-![Scatterplot of 7 points in the xy-plane, with both axes labeled from 2 to 14 in steps of 2. The points are at approximately (2, 3), (4.5, 7), (5.5, 10), (6.5, 7), (7, 8.5), (9.5, 10), and (12.5, 13.5). A line of best fit, approximately y = 2.5 + 0.87x, rises from about (0, 2.5) on the y-axis to about (15, 15.5), passing through about (7, 8.5) and (12.5, 13.5).](tests/images/data-analysis-b/q10.svg)
+![Scatterplot of 7 points in the xy-plane, with both axes labeled from 2 to 14 in steps of 2. The points are at approximately (2, 3), (4.5, 7), (5.5, 10), (6.5, 7), (7, 8.5), (9.5, 10), and (12.5, 13.4). A line of best fit, approximately y = 2.4 + 0.88x, rises from about (0, 2.4) on the y-axis to about (15, 15.6), passing through about (7, 8.5) and (12.5, 13.4).](tests/images/data-analysis-b/q10.svg)
 
 The scatterplot shows the relationship between two variables, $x$ and $y$, for the $7$ data points in data set W. A line of best fit for data set W is also shown. This line can be represented by an equation in the form $y = s + tx$, where $s$ and $t$ are constants. Data set V consists of all the data points in data set W as well as the point $(14, 8)$. A line of best fit for data set V can be represented by the equation $y = r + px$, where $r$ and $p$ are constants. Assuming the lines of best fit are calculated the same way, which of the following statements must be true?
 
@@ -131,7 +131,7 @@ C. I and II
 D. Neither I nor II
 Answer: A
 Domain: Problem-Solving and Data Analysis
-Explanation: The line for data set W has a $y$-intercept of about $2.5$ and a slope of about $0.87$, so at $x = 14$ it is at about $y = 14.7$. The new point $(14, 8)$ is far below the line and to the right of all the other points, so it pulls the right end of the line down: the new line is less steep, so $p < t$ and statement I is true. A less steep line that still passes near the middle of the data is higher at the left end, so its $y$-intercept increases: $r > s$, and statement II is false. (A least-squares fit gives about $y = 2.5 + 0.87x$ for W and about $y = 4.5 + 0.50x$ for V.)
+Explanation: The line for data set W has a $y$-intercept of about $2.4$ and a slope of about $0.88$, so at $x = 14$ it is at about $y = 14.7$. The new point $(14, 8)$ is far below the line and to the right of all the other points, so it pulls the right end of the line down: the new line is less steep, so $p < t$ and statement I is true. A less steep line that still passes near the middle of the data is higher at the left end, so its $y$-intercept increases: $r > s$, and statement II is false. (A least-squares fit gives about $y = 2.6 + 0.86x$ for W and about $y = 4.5 + 0.50x$ for V.)
 
 11. A researcher investigated two species of mites: a predator and its prey. At the start of a week, there was an equal number of the two species. At the end of the week, the number of prey has increased by $2{,}700\%$ of the number of prey at the start of the week, and the number of predators has increased by $180\%$ of the number of predators at the start of the week. The number of prey at the end of the week was $p\%$ greater than the number of predators at the end of the week. What is the value of $p$?
 Answer: 900
@@ -437,7 +437,7 @@ Explanation: The concentration in the bottled water is $48\%$ of $36$ mg/L, whic
 
 37. A group of $10$ gardeners recorded data on the germination rates of their tomato crop for one growing season. The scatterplot shows the relationship between the number of tomato seeds planted, $x$, and the number of tomato seeds that germinated, $y$, for each of the gardeners. A line of best fit is also shown.
 
-![Scatterplot in the xy-plane with the origin labeled O. The x-axis (number of tomato seeds planted) and the y-axis (number of tomato seeds that germinated) each run from 0 to 500, labeled every 100, with grid lines every 50. Ten points are plotted at approximately (35, 25), (100, 90), (160, 90), (200, 140), (245, 210), (310, 170), (350, 245), (385, 230), (460, 370), and (490, 345). The line of best fit starts at the origin and passes through (100, 70), (200, 140), and (500, 350).](tests/images/data-analysis-b/q37.svg)
+![Scatterplot in the xy-plane with the origin labeled O. The x-axis (number of tomato seeds planted) and the y-axis (number of tomato seeds that germinated) each run from 0 to 500, labeled every 100, with grid lines every 50. Ten points are plotted at (35, 24), (100, 90), (162, 89), (200, 141), (243, 209), (310, 169), (350, 246), (387, 230), (459, 372), and (490, 347). The line of best fit starts at the origin and passes through (100, 70), (200, 140), and (500, 350).](tests/images/data-analysis-b/q37.svg)
 
 Which of the following is the best interpretation of the slope of the line of best fit in this context?
 A. The number of tomato seeds planted is predicted to increase by $70$ seeds every $100$ days.
@@ -506,7 +506,7 @@ C. $7 : 5$
 D. $21 : 20$
 Answer: B
 Domain: Problem-Solving and Data Analysis
-Explanation: Let the initial concentrations of conjugate base and acid be $3x$ and $5x$. After the change, the conjugate base concentration is $1.40(3x) = 4.2x$ and the acid concentration is $0.75(5x) = 3.75x$. The new ratio is $4.2 : 3.75$, which is $420 : 375 = 28 : 25$. Choice C applies only the $40\%$ increase ($4.2 : 3 = 7 : 5$).
+Explanation: Let the initial concentrations of conjugate base and acid be $3x$ and $5x$. After the change, the conjugate base concentration is $1.40(3x) = 4.2x$ and the acid concentration is $0.75(5x) = 3.75x$. The new ratio is $4.2 : 3.75$, which is $420 : 375 = 28 : 25$. Choice C, $4.2 : 3 = 7 : 5$, results from reducing the acid concentration by $40\%$ instead of $25\%$.
 
 46. A real estate company offers a series of three webinars. $1{,}875$ people attended the first webinar, $64\%$ of the people who attended the first webinar attended the second webinar, and $29\%$ of the people who attended the first and second webinars attended the third webinar. How many people attended all three webinars?
 Answer: 348
@@ -598,7 +598,7 @@ C. $157.00\%$
 D. $236.38\%$
 Answer: A
 Domain: Problem-Solving and Data Analysis
-Explanation: If the value at the end of $2012$ was $v$, the value at the end of $2013$ was $(1 + 1.78)v = 2.78v$, and the value at the end of $2014$ was $(1 - 0.21)(2.78v) = 0.79(2.78v) = 2.1962v$. This is a net increase of $2.1962v - v = 1.1962v$, or $119.62\%$. Choice C incorrectly subtracts the percentages, $178\% - 21\% = 157\%$, but the $21\%$ decrease applies to the larger 2013 value.
+Explanation: If the value at the end of $2012$ was $v$, the value at the end of $2013$ was $(1 + 1.78)v = 2.78v$, and the value at the end of $2014$ was $(1 - 0.21)(2.78v) = 0.79(2.78v) = 2.1962v$. This is a net increase of $2.1962v - v = 1.1962v$, or $119.62\%$. Choice C incorrectly subtracts the percentages, $178\% - 21\% = 157\%$, but the $21\%$ decrease applies to the larger $2013$ value.
 
 58. A bin contains a mixture of T-shirts for two sports teams. The table shows the number of T-shirts in the bin, classified by size and sports team.
 
@@ -624,7 +624,7 @@ C. $q = s$
 D. The relationship between $q$ and $s$ cannot be determined.
 Answer: C
 Domain: Problem-Solving and Data Analysis
-Explanation: Each value in data set Y is $11$ less than the corresponding value in data set X ($13 - 11 = 2$, $14 - 11 = 3$, and so on). Subtracting the same number from every value shifts the data and the mean by $11$ but does not change the distances of the values from the mean, so the spread is the same. Therefore $q = s$ (both are about $1.49$).
+Explanation: Each value in data set Y is $11$ less than the corresponding value in data set X ($13 - 11 = 2$, $14 - 11 = 3$, and so on). Subtracting the same number from every value shifts the data and the mean by $11$ but does not change the distances of the values from the mean, so the spread is the same. Therefore $q = s$. (Both are about $1.49$ as population standard deviations, or about $1.58$ as sample standard deviations.)
 
 60.
 
