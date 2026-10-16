@@ -299,7 +299,7 @@ Mỗi lần học sinh nhập mã hoặc trang web kiểm tra mã, một dòng �
 
 ## Phần 2b. Bán Premium bằng chuyển khoản (QR, tự kích hoạt)
 
-Học sinh bấm **Thanh toán** trên trang Practice Tests, chọn gói, quét **mã QR VietQR** bằng app ngân hàng. Nội dung chuyển khoản là mã đơn dạng `TUNNXXXXXXXX`. Khi tiền vào, máy chủ tạo một mã Premium mới và trang web của học sinh **tự kích hoạt** trên đúng máy đã đặt đơn (không cần nhập mã). Mã cũng hiện trên màn hình để học sinh lưu lại.
+Học sinh bấm **Pay now** trên trang Practice Tests, chọn gói, quét **mã QR VietQR** bằng app ngân hàng. Nội dung chuyển khoản là mã đơn dạng `TUNNXXXXXXXX`. Khi tiền vào, máy chủ tạo một mã Premium mới và trang web của học sinh **tự kích hoạt** trên đúng máy đã đặt đơn (không cần nhập mã). Mã cũng hiện trên màn hình để học sinh lưu lại.
 
 ### Cài đặt lần đầu
 

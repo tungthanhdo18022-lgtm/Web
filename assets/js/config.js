@@ -46,9 +46,9 @@ window.APP_CONFIG = {
     payment: {
       bank: 'MB',              // VietQR bank id (MB Bank = 'MB')
       bankName: 'MB Bank',
-      account: '',             // account number that receives the money
-      accountName: '',         // account holder, IN HOA KHÔNG DẤU (e.g. 'NGUYEN VAN A')
-      buttonLabel: 'Thanh toán',
+      account: '180228822828', // account number that receives the money
+      accountName: 'DO DANH THANH TUNG', // account holder, IN HOA KHÔNG DẤU
+      buttonLabel: 'Pay now',
       plans: [
         { id: '1m', label: '1 month', price: 69000, days: 30 },
         { id: '3m', label: '3 months', price: 189000, days: 90 }

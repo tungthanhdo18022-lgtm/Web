@@ -89,7 +89,7 @@
     if (o && enabled()) {
       action = '<button type="button" class="pp-prem-btn is-wait" data-pay-resume><span class="pp-prem-dot"></span>Waiting for payment · Show QR</button>';
     } else if (enabled()) {
-      action = '<button type="button" class="pp-prem-btn" data-pay>' + U.esc(cfg().buttonLabel || 'Thanh toán') + '</button>';
+      action = '<button type="button" class="pp-prem-btn" data-pay>' + U.esc(cfg().buttonLabel || 'Pay now') + '</button>';
     } else if (P().available()) {
       action = '<button type="button" class="pp-prem-btn" data-premium-unlock>Enter code</button>';
     } else {
