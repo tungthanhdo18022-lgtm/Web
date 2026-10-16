@@ -6,7 +6,8 @@
  *   Premium tests on the tunn.sat website are published encrypted. Every test file has its own
  *   AES key, wrapped with the site's RSA public key (assets/premium-key.json). This script:
  *     - checks premium codes (TUNN-XXXX-XXXX-XXXX) kept in the "Codes" sheet,
- *     - binds every code to ONE device. A device is an RSA key pair made by the student's browser
+ *     - binds every code to up to N devices (Settings row "Max devices", default 2, 1..5). A device is
+ *       an RSA key pair made by the student's browser
  *       with WebCrypto as NON-EXTRACTABLE (its private key cannot be read, copied or exported);
  *       the device id is "k_" + base64url(SHA-256(public key)),
  *     - after the checks pass, unwraps the AES keys with the site's RSA private key (RSA-OAEP,
@@ -38,6 +39,12 @@
  *     every request carries "deviceKey" (base64 SPKI of the device's RSA-OAEP public key); requests
  *     without it get "update". A code still bound to a v1 random device id moves to the device key
  *     the first time that same device id asks with a key ("upgrade").
+ *   - Version 3 (several devices per code): the first device stays in Device / Device info (cols 8-9);
+ *     devices 2..5 live in 8 extra columns right after Moves (cols 13-20: Device 2, Device 2 info, ...).
+ *     Slots are kept in binding order, oldest first, so "the oldest device" needs no extra timestamps.
+ *     Sheets from version 2 get the extra columns automatically (ensureDeviceColumns_): they are
+ *     written in place when cols 13-20 are completely empty, otherwise 8 columns are INSERTED after
+ *     Moves, which pushes the owner's own columns to the right without touching their data.
  *   - Apps Script has no TextEncoder, atob/btoa, WebCrypto, fetch, require or Buffer. Utilities.*
  *     works on Java-style SIGNED bytes (-128..127). Inside this file every byte array is a plain
  *     array of UNSIGNED bytes (0..255); conversion happens only at the Utilities boundary.
@@ -53,7 +60,7 @@
 
 var PREMIUM = {
   SERVICE: 'tunn.sat premium',
-  VERSION: 2,
+  VERSION: 3,
 
   // Copy of "kid" and "spki" from assets/premium-key.json (public, safe to share).
   // "Cài đặt khóa bí mật" refuses a private key that does not match this public key, so the
@@ -89,6 +96,9 @@ var PREMIUM = {
 
   SETTING_MOVE_AFTER_DAYS: 'Move after days',
   SETTING_REFRESH_HOURS: 'Refresh hours',
+  SETTING_MAX_DEVICES: 'Max devices',
+  DEFAULT_MAX_DEVICES: 2,
+  MAX_DEVICES_LIMIT: 5,      // one Device slot per device: the sheet has 5 (see EXTRA_DEVICE_HEADERS)
   DEFAULT_MOVE_AFTER_DAYS: 7,
   DEFAULT_REFRESH_HOURS: 24,
 
@@ -118,11 +128,17 @@ var PREMIUM = {
 // Column numbers (1-based) of the Codes sheet.
 var COL = {
   CODE: 1, STATUS: 2, DAYS: 3, NOTE: 4, CREATED: 5, ACTIVATED: 6, EXPIRES: 7,
-  DEVICE: 8, DEVICE_INFO: 9, LAST_CHECK: 10, MOVED: 11, MOVES: 12
+  DEVICE: 8, DEVICE_INFO: 9, LAST_CHECK: 10, MOVED: 11, MOVES: 12,
+  EXTRA_FIRST: 13   // Device 2 (id), Device 2 info, Device 3, Device 3 info, ... Device 5 info = col 20
 };
 var CODES_HEADERS = ['Code', 'Status', 'Days', 'Note', 'Created', 'Activated', 'Expires',
   'Device', 'Device info', 'Last check', 'Moved', 'Moves'];
+var EXTRA_DEVICE_HEADERS = ['Device 2', 'Device 2 info', 'Device 3', 'Device 3 info',
+  'Device 4', 'Device 4 info', 'Device 5', 'Device 5 info'];
 var CODES_WIDTHS = [175, 80, 60, 220, 135, 135, 135, 210, 170, 135, 135, 60];
+var EXTRA_DEVICE_WIDTHS = [210, 170, 210, 170, 210, 170, 210, 170];
+// Columns the server reads for every code: the 12 fixed ones plus the extra device slots.
+var ROW_WIDTH = COL.EXTRA_FIRST - 1 + EXTRA_DEVICE_HEADERS.length;
 var LOG_HEADERS = ['Time', 'Action', 'Code', 'Device', 'Result'];
 // Columns of the Orders sheet.
 var ORD = { ORDER: 1, STATUS: 2, PLAN: 3, AMOUNT: 4, DAYS: 5, CREATED: 6, PAID: 7, CODE: 8, DEVICE: 9, PAYMENT: 10, NOTE: 11 };
@@ -148,6 +164,10 @@ var MESSAGES = {
   deviceWait: 'This code is already in use on another device. You can move it to this device after {date}, or ask the site owner to reset it.',
   deviceMoveNow: 'This code is now in use on another device. Enter the code again to move it back to this device.',
   deviceOwner: 'This code is already in use on another device. If you changed devices, ask the site owner to reset it.',
+  // Used instead of the three messages above when a code may be used on several devices ({n} = the limit).
+  deviceWaitMany: 'This code is already in use on {n} devices, the maximum. You can use it on this device after {date}: it then replaces the oldest device. Or ask the site owner to reset it.',
+  deviceMoveNowMany: 'This code is in use on {n} devices, the maximum. Enter the code again on this device to replace the oldest device.',
+  deviceOwnerMany: 'This code is already in use on {n} devices, the maximum. If you changed devices, ask the site owner to reset it.',
   notActivated: 'This code has not been activated on this device yet. Enter the code to activate it.',
   rate: 'Too many failed attempts. Please wait 15 minutes and try again.',
   setup: 'Premium is not available right now because the server is not set up yet. Please contact the site owner.',
@@ -238,13 +258,16 @@ function handleApiRequest_(e) {
   try {
     verdict = withLock_(function () {
       // Columns are read by position: refuse to guess if the owner inserted or renamed a column.
-      if (!codesHeaderOk_(sheet)) return { error: 'setup', log: 'setup (Codes header changed)' };
+      var header = readCodesHeader_(sheet);
+      if (!codesHeaderOk_(sheet, header)) return { error: 'setup', log: 'setup (Codes header changed)' };
+      // Sheets from version 2 get the Device 2..5 columns on the first request after the update.
+      ensureDeviceColumns_(sheet, header);
       // The owner can insert or delete rows at any moment (typing in the sheet does not take the
       // script lock), so the row that was read must still hold this code; otherwise look again.
       for (var attempt = 0; attempt < 3; attempt++) {
         var row = findCodeRow_(sheet, req.code);
         if (!row) return { error: 'notfound' };
-        var values = sheet.getRange(row, 1, 1, CODES_HEADERS.length).getValues()[0];
+        var values = sheet.getRange(row, 1, 1, ROW_WIDTH).getValues()[0];
         if (cellCode_(values[COL.CODE - 1]) !== req.code) continue;
         var v = evaluateLicense_(values, req, settings, now);
         if (v.problem) v.log = 'sheet (dòng ' + row + ': ' + v.problem + ')';
@@ -262,7 +285,7 @@ function handleApiRequest_(e) {
   if (verdict.error) {
     if (verdict.error === 'notfound') recordFailure_(req.device);
     logEvent_(req.action, req.code, req.device, verdict.log || verdict.error);
-    return apiError_(verdict.error, verdict.messageKey, verdict.retryAfter);
+    return apiError_(verdict.error, verdict.messageKey, verdict.retryAfter, settings.maxDevices);
   }
 
   // The license checks passed: only now are keys unwrapped (no decryption oracle for strangers),
@@ -281,7 +304,10 @@ function handleApiRequest_(e) {
     checkAfter: Math.round(settings.refreshHours * 3600)
   };
   if (unwrapped.bad.length) res.bad = unwrapped.bad;
-  logEvent_(req.action, req.code, req.device, (verdict.moved ? 'ok (moved)' : verdict.upgraded ? 'ok (upgraded)' : 'ok') +
+  // A plain successful refresh is not logged (the page asks on every load, which would fill the Log); Last check
+  // in the Codes sheet still shows it
+  if (req.action !== 'refresh' || verdict.moved || verdict.added || verdict.upgraded || unwrapped.bad.length) logEvent_(req.action, req.code, req.device, (verdict.moved ? 'ok (moved)' : verdict.added ? 'ok (device ' + verdict.added + ' added)'
+    : verdict.upgraded ? 'ok (upgraded)' : 'ok') +
     ' · keys ' + unwrapped.count + (unwrapped.bad.length ? ' · bad ' + unwrapped.bad.length : ''));
   return res;
 }
@@ -399,7 +425,8 @@ function evaluateLicense_(row, req, settings, now) {
   }
   var lastCheck = readTime_(row[COL.LAST_CHECK - 1]);
   if (isBadNumber_(lastCheck)) lastCheck = null; // informational only
-  var bound = readText_(row[COL.DEVICE - 1]);
+  var devices = readDevices_(row);
+  var maxDevices = settings.maxDevices;
   var moves = Math.floor(readNumber_(row[COL.MOVES - 1]));
   if (!(moves >= 0)) moves = 0;
 
@@ -428,38 +455,57 @@ function evaluateLicense_(row, req, settings, now) {
     changes[COL.LAST_CHECK] = nowDate;
   }
 
-  // Not bound yet (new code, or the owner reset the device): only "activate" binds.
-  if (!bound) {
+  // Not bound yet (new code, or the owner reset the devices): only "activate" binds.
+  if (!devices.length) {
     if (req.action !== 'activate') return { error: 'device', messageKey: 'notActivated', changes: changes };
-    // Binding again after the owner reset the device counts as a device change: Moved = now, so
+    // Binding again after the owner reset the devices counts as a device change: Moved = now, so
     // the "Move after days" wait starts again and another device cannot take the code over at once.
     if (activated !== null) changes[COL.MOVED] = nowDate;
-    changes[COL.DEVICE] = req.device;
-    changes[COL.DEVICE_INFO] = req.info;
+    devices = [{ id: req.device, info: req.info }];
+    deviceChanges_(row, devices, changes);
     markGood();
     return { expires: expires, moved: false, changes: changes };
   }
 
-  // Same device: refresh Last check (and the device label). A code still bound to a v1 random
-  // device id moves to the device key when that same id asks with a key ("upgrade"); a code bound
-  // to a device key only matches that key.
-  var upgrade = bound !== req.device && !KEY_DEVICE_RE.test(bound) && !!req.claimedDevice &&
-    bound === req.claimedDevice && !!req.deviceKey;
-  if (bound === req.device || upgrade) {
-    if (upgrade) changes[COL.DEVICE] = req.device;
-    if (req.info && req.info !== readText_(row[COL.DEVICE_INFO - 1])) changes[COL.DEVICE_INFO] = req.info;
+  // A device that is already bound: refresh Last check (and its label). A slot still holding a v1
+  // random device id moves to the device key when that same id asks with a key ("upgrade"); a slot
+  // holding a device key only matches that key.
+  var slot = indexOfDevice_(devices, req.device);
+  var upgrade = false;
+  if (slot < 0 && !!req.claimedDevice && !!req.deviceKey && !KEY_DEVICE_RE.test(req.claimedDevice)) {
+    slot = indexOfDevice_(devices, req.claimedDevice);
+    upgrade = slot >= 0;
+  }
+  if (slot >= 0) {
+    if (upgrade) devices[slot].id = req.device;
+    if (req.info) devices[slot].info = req.info;
+    deviceChanges_(row, devices, changes);
     markGood();
     return { expires: expires, moved: false, upgraded: upgrade, changes: changes };
   }
 
-  // Another device. Self-service move once every N days ("Move after days"; 0 = owner only).
+  // A free slot: a new device joins (activate only; a refresh never binds). Moved = now, so the
+  // "Move after days" wait for replacing a device starts from the latest change of the device list.
+  if (devices.length < maxDevices) {
+    if (req.action !== 'activate') return { error: 'device', messageKey: 'notActivated', changes: changes };
+    devices.push({ id: req.device, info: req.info });
+    deviceChanges_(row, devices, changes);
+    changes[COL.MOVED] = nowDate;
+    markGood();
+    return { expires: expires, moved: false, added: devices.length, changes: changes };
+  }
+
+  // Every slot is taken. Self-service replacement of the OLDEST device once every N days
+  // ("Move after days"; 0 = owner only). Slots are in binding order, so the oldest is the first.
   var moveDays = settings.moveAfterDays;
   if (moveDays > 0) {
     var since = movedAt !== null ? movedAt : (activated !== null ? activated : lastCheck);
     var allowedAt = since !== null ? since + moveDays * DAY_MS : now;
     if (req.action === 'activate' && now >= allowedAt) {
-      changes[COL.DEVICE] = req.device;
-      changes[COL.DEVICE_INFO] = req.info;
+      // (A lowered "Max devices" leaves more devices than slots: drop the oldest ones until one is free.)
+      devices = devices.slice(devices.length - maxDevices + 1);
+      devices.push({ id: req.device, info: req.info });
+      deviceChanges_(row, devices, changes);
       changes[COL.MOVED] = nowDate;
       changes[COL.MOVES] = moves + 1;
       markGood();
@@ -475,15 +521,58 @@ function evaluateLicense_(row, req, settings, now) {
   return { error: 'device', messageKey: 'deviceOwner', changes: changes };
 }
 
+// ---- Device slots -------------------------------------------------------------------------------
+
+/** Columns (id, info) of device slot k (0 = Device / Device info, 1..4 = Device 2..5). */
+function slotCols_(k) {
+  return k === 0 ? [COL.DEVICE, COL.DEVICE_INFO] : [COL.EXTRA_FIRST + 2 * (k - 1), COL.EXTRA_FIRST + 2 * (k - 1) + 1];
+}
+
+/** The devices bound to a row, oldest first: [{ id, info }]. Empty slots and repeated ids are skipped. */
+function readDevices_(row) {
+  var out = [];
+  var seen = {};
+  for (var k = 0; k < PREMIUM.MAX_DEVICES_LIMIT; k++) {
+    var cols = slotCols_(k);
+    var id = readText_(row[cols[0] - 1]);
+    if (!id || hasOwn_(seen, id)) continue;
+    seen[id] = true;
+    out.push({ id: id, info: readText_(row[cols[1] - 1]) });
+  }
+  return out;
+}
+
+function indexOfDevice_(devices, id) {
+  for (var i = 0; i < devices.length; i++) if (devices[i].id === id) return i;
+  return -1;
+}
+
+/** Puts the cells that differ from the row into changes: slots are packed, so a gap left by the owner closes. */
+function deviceChanges_(row, devices, changes) {
+  for (var k = 0; k < PREMIUM.MAX_DEVICES_LIMIT; k++) {
+    var cols = slotCols_(k);
+    var id = k < devices.length ? devices[k].id : '';
+    var info = k < devices.length ? devices[k].info : '';
+    if (id !== readText_(row[cols[0] - 1])) changes[cols[0]] = id;
+    if (info !== readText_(row[cols[1] - 1])) changes[cols[1]] = info;
+  }
+}
+
 /** Builds { ok:false, error, message, retryAfter? }. */
-function apiError_(code, messageKey, retryAfterMs) {
-  var res = { ok: false, error: code, message: MESSAGES[messageKey || code] || MESSAGES.server };
+function apiError_(code, messageKey, retryAfterMs, maxDevices) {
+  var key = messageKey || code;
+  // With room for several devices the three "device" messages say how many devices the code is on.
+  if (maxDevices > 1 && /^device(Wait|MoveNow|Owner)$/.test(key)) key += 'Many';
+  var res = { ok: false, error: code, message: MESSAGES[key] || MESSAGES.server };
+  res.message = res.message.replace('{n}', String(maxDevices));
   if (retryAfterMs) {
     var iso = new Date(retryAfterMs).toISOString();
     res.retryAfter = iso;
     res.message = res.message.replace('{date}', iso.slice(0, 16).replace('T', ' ') + ' UTC');
   }
-  if (code === 'device' && !messageKey) res.message = MESSAGES.deviceOwner;
+  if (code === 'device' && !messageKey) {
+    res.message = (maxDevices > 1 ? MESSAGES.deviceOwnerMany : MESSAGES.deviceOwner).replace('{n}', String(maxDevices));
+  }
   return res;
 }
 
@@ -1186,6 +1275,7 @@ function ensureSheets_(ss) {
     created.push(PREMIUM.SHEET_CODES);
   }
   if (codes.getLastRow() === 0) formatCodesSheet_(codes);
+  else if (codesHeaderOk_(codes)) ensureDeviceColumns_(codes); // a sheet from version 2: add Device 2..5
 
   var settings = ss.getSheetByName(PREMIUM.SHEET_SETTINGS);
   if (!settings) {
@@ -1228,6 +1318,8 @@ function formatCodesSheet_(sheet) {
   sheet.getRange(1, 1, 1, CODES_HEADERS.length).setValues([CODES_HEADERS]).setFontWeight('bold').setBackground('#f1f3f4');
   sheet.setFrozenRows(1);
   for (var i = 0; i < CODES_WIDTHS.length; i++) sheet.setColumnWidth(i + 1, CODES_WIDTHS[i]);
+  if (sheet.getMaxColumns() < ROW_WIDTH) sheet.insertColumnsAfter(sheet.getMaxColumns(), ROW_WIDTH - sheet.getMaxColumns());
+  formatDeviceColumns_(sheet);
   ensureRows_(sheet, 2);
   formatCodeRows_(sheet, 2, sheet.getMaxRows() - 1);
 }
@@ -1258,7 +1350,10 @@ function ensureSettingRows_(sheet) {
     [PREMIUM.SETTING_MOVE_AFTER_DAYS, PREMIUM.DEFAULT_MOVE_AFTER_DAYS,
       'Sau bao nhiêu ngày (kể từ lần kích hoạt hoặc lần chuyển gần nhất) học sinh được TỰ chuyển mã sang thiết bị mới. 0 = chỉ chủ trang chuyển được (menu Gỡ thiết bị).'],
     [PREMIUM.SETTING_REFRESH_HOURS, PREMIUM.DEFAULT_REFRESH_HOURS,
-      'Cứ bao nhiêu giờ trang web kiểm tra lại mã một lần (mã bị thu hồi sẽ bị khóa sau tối đa chừng này giờ).']
+      'Cứ bao nhiêu giờ trang web kiểm tra lại mã một lần (mã bị thu hồi sẽ bị khóa sau tối đa chừng này giờ).'],
+    [PREMIUM.SETTING_MAX_DEVICES, PREMIUM.DEFAULT_MAX_DEVICES,
+      'Mỗi mã dùng được trên tối đa bao nhiêu thiết bị cùng lúc (số nguyên từ 1 đến ' + PREMIUM.MAX_DEVICES_LIMIT + '; 1 = mỗi mã một thiết bị). ' +
+      'Khi đã đủ số thiết bị, thiết bị mới thay thiết bị CŨ NHẤT sau "Move after days" ngày.']
   ];
   var last = sheet.getLastRow();
   var names = {};
@@ -1273,7 +1368,12 @@ function ensureSettingRows_(sheet) {
 
 /** Reads Settings; missing or invalid values fall back to the defaults. */
 function readSettings_(ss) {
-  var out = { moveAfterDays: PREMIUM.DEFAULT_MOVE_AFTER_DAYS, refreshHours: PREMIUM.DEFAULT_REFRESH_HOURS };
+  var out = {
+    moveAfterDays: PREMIUM.DEFAULT_MOVE_AFTER_DAYS,
+    refreshHours: PREMIUM.DEFAULT_REFRESH_HOURS,
+    maxDevices: PREMIUM.DEFAULT_MAX_DEVICES,
+    maxDevicesBad: false   // the "Max devices" cell holds something else than a whole number 1..5
+  };
   var sheet = ss.getSheetByName(PREMIUM.SHEET_SETTINGS);
   if (!sheet) return out;
   var last = sheet.getLastRow();
@@ -1286,6 +1386,13 @@ function readSettings_(ss) {
       out.moveAfterDays = value;
     } else if (name === PREMIUM.SETTING_REFRESH_HOURS.toLowerCase() && value > 0 && value <= 24 * 30) {
       out.refreshHours = value;
+    } else if (name === PREMIUM.SETTING_MAX_DEVICES.toLowerCase()) {
+      if (value >= 1 && value <= PREMIUM.MAX_DEVICES_LIMIT && Math.floor(value) === value) {
+        out.maxDevices = value;
+        out.maxDevicesBad = false;
+      } else {
+        out.maxDevicesBad = true;
+      }
     }
   }
   return out;
@@ -1312,14 +1419,69 @@ function cellCode_(v) {
   return normalizeCode_(s) || '';
 }
 
+/** The header cells of the columns the server reads (as many as the sheet has, at most ROW_WIDTH): one call. */
+function readCodesHeader_(sheet) {
+  var n = Math.min(ROW_WIDTH, sheet.getMaxColumns());
+  return n < 1 ? [] : sheet.getRange(1, 1, 1, n).getValues()[0];
+}
+
 /** true when the first 12 headers of the Codes sheet are the expected ones (case and spaces ignored). */
-function codesHeaderOk_(sheet) {
-  if (sheet.getMaxColumns() < CODES_HEADERS.length) return false;
-  var header = sheet.getRange(1, 1, 1, CODES_HEADERS.length).getValues()[0];
+function codesHeaderOk_(sheet, header) {
+  header = header || readCodesHeader_(sheet);
+  if (header.length < CODES_HEADERS.length) return false;
   for (var i = 0; i < CODES_HEADERS.length; i++) {
     if (readText_(header[i]).toLowerCase() !== CODES_HEADERS[i].toLowerCase()) return false;
   }
   return true;
+}
+
+/**
+ * Makes sure the Codes sheet has the Device 2..5 columns (cols 13-20), as version 3 needs them
+ * (call inside withLock_, after codesHeaderOk_). Returns true when it changed the sheet.
+ *   - headers already there: nothing to do;
+ *   - cols 13-20 completely empty (header row and all rows): the headers are written there, nothing moves;
+ *   - otherwise (the owner keeps their own columns there): 8 columns are inserted after Moves, so the
+ *     owner's columns move to the right with all their data, then the headers are written.
+ * Insertion (not overwriting) is the only way to keep the owner's cells, and the columns are only
+ * inserted when there is something to protect, so a plain sheet does not get an empty gap.
+ */
+function ensureDeviceColumns_(sheet, header) {
+  var first = COL.EXTRA_FIRST;
+  var n = EXTRA_DEVICE_HEADERS.length;
+  var maxCols = sheet.getMaxColumns();
+  var have = Math.max(0, Math.min(n, maxCols - first + 1));
+  header = header || readCodesHeader_(sheet);
+  var ok = have === n && header.length >= ROW_WIDTH;
+  for (var i = 0; ok && i < n; i++) ok = readText_(header[first - 1 + i]).toLowerCase() === EXTRA_DEVICE_HEADERS[i].toLowerCase();
+  if (ok) return false;
+
+  var empty = true;
+  var lastRow = sheet.getLastRow();
+  if (have && lastRow >= 1) {
+    var cells = sheet.getRange(1, first, lastRow, have).getValues();
+    for (var r = 0; empty && r < cells.length; r++) {
+      for (var c = 0; c < cells[r].length; c++) {
+        if (readText_(cells[r][c]) !== '') { empty = false; break; }
+      }
+    }
+  }
+  if (!empty) {
+    sheet.insertColumnsAfter(COL.MOVES, n);
+    maxCols += n;
+  } else if (maxCols < first + n - 1) {
+    sheet.insertColumnsAfter(maxCols, first + n - 1 - maxCols);
+  }
+  formatDeviceColumns_(sheet);
+  logEvent_('setup', '', '', 'added columns Device 2..5 to the Codes sheet' + (empty ? '' : ' (inserted after Moves; your own columns moved right)'));
+  return true;
+}
+
+/** Header, widths and formats of the Device 2..5 columns. */
+function formatDeviceColumns_(sheet) {
+  var first = COL.EXTRA_FIRST;
+  sheet.getRange(1, first, 1, EXTRA_DEVICE_HEADERS.length).setValues([EXTRA_DEVICE_HEADERS])
+    .setFontWeight('bold').setBackground('#f1f3f4');
+  for (var i = 0; i < EXTRA_DEVICE_WIDTHS.length; i++) sheet.setColumnWidth(first + i, EXTRA_DEVICE_WIDTHS[i]);
 }
 
 /** Writes { column: value } into one row, one setValues call per run of adjacent columns. */
@@ -1554,11 +1716,12 @@ function revokeFlow_(ui, ss) {
 }
 
 function resetDeviceFlow_(ui, ss) {
+  withLock_(function () { ensureSheets_(ss); }); // the Device 2..5 columns must exist before they are read and cleared
   var picked = selectedCodeRows_(ui, ss);
   if (!picked) return;
   var answer = ui.alert('Gỡ thiết bị',
     'Gỡ thiết bị khỏi ' + picked.length + ' mã sau?\n' + listCodes_(picked) +
-    '\n\nMã sẽ kích hoạt lại được trên một thiết bị mới. Thiết bị cũ sẽ bị khóa ở lần kiểm tra tiếp theo. ' +
+    '\n\nTẤT CẢ thiết bị của mã sẽ bị gỡ; mã kích hoạt lại được trên thiết bị mới. Các thiết bị cũ sẽ bị khóa ở lần kiểm tra tiếp theo. ' +
     'Thời hạn sử dụng không thay đổi.',
     ui.ButtonSet.YES_NO);
   if (answer !== ui.Button.YES) return;
@@ -1567,11 +1730,16 @@ function resetDeviceFlow_(ui, ss) {
     picked.forEach(function (p) {
       if (!sameCodeAtRow_(picked.sheet, p)) return;
       var c = {};
-      c[COL.DEVICE] = '';
-      c[COL.DEVICE_INFO] = '';
+      var removed = readDevices_(p.values);
+      for (var k = 0; k < PREMIUM.MAX_DEVICES_LIMIT; k++) {
+        var cols = slotCols_(k);
+        c[cols[0]] = '';
+        c[cols[1]] = '';
+      }
       c[COL.MOVED] = '';
       writeRowChanges_(picked.sheet, p.row, c);
-      logEvent_('reset', p.code, readText_(p.values[COL.DEVICE - 1]), 'device removed by owner');
+      logEvent_('reset', p.code, removed.map(function (d) { return d.id; }).join(' '),
+        removed.length + ' device(s) removed by owner');
       n++;
     });
     return n;
@@ -1591,7 +1759,7 @@ function selectedCodeRows_(ui, ss) {
   var last = Math.min(range.getLastRow(), sheet.getLastRow());
   var picked = [];
   if (last >= first) {
-    var values = sheet.getRange(first, 1, last - first + 1, CODES_HEADERS.length).getValues();
+    var values = sheet.getRange(first, 1, last - first + 1, Math.min(ROW_WIDTH, sheet.getMaxColumns())).getValues();
     for (var i = 0; i < values.length; i++) {
       var code = readText_(values[i][COL.CODE - 1]);
       if (!code) continue;
@@ -1667,7 +1835,7 @@ function checkSetup_(ss) {
     var seen = {};
     var last = codes.getLastRow();
     if (last >= 2) {
-      var vals = codes.getRange(2, 1, last - 1, CODES_HEADERS.length).getValues();
+      var vals = codes.getRange(2, 1, last - 1, Math.min(ROW_WIDTH, codes.getMaxColumns())).getValues();
       for (var i = 0; i < vals.length; i++) {
         var raw = readText_(vals[i][COL.CODE - 1]);
         if (!raw) continue;
@@ -1695,12 +1863,16 @@ function checkSetup_(ss) {
     }
   } else {
     bad('Hàng tiêu đề của trang Codes khác mẫu, nên máy chủ đang từ chối mọi mã. 12 cột đầu phải đúng thứ tự: ' +
-      CODES_HEADERS.join(' | ') + '. Muốn thêm cột riêng, hãy thêm ở bên phải cột Moves.');
+      CODES_HEADERS.join(' | ') + '. Sau đó là 8 cột Device 2 … Device 5 info (máy chủ tự thêm). Muốn thêm cột riêng, hãy thêm ở bên phải cột Device 5 info.');
   }
 
   var settings = readSettings_(ss);
   good('Settings: Move after days = ' + settings.moveAfterDays + (settings.moveAfterDays > 0 ? '' : ' (chỉ chủ trang chuyển mã)') +
-    ', Refresh hours = ' + settings.refreshHours + '.');
+    ', Refresh hours = ' + settings.refreshHours + ', Max devices = ' + settings.maxDevices +
+    (settings.maxDevices === 1 ? ' (mỗi mã một thiết bị)' : ' (mỗi mã tối đa ' + settings.maxDevices + ' thiết bị)') + '.');
+  if (settings.maxDevicesBad) {
+    bad('Settings: ô "Max devices" phải là số nguyên từ 1 đến ' + PREMIUM.MAX_DEVICES_LIMIT + '. Máy chủ đang dùng giá trị mặc định ' + PREMIUM.DEFAULT_MAX_DEVICES + ' cho tới khi bạn sửa.');
+  }
   var log = ss.getSheetByName(PREMIUM.SHEET_LOG);
   good('Trang tính Log: ' + Math.max(0, log.getLastRow() - 1) + ' dòng.');
   var orders = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
