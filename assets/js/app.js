@@ -184,6 +184,8 @@
       // Open the Premium (Advanced) tests this device has keys for
       .then(function () { return global.Premium ? global.Premium.boot() : null; })
       .catch(function (e) { console.error('[Premium]', e); })
+      // A bank-transfer order made earlier (tab closed while waiting): keep checking it
+      .then(function () { if (global.Payment) global.Payment.resume(); })
       .then(function () {
         window.removeEventListener('error', onErr);
         if (!global.katex) U.toast('Math rendering (KaTeX) failed to load — formulas will appear as code.', 'error', 6000);

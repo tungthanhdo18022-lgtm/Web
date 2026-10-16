@@ -297,6 +297,45 @@ Mỗi lần học sinh nhập mã hoặc trang web kiểm tra mã, một dòng �
 
 ---
 
+## Phần 2b. Bán Premium bằng chuyển khoản (QR, tự kích hoạt)
+
+Học sinh bấm **Thanh toán** trên trang Practice Tests, chọn gói, quét **mã QR VietQR** bằng app ngân hàng. Nội dung chuyển khoản là mã đơn dạng `TUNNXXXXXXXX`. Khi tiền vào, máy chủ tạo một mã Premium mới và trang web của học sinh **tự kích hoạt** trên đúng máy đã đặt đơn (không cần nhập mã). Mã cũng hiện trên màn hình để học sinh lưu lại.
+
+### Cài đặt lần đầu
+
+1. Trong `assets/js/config.js`, phần `premium.payment`: điền `account` (số tài khoản), `accountName` (tên chủ tài khoản, IN HOA không dấu). `bank: 'MB'` là MB Bank. Khi `account` còn trống, trang web chỉ hiện nút nhập mã.
+2. Giá và số ngày của gói nằm ở **hai chỗ, phải giống nhau**: `PREMIUM.PLANS` trong `Code.gs` (máy chủ dùng giá này để kiểm tra số tiền) và `premium.payment.plans` trong `config.js` (giá hiện trên trang).
+3. Dán `Code.gs` mới vào Apps Script → **Deploy → Manage deployments → Edit → Version: New version** (đường link /exec giữ nguyên). Tải lại Google Sheet: có thêm trang **Orders**.
+4. Menu **tunn.sat Premium → Cài đặt thanh toán (webhook)…**: máy chủ tạo một mã bí mật và hiện phần `?hook=…`.
+5. Trên **SePay → Tích hợp WebHooks → Thêm webhook**:
+   - Gọi đến URL: đường link Web app (kết thúc bằng `/exec`) **nối thêm** `?hook=…` vừa hiện.
+   - Sự kiện: **Có tiền vào**. Chứng thực: **Không cần chứng thực** (mã bí mật đã nằm trong link). Kiểu nội dung: `application/json`.
+6. Thử: đặt một đơn trên web, chuyển đúng số tiền với đúng nội dung. Trong vài giây, trang Orders đổi sang `paid` và có mã ở cột Code.
+
+Giữ link webhook bí mật: ai có link đều có thể báo "đã thanh toán". Nếu lộ, chạy lại menu và chọn tạo mã mới, rồi dán link mới vào SePay.
+
+### Trang Orders
+
+| Cột | Ý nghĩa |
+|---|---|
+| Order | Mã đơn = nội dung chuyển khoản (`TUNNXXXXXXXX`) |
+| Status | `pending` chờ tiền · `paid` đã nhận · `expired` quá 24 giờ chưa trả · `cancelled` |
+| Plan, Amount, Days | Gói, số tiền phải trả, số ngày dùng (tính từ lúc kích hoạt) |
+| Created, Paid | Lúc đặt đơn, lúc nhận tiền |
+| Code | Mã Premium tạo cho đơn (cũng có trong trang Codes, ghi chú `Order TUNN…`) |
+| Device | Thiết bị đã đặt đơn: chỉ thiết bị này nhận được mã tự động |
+| Payment, Note | Mã giao dịch và số tiền; ghi chú khi chuyển thiếu (`Underpaid: …`) |
+
+### Duyệt tay (không cần SePay)
+
+Nếu học sinh chuyển khoản mà đơn vẫn `pending` (chuyển sai nội dung, webhook chưa cài…), bạn kiểm tra tiền trong app ngân hàng rồi đổi **Status** của đơn thành **`paid`**. Lần kiểm tra tiếp theo của trang web (vài giây) sẽ tạo mã và tự kích hoạt. Học sinh đã đóng trang thì lần mở lại sau sẽ tự kích hoạt; hoặc bạn gửi mã ở cột Code cho học sinh.
+
+- Chuyển **thiếu tiền**: đơn giữ `pending`, cột Note ghi số đã nhận. Học sinh chuyển thêm **đủ số tiền** với cùng nội dung, hoặc bạn tự duyệt tay.
+- Một đơn chưa trả quá 24 giờ thành `expired`, nhưng nếu tiền vẫn đến sau đó thì đơn vẫn được tính là đã trả.
+- Mỗi thiết bị đặt tối đa 5 đơn mỗi giờ.
+
+Trong trang Log, các dòng `webhook` cho biết máy chủ đã làm gì với mỗi giao dịch: `paid · code created`, `underpaid`, `no order reference` (nội dung không có mã đơn), `refused (wrong or missing token)`.
+
 ## Phần 3. Cập nhật máy chủ sau này
 
 Khi lập trình viên gửi file `Code.gs` mới:

@@ -24,6 +24,7 @@
  *   import { createSim } from './sim.mjs';
  *   const sim = createSim({ keyPath, moveAfterDays: 7, now: Date.parse('2026-10-12T08:00:00Z') });
  *   sim.doPost({ action: 'activate', code, device, info, files })   // -> parsed JSON answer
+ *   sim.doPost(webhookJson, 'application/json', { hook: token })    // payment webhook (URL query as e.parameter)
  *   sim.doGet()                                                     // -> parsed JSON answer
  *   sim.runMenu('menuCreateCodes' | 'Tạo mã mới…', ['5', '30', 'note'])   // scripted ui.prompt / ui.alert answers
  *   sim.createCodes(5, 30, 'note')                                  // -> ['TUNN-…', …] via the menu
@@ -1213,14 +1214,16 @@ export function createSim(options = {}) {
     }
   }
 
-  function postEvent(body, contentType) {
+  function postEvent(body, contentType, parameter = {}) {
     const contents = typeof body === 'string' ? body : JSON.stringify(body);
     const type = String(contentType || 'text/plain;charset=UTF-8').split(';')[0].trim();
+    const parameters = {};
+    for (const k of Object.keys(parameter)) parameters[k] = [String(parameter[k])];
     return {
       postData: { contents, length: Buffer.byteLength(contents, 'utf8'), type, name: 'postData' },
-      parameter: {},
-      parameters: {},
-      queryString: '',
+      parameter: Object.fromEntries(Object.entries(parameter).map(([k, v]) => [k, String(v)])),
+      parameters,
+      queryString: new URLSearchParams(parameter).toString(),
       contentLength: Buffer.byteLength(contents, 'utf8'),
       contextPath: ''
     };
@@ -1247,8 +1250,9 @@ export function createSim(options = {}) {
       return web('doGet', e);
     },
     doGet(parameter) { return parseJsonOutput(api.doGetRaw(parameter), 'doGet'); },
-    doPostRaw(body, contentType) { return web('doPost', postEvent(body, contentType)); },
-    doPost(body, contentType) { return parseJsonOutput(api.doPostRaw(body, contentType), 'doPost'); },
+    /** parameter: the URL query (?hook=… for the payment webhook), like e.parameter in Apps Script. */
+    doPostRaw(body, contentType, parameter) { return web('doPost', postEvent(body, contentType, parameter)); },
+    doPost(body, contentType, parameter) { return parseJsonOutput(api.doPostRaw(body, contentType, parameter), 'doPost'); },
 
     /** Runs onOpen like the simple trigger does when the owner opens the spreadsheet. */
     open() {
@@ -1520,7 +1524,7 @@ export function startServer(sim, { port = 8787, host = '127.0.0.1', redirect = t
       req.on('end', () => {
         try {
           const body = Buffer.concat(chunks).toString('utf8');
-          const out = sim.doPostRaw(body, req.headers['content-type'] || '');
+          const out = sim.doPostRaw(body, req.headers['content-type'] || '', Object.fromEntries(url.searchParams));
           let summary = out.content.slice(0, 100);
           try {
             const q = JSON.parse(body);

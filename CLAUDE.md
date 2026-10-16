@@ -26,6 +26,7 @@ assets/js/config.js      APP_CONFIG (site name, SAT dates, Desmos key, premium.a
 assets/js/parser.js      test text/JSON format → P.parseText / P.normalizeObject (format documented at the top)
 assets/js/store.js       SATLibrary: manifest, register(), prepare() (counts, default times), premium stubs; attempts
 assets/js/premium.js     Premium client: code entry, device id, server calls, decryption (WebCrypto)
+assets/js/payment.js     Premium by bank transfer: Premium card, VietQR dialog, order polling, auto activation
 assets/js/admin.js       owner publishing through the GitHub API (encrypts Advanced tests in the browser)
 assets/js/views/         pages (home, intro, exam, results, guide, builder, admin)
 assets/premium-key.json  Premium PUBLIC key (RSA-OAEP-256, kid k1)
@@ -66,6 +67,10 @@ tools/premium/           encrypt.mjs + test-encrypt.mjs, decrypt.mjs (needs the 
 - **Never commit any private key** (a JWK with `"d"`, `private-key.json`, PEM, …) and never print one. Only
   `assets/premium-key.json` (public) belongs in the repo. The private key lives only in the owner's Apps Script
   project (Script Properties `PRIVATE_KEY_JWK`) and in the owner's own backup.
+- **Payments:** `action: order / orderStatus` (bound to the device key like codes) and a SePay webhook at
+  `/exec?hook=<token>` (token in Script Property `PAYMENT_WEBHOOK_TOKEN`, made by the menu) fill the `Orders` sheet and
+  create a code per paid order; only the ordering device gets it. Plan prices live in `PREMIUM.PLANS` (Code.gs) AND
+  `APP_CONFIG.premium.payment.plans`: keep them equal. Owner guide: HUONG-DAN.md "Phần 2b".
 - **The server lives in `tools/premium/server/Code.gs`** and runs in the owner's Google Apps Script project (bound to
   the owner's Google Sheet of codes). The owner deploys it: **changing Code.gs in the repo changes nothing live —
   the owner must paste the new version into Apps Script and deploy a new version** (Deploy → Manage deployments →

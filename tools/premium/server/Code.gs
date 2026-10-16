@@ -24,6 +24,15 @@
  *   After changing this file: Deploy -> Manage deployments -> Edit -> Version: New version
  *   (the /exec URL stays the same).
  *
+ * PAYMENTS (optional)
+ *   The website can sell a plan by bank transfer (VietQR). action "order" adds a row to the "Orders"
+ *   sheet with a random payment reference (TUNNXXXXXXXX) bound to the device key that asked for it; the
+ *   student transfers the amount with that reference. SePay (sepay.vn) calls this web app with
+ *   ?hook=<token> when money arrives: a matching, fully paid order becomes "paid" and gets a new code.
+ *   The owner can also set Status to "paid" by hand. action "orderStatus" answers the code ONLY to the
+ *   device that made the order; the website then activates it as usual. Menu "Cài đặt thanh toán…"
+ *   makes the token and shows the webhook URL.
+ *
  * NOTES FOR DEVELOPERS
  *   - Follows the tunn.sat Premium spec v1 (code format, web API, sheet layout) plus device keys (v2):
  *     every request carries "deviceKey" (base64 SPKI of the device's RSA-OAEP public key); requests
@@ -61,7 +70,22 @@ var PREMIUM = {
   SHEET_CODES: 'Codes',
   SHEET_SETTINGS: 'Settings',
   SHEET_LOG: 'Log',
+  SHEET_ORDERS: 'Orders',
   STATUSES: ['new', 'active', 'expired', 'revoked'],
+  ORDER_STATUSES: ['pending', 'paid', 'expired', 'cancelled'],
+
+  // Plans sold on the website (VND, days counted from activation). The website shows the prices in
+  // assets/js/config.js (APP_CONFIG.premium.payment.plans): keep the ids and prices the same in both.
+  PLANS: {
+    '1m': { days: 30, amount: 69000 },
+    '3m': { days: 90, amount: 189000 }
+  },
+  ORDER_PREFIX: 'TUNN',      // payment reference: TUNN + 8 Crockford base32 symbols (40 random bits)
+  ORDER_HOURS: 24,           // an unpaid order expires after this
+  ORDER_MAX_PER_HOUR: 5,     // new orders per device per hour
+  PROP_WEBHOOK_TOKEN: 'PAYMENT_WEBHOOK_TOKEN',
+  MAX_ORDER_BODY_CHARS: 4096,
+  MAX_WEBHOOK_BODY_CHARS: 16384,
 
   SETTING_MOVE_AFTER_DAYS: 'Move after days',
   SETTING_REFRESH_HOURS: 'Refresh hours',
@@ -100,6 +124,10 @@ var CODES_HEADERS = ['Code', 'Status', 'Days', 'Note', 'Created', 'Activated', '
   'Device', 'Device info', 'Last check', 'Moved', 'Moves'];
 var CODES_WIDTHS = [175, 80, 60, 220, 135, 135, 135, 210, 170, 135, 135, 60];
 var LOG_HEADERS = ['Time', 'Action', 'Code', 'Device', 'Result'];
+// Columns of the Orders sheet.
+var ORD = { ORDER: 1, STATUS: 2, PLAN: 3, AMOUNT: 4, DAYS: 5, CREATED: 6, PAID: 7, CODE: 8, DEVICE: 9, PAYMENT: 10, NOTE: 11 };
+var ORDERS_HEADERS = ['Order', 'Status', 'Plan', 'Amount', 'Days', 'Created', 'Paid', 'Code', 'Device', 'Payment', 'Note'];
+var ORDERS_WIDTHS = [130, 80, 50, 80, 50, 135, 135, 175, 210, 220, 220];
 var LOG_WIDTHS = [150, 100, 175, 210, 360];
 var SETTINGS_HEADERS = ['Setting', 'Value', 'Giải thích'];
 
@@ -126,7 +154,10 @@ var MESSAGES = {
   server: 'Something went wrong on the server. Please try again later.',
   busy: 'The server is busy right now. Please try again in a moment.',
   update: 'tunn.sat was updated. Please reload the page, then try again.',
-  sheet: 'This code cannot be checked right now because of a problem in the list of codes. Please contact the site owner.'
+  sheet: 'This code cannot be checked right now because of a problem in the list of codes. Please contact the site owner.',
+  orderNotFound: 'This payment was not found. Please start the payment again.',
+  orderRate: 'Too many payment requests from this device. Please wait an hour and try again.',
+  orderSheet: 'Payments are not available right now because of a problem in the list of orders. Please contact the site owner.'
 };
 
 // =============================================================================================
@@ -147,7 +178,12 @@ function doGet(e) {
 function doPost(e) {
   var result;
   try {
-    result = handleApiRequest_(e);
+    if (e && e.parameter && hasOwn_(e.parameter, 'hook')) {
+      result = handlePaymentWebhook_(e);
+    } else {
+      var action = peekAction_(e);
+      result = action === 'order' || action === 'orderStatus' ? handleOrderRequest_(e) : handleApiRequest_(e);
+    }
   } catch (err) {
     reportError_('doPost', err);
     result = apiError_('server', err && err.busy ? 'busy' : null);
@@ -449,6 +485,336 @@ function apiError_(code, messageKey, retryAfterMs) {
   }
   if (code === 'device' && !messageKey) res.message = MESSAGES.deviceOwner;
   return res;
+}
+
+// =============================================================================================
+// Payments: orders (website) and the bank-transfer webhook (SePay)
+// =============================================================================================
+
+/** The "action" of a JSON body, or '' (the full checks happen in the handler). */
+function peekAction_(e) {
+  var body = (e && e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
+  if (!body || body.length > PREMIUM.MAX_BODY_CHARS) return '';
+  try {
+    var data = JSON.parse(body);
+    return data && typeof data === 'object' && typeof data.action === 'string' ? data.action : '';
+  } catch (err) {
+    return '';
+  }
+}
+
+/**
+ * { action: 'order', plan, deviceKey } -> a new pending order for that device;
+ * { action: 'orderStatus', order, deviceKey } -> its status, with the code once it is paid.
+ * The device is its key (as for codes): another browser cannot read the code of someone else's order.
+ */
+function handleOrderRequest_(e) {
+  var body = (e && e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
+  var data = null;
+  if (body && body.length <= PREMIUM.MAX_ORDER_BODY_CHARS) {
+    try { data = JSON.parse(body); } catch (err) { data = null; }
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return apiError_('invalid', 'badRequest');
+  if (data.deviceKey === undefined || data.deviceKey === null) {
+    logEvent_(data.action, '', '', 'update (no device key)');
+    return apiError_('update');
+  }
+  var dk = typeof data.deviceKey === 'string' && data.deviceKey.length <= PREMIUM.MAX_DEVICE_KEY_CHARS
+    ? readDeviceKey_(data.deviceKey) : null;
+  if (!dk) {
+    logEvent_(data.action, '', '', 'invalid (deviceKey)');
+    return apiError_('invalid', 'badRequest');
+  }
+  var device = dk.id;
+  var blockedUntil = rateLimitedUntil_(device);
+  if (blockedUntil) return apiError_('rate', null, blockedUntil);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) return apiError_('setup');
+  try {
+    return data.action === 'order' ? createOrder_(ss, device, data.plan) : orderStatus_(ss, device, data.order);
+  } catch (err) {
+    if (!err || !err.busy) throw err;
+    logEvent_(data.action, '', device, 'busy');
+    return apiError_('server', 'busy');
+  }
+}
+
+function createOrder_(ss, device, planId) {
+  var plan = typeof planId === 'string' && hasOwn_(PREMIUM.PLANS, planId) ? PREMIUM.PLANS[planId] : null;
+  if (!plan) {
+    logEvent_('order', '', device, 'invalid (plan)');
+    return apiError_('invalid', 'badRequest');
+  }
+  if (!takeOrderSlot_(device)) {
+    logEvent_('order', '', device, 'rate (more than ' + PREMIUM.ORDER_MAX_PER_HOUR + ' orders in an hour)');
+    return apiError_('rate', 'orderRate');
+  }
+  var created = new Date();
+  var order = withLock_(function () {
+    ensureSheets_(ss);
+    var sheet = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
+    if (!ordersHeaderOk_(sheet)) return '';
+    var existing = {};
+    var last = sheet.getLastRow();
+    if (last >= 2) {
+      var col = sheet.getRange(2, ORD.ORDER, last - 1, 1).getValues();
+      for (var i = 0; i < col.length; i++) existing[readText_(col[i][0]).toUpperCase()] = true;
+    }
+    var id = '';
+    for (var attempt = 0; attempt < 20 && (!id || existing[id]); attempt++) id = generateOrderId_();
+    if (existing[id]) throw new Error('Could not generate a unique order id');
+    var row = Math.max(last, 1) + 1;
+    ensureRows_(sheet, row);
+    formatOrderRows_(sheet, row, 1);
+    sheet.getRange(row, 1, 1, ORDERS_HEADERS.length).setValues([[
+      id, 'pending', planId, plan.amount, plan.days, created, '', '', device, '', ''
+    ].map(toCell_)]);
+    return id;
+  });
+  if (!order) {
+    logEvent_('order', '', device, 'setup (Orders header changed)');
+    return apiError_('setup', 'orderSheet');
+  }
+  logEvent_('order', order, device, 'created · plan ' + planId + ' · ' + plan.amount);
+  return {
+    ok: true, order: order, status: 'pending', plan: planId, amount: plan.amount, days: plan.days,
+    expiresAt: new Date(created.getTime() + PREMIUM.ORDER_HOURS * 3600000).toISOString()
+  };
+}
+
+function orderStatus_(ss, device, input) {
+  var id = normalizeOrderId_(input);
+  if (!id) return apiError_('invalid', 'badRequest');
+  var now = Date.now();
+  var v = withLock_(function () {
+    var sheet = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
+    if (!sheet || !ordersHeaderOk_(sheet)) return { error: 'setup' };
+    var row = findOrderRow_(sheet, id);
+    if (!row) return { error: 'notfound' };
+    var values = sheet.getRange(row, 1, 1, ORDERS_HEADERS.length).getValues()[0];
+    // Someone else's order looks the same as a missing one
+    if (readText_(values[ORD.DEVICE - 1]) !== device) return { error: 'notfound' };
+    var status = readOrderStatus_(values[ORD.STATUS - 1]);
+    if (status === 'paid') {
+      var code = cellCode_(values[ORD.CODE - 1]) || issueOrderCode_(ss, sheet, row, id, values);
+      return code ? { status: 'paid', code: code, days: readNumber_(values[ORD.DAYS - 1]) } : { error: 'setup' };
+    }
+    var createdAt = readTime_(values[ORD.CREATED - 1]);
+    if (status === 'pending' && createdAt !== null && now - createdAt > PREMIUM.ORDER_HOURS * 3600000) {
+      writeRowChanges_(sheet, row, (function () { var c = {}; c[ORD.STATUS] = 'expired'; return c; })());
+      status = 'expired';
+    }
+    return { status: status || 'pending' };
+  });
+  if (v.error === 'notfound') {
+    logEvent_('orderStatus', id, device, 'notfound');
+    return apiError_('notfound', 'orderNotFound');
+  }
+  if (v.error) {
+    logEvent_('orderStatus', id, device, 'setup (Orders sheet)');
+    return apiError_('setup', 'orderSheet');
+  }
+  if (v.status === 'paid') logEvent_('orderStatus', id, device, 'paid · code sent to the device');
+  var res = { ok: true, order: id, status: v.status };
+  if (v.status === 'paid') { res.code = v.code; res.days = v.days; }
+  return res;
+}
+
+/**
+ * Creates the code of a paid order (Status "new", the order's Days) and writes it into the order row.
+ * Call inside withLock_. Returns the code, or '' when the Codes sheet cannot be used.
+ */
+function issueOrderCode_(ss, sheet, row, id, values) {
+  var codes = ss.getSheetByName(PREMIUM.SHEET_CODES);
+  if (!codes || !codesHeaderOk_(codes)) return '';
+  var days = readNumber_(values[ORD.DAYS - 1]);
+  if (!(days >= 0 && days <= 36500)) {
+    var plan = hasOwn_(PREMIUM.PLANS, readText_(values[ORD.PLAN - 1])) ? PREMIUM.PLANS[readText_(values[ORD.PLAN - 1])] : null;
+    days = plan ? plan.days : 30;
+  }
+  var code = createCodes_(ss, 1, Math.round(days), 'Order ' + id)[0];
+  var changes = {};
+  changes[ORD.CODE] = code;
+  if (!readText_(values[ORD.PAID - 1])) changes[ORD.PAID] = new Date();
+  writeRowChanges_(sheet, row, changes);
+  return code;
+}
+
+/**
+ * POST ?hook=<token> from the bank-transfer service (SePay webhook JSON: id, transferType, transferAmount,
+ * content, code, referenceCode, ...). Answers { success } (always success once the token is right, so the
+ * service does not keep retrying a transfer that is not for an order).
+ */
+function handlePaymentWebhook_(e) {
+  var expected = PropertiesService.getScriptProperties().getProperty(PREMIUM.PROP_WEBHOOK_TOKEN);
+  var token = readText_(e.parameter.hook);
+  if (!expected || !token || !sameText_(token, expected)) {
+    logEvent_('webhook', '', '', 'refused (wrong or missing token)');
+    return { success: false, message: 'unauthorized' };
+  }
+  var body = (e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
+  var data = null;
+  if (body && body.length <= PREMIUM.MAX_WEBHOOK_BODY_CHARS) {
+    try { data = JSON.parse(body); } catch (err) { data = null; }
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    logEvent_('webhook', '', '', 'invalid body');
+    return { success: false, message: 'invalid body' };
+  }
+  var amount = typeof data.transferAmount === 'number' ? data.transferAmount : readNumber_(data.transferAmount);
+  var txn = cleanText_(data.id !== undefined && data.id !== null ? data.id : data.referenceCode, 40);
+  var text = [data.code, data.content, data.description].map(function (x) { return typeof x === 'string' ? x : ''; }).join(' ');
+  if (readText_(data.transferType).toLowerCase() !== 'in') {
+    logEvent_('webhook', '', '', 'ignored (not incoming) · txn ' + txn);
+    return { success: true, message: 'ignored' };
+  }
+  var candidates = orderIdsInText_(text);
+  if (!candidates.length) {
+    logEvent_('webhook', '', '', 'no order reference · ' + amount + ' · txn ' + txn + ' · ' + cleanText_(text, 80));
+    return { success: true, message: 'no order' };
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var out = withLock_(function () {
+    ensureSheets_(ss);
+    var sheet = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
+    if (!ordersHeaderOk_(sheet)) return { message: 'setup' };
+    for (var i = 0; i < candidates.length; i++) {
+      var id = candidates[i];
+      var row = findOrderRow_(sheet, id);
+      if (!row) continue;
+      var values = sheet.getRange(row, 1, 1, ORDERS_HEADERS.length).getValues()[0];
+      var status = readOrderStatus_(values[ORD.STATUS - 1]);
+      if (status === 'paid') return { id: id, message: 'already paid' };
+      var due = readNumber_(values[ORD.AMOUNT - 1]);
+      var changes = {};
+      if (!(amount >= due)) {
+        changes[ORD.NOTE] = clip_('Underpaid: received ' + amount + ' of ' + due + (txn ? ' (txn ' + txn + ')' : ''), 200);
+        writeRowChanges_(sheet, row, changes);
+        return { id: id, message: 'underpaid' };
+      }
+      changes[ORD.STATUS] = 'paid';
+      changes[ORD.PAID] = new Date();
+      changes[ORD.PAYMENT] = clip_((txn ? 'txn ' + txn + ' · ' : '') + amount, 200);
+      writeRowChanges_(sheet, row, changes);
+      values[ORD.STATUS - 1] = 'paid';
+      values[ORD.PAID - 1] = changes[ORD.PAID];
+      var code = issueOrderCode_(ss, sheet, row, id, values);
+      return { id: id, message: code ? 'paid · code created' : 'paid · Codes sheet problem, no code yet' };
+    }
+    return { id: candidates[0], message: 'order not found' };
+  });
+  logEvent_('webhook', out.id || '', '', out.message + ' · ' + amount + (txn ? ' · txn ' + txn : ''));
+  return { success: true, message: out.message };
+}
+
+/** Order references found in a transfer description (banks may add, drop or move spaces and dots). */
+function orderIdsInText_(text) {
+  var flat = String(text || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  var re = new RegExp(PREMIUM.ORDER_PREFIX + '([0-9A-HJKMNP-TV-Z]{8})', 'g');
+  var out = [];
+  var m;
+  while ((m = re.exec(flat)) && out.length < 5) {
+    var id = PREMIUM.ORDER_PREFIX + m[1];
+    if (out.indexOf(id) === -1) out.push(id);
+    re.lastIndex = m.index + 1;
+  }
+  return out;
+}
+
+/** "tunn k7q2 m9xd" -> "TUNNK7Q2M9XD", or '' when it is not an order reference. */
+function normalizeOrderId_(input) {
+  if (typeof input !== 'string' || input.length > 40) return '';
+  var s = input.toUpperCase().replace(/[\s-]/g, '');
+  var re = new RegExp('^' + PREMIUM.ORDER_PREFIX + '[0-9A-HJKMNP-TV-Z]{8}$');
+  return re.test(s) ? s : '';
+}
+
+function generateOrderId_() {
+  var nibbles = uuidRandomNibbles_();
+  var bits = '';
+  for (var i = 0; i < 10; i++) bits += ('000' + nibbles[i].toString(2)).slice(-4);
+  var out = PREMIUM.ORDER_PREFIX;
+  for (var j = 0; j < 8; j++) out += PREMIUM.CODE_ALPHABET.charAt(parseInt(bits.substr(j * 5, 5), 2));
+  return out;
+}
+
+/** Counts a new order for the device; false when it already made ORDER_MAX_PER_HOUR in the last hour. */
+function takeOrderSlot_(device) {
+  var cache = CacheService.getScriptCache();
+  var key = 'ro:' + device;
+  var now = Date.now();
+  var times = [];
+  try {
+    var saved = JSON.parse(cache.get(key) || '[]');
+    if (Array.isArray(saved)) times = saved;
+  } catch (err) {
+    times = [];
+  }
+  times = times.filter(function (t) { return typeof t === 'number' && t > now - 3600000 && t <= now; });
+  if (times.length >= PREMIUM.ORDER_MAX_PER_HOUR) return false;
+  times.push(now);
+  cache.put(key, JSON.stringify(times), 3600);
+  return true;
+}
+
+function findOrderRow_(sheet, id) {
+  var last = sheet.getLastRow();
+  if (last < 2) return 0;
+  var col = sheet.getRange(2, ORD.ORDER, last - 1, 1).getValues();
+  for (var i = 0; i < col.length; i++) {
+    if (normalizeOrderId_(readText_(col[i][0])) === id) return i + 2;
+  }
+  return 0;
+}
+
+function readOrderStatus_(v) {
+  var s = foldWord_(v); // lowercase, no accents, letters and digits only
+  if (s === 'paid' || s === 'dathanhtoan' || s === 'datra' || s === 'danhan') return 'paid';
+  if (s === 'expired' || s === 'hethan') return 'expired';
+  if (s === 'cancelled' || s === 'canceled' || s === 'huy' || s === 'dahuy') return 'cancelled';
+  return 'pending';
+}
+
+function ordersHeaderOk_(sheet) {
+  if (!sheet || sheet.getMaxColumns() < ORDERS_HEADERS.length) return false;
+  var header = sheet.getRange(1, 1, 1, ORDERS_HEADERS.length).getValues()[0];
+  for (var i = 0; i < ORDERS_HEADERS.length; i++) {
+    if (readText_(header[i]).toLowerCase() !== ORDERS_HEADERS[i].toLowerCase()) return false;
+  }
+  return true;
+}
+
+function formatOrdersSheet_(sheet) {
+  sheet.getRange(1, 1, 1, ORDERS_HEADERS.length).setValues([ORDERS_HEADERS]).setFontWeight('bold').setBackground('#f1f3f4');
+  sheet.setFrozenRows(1);
+  for (var i = 0; i < ORDERS_WIDTHS.length; i++) sheet.setColumnWidth(i + 1, ORDERS_WIDTHS[i]);
+  ensureRows_(sheet, 2);
+  formatOrderRows_(sheet, 2, sheet.getMaxRows() - 1);
+}
+
+function formatOrderRows_(sheet, first, count) {
+  if (count < 1) return;
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(PREMIUM.ORDER_STATUSES, true)
+    .setAllowInvalid(false)
+    .setHelpText('pending = chờ thanh toán, paid = đã nhận tiền (chọn tay nếu học sinh chuyển khoản mà chưa tự kích hoạt), expired, cancelled')
+    .build();
+  sheet.getRange(first, ORD.STATUS, count, 1).setDataValidation(rule);
+  sheet.getRange(first, ORD.CREATED, count, 1).setNumberFormat(DATE_FORMAT);
+  sheet.getRange(first, ORD.PAID, count, 1).setNumberFormat(DATE_FORMAT);
+  sheet.getRange(first, ORD.AMOUNT, count, 1).setNumberFormat('#,##0');
+  sheet.getRange(first, ORD.DAYS, count, 1).setNumberFormat('0');
+  sheet.getRange(first, ORD.ORDER, count, 1).setFontFamily('Roboto Mono');
+  sheet.getRange(first, ORD.CODE, count, 1).setFontFamily('Roboto Mono');
+}
+
+/** Same text, compared without stopping at the first difference. */
+function sameText_(a, b) {
+  a = String(a);
+  b = String(b);
+  var diff = a.length ^ b.length;
+  for (var i = 0; i < Math.max(a.length, b.length); i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  return diff === 0;
 }
 
 // =============================================================================================
@@ -803,7 +1169,7 @@ function withLock_(fn) {
   }
 }
 
-/** Creates the Codes, Settings and Log sheets when missing (call inside withLock_). */
+/** Creates the Codes, Settings, Orders and Log sheets when missing (call inside withLock_). */
 function ensureSheets_(ss) {
   var created = [];
   var codes = ss.getSheetByName(PREMIUM.SHEET_CODES);
@@ -835,6 +1201,13 @@ function ensureSheets_(ss) {
     settings.setColumnWidth(3, 560);
   }
   ensureSettingRows_(settings);
+
+  var orders = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
+  if (!orders) {
+    orders = ss.insertSheet(PREMIUM.SHEET_ORDERS);
+    created.push(PREMIUM.SHEET_ORDERS);
+  }
+  if (orders.getLastRow() === 0) formatOrdersSheet_(orders);
 
   var log = ss.getSheetByName(PREMIUM.SHEET_LOG);
   if (!log) {
@@ -1021,6 +1394,7 @@ function onOpen(e) {
     .addItem('Thu hồi mã đang chọn', 'menuRevokeSelected')
     .addItem('Gỡ thiết bị của mã đang chọn', 'menuResetDevice')
     .addSeparator()
+    .addItem('Cài đặt thanh toán (webhook)…', 'menuPaymentSetup')
     .addItem('Cài đặt khóa bí mật…', 'menuInstallPrivateKey')
     .addItem('Kiểm tra cài đặt', 'menuCheckSetup')
     .addToUi();
@@ -1036,6 +1410,37 @@ function menuRevokeSelected() { runMenuAction_('menuRevokeSelected', revokeFlow_
 function menuResetDevice() { runMenuAction_('menuResetDevice', resetDeviceFlow_); }
 function menuInstallPrivateKey() { runMenuAction_('menuInstallPrivateKey', installKeyFlow_); }
 function menuCheckSetup() { runMenuAction_('menuCheckSetup', checkSetupFlow_); }
+function menuPaymentSetup() { runMenuAction_('menuPaymentSetup', paymentSetupFlow_); }
+
+/** Makes the webhook token (once) and shows how to set the webhook URL in SePay. */
+function paymentSetupFlow_(ui, ss) {
+  withLock_(function () { ensureSheets_(ss); });
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty(PREMIUM.PROP_WEBHOOK_TOKEN);
+  if (token) {
+    var again = ui.alert('Cài đặt thanh toán', 'Đã có mã bí mật cho webhook. Bấm YES để xem lại đường link, NO để tạo mã MỚI ' +
+      '(đường link cũ trong SePay sẽ ngừng hoạt động, phải dán link mới vào SePay).', ui.ButtonSet.YES_NO_CANCEL);
+    if (again === ui.Button.CANCEL || again === ui.Button.CLOSE) return;
+    if (again === ui.Button.NO) token = '';
+  }
+  if (!token) {
+    token = bytesToBase64_(randomBytes_(24)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    props.setProperty(PREMIUM.PROP_WEBHOOK_TOKEN, token);
+    logEvent_('payment setup', '', '', 'new webhook token');
+  }
+  var html = '<!DOCTYPE html><html><head><base target="_top"><style>' +
+    'body{font-family:Arial,sans-serif;font-size:13px;margin:0;color:#202124}p{margin:0 0 8px}' +
+    'textarea{width:100%;box-sizing:border-box;height:70px;font-family:"Roboto Mono",Consolas,monospace;font-size:13px;padding:8px}' +
+    '</style></head><body>' +
+    '<p>Trong SePay → <b>Tích hợp WebHooks</b> → Thêm webhook:</p>' +
+    '<p>• <b>Gọi đến URL</b>: đường link Web app của bạn (kết thúc bằng <b>/exec</b>, giống ô premium.api trong config.js) rồi thêm ngay phía sau:</p>' +
+    '<textarea readonly onclick="this.select()">?hook=' + escapeHtml_(token) + '</textarea>' +
+    '<p>Ví dụ: https://script.google.com/macros/s/…/exec?hook=' + escapeHtml_(token.slice(0, 6)) + '…</p>' +
+    '<p>• Sự kiện: <b>Có tiền vào</b>. Chứng thực: <b>Không cần chứng thực</b> (mã bí mật nằm trong link). Kiểu nội dung: <b>application/json</b>.</p>' +
+    '<p>Giữ link này bí mật: ai có link đều có thể báo "đã thanh toán". Nếu lộ, chạy lại menu này và chọn tạo mã mới.</p>' +
+    '</body></html>';
+  ui.showModalDialog(HtmlService.createHtmlOutput(html).setWidth(560).setHeight(330), 'Cài đặt thanh toán');
+}
 
 function runMenuAction_(name, flow) {
   var ui = SpreadsheetApp.getUi();
@@ -1298,6 +1703,11 @@ function checkSetup_(ss) {
     ', Refresh hours = ' + settings.refreshHours + '.');
   var log = ss.getSheetByName(PREMIUM.SHEET_LOG);
   good('Trang tính Log: ' + Math.max(0, log.getLastRow() - 1) + ' dòng.');
+  var orders = ss.getSheetByName(PREMIUM.SHEET_ORDERS);
+  if (ordersHeaderOk_(orders)) good('Trang tính Orders: ' + Math.max(0, orders.getLastRow() - 1) + ' đơn.');
+  else bad('Hàng tiêu đề của trang Orders khác mẫu, nên thanh toán đang bị tắt. 11 cột đầu phải đúng thứ tự: ' + ORDERS_HEADERS.join(' | ') + '.');
+  if (PropertiesService.getScriptProperties().getProperty(PREMIUM.PROP_WEBHOOK_TOKEN)) good('Thanh toán: đã có mã bí mật cho webhook.');
+  else note('Thanh toán tự động: chưa cài webhook (menu tunn.sat Premium → Cài đặt thanh toán…). Bạn vẫn có thể duyệt tay: đặt Status của đơn thành paid.');
 
   var raw = PropertiesService.getScriptProperties().getProperty(PREMIUM.PROP_PRIVATE_KEY);
   if (!raw) {

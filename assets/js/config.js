@@ -40,6 +40,20 @@ window.APP_CONFIG = {
   // (tools/premium/HUONG-DAN.md explains the setup; it ends with /exec). Leave '' until it is deployed.
   // "contact" tells students where to get a code, e.g. { text: 'Zalo 0900 000 000', url: 'https://zalo.me/0900000000' }.
   premium: {
+    // Selling Premium by bank transfer (VietQR, tools/premium/HUONG-DAN.md "Phần 2b"). While "account" is empty
+    // the site only offers "Enter code". The ids, prices and days of the plans must match PREMIUM.PLANS in
+    // tools/premium/server/Code.gs (the server checks the amount with its own prices).
+    payment: {
+      bank: 'MB',              // VietQR bank id (MB Bank = 'MB')
+      bankName: 'MB Bank',
+      account: '',             // account number that receives the money
+      accountName: '',         // account holder, IN HOA KHÔNG DẤU (e.g. 'NGUYEN VAN A')
+      buttonLabel: 'Thanh toán',
+      plans: [
+        { id: '1m', label: '1 month', price: 69000, days: 30 },
+        { id: '3m', label: '3 months', price: 189000, days: 90 }
+      ]
+    },
     api: 'https://script.google.com/macros/s/AKfycbwoasZVQzvzfJtIEexPTHUlOeAhbkX5PgJmL4Nd8uk6OrJj227Aurh-Y3qi3hyAFDTp/exec',
     contact: null
   },
