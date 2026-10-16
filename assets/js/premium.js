@@ -654,11 +654,8 @@
         '<div><b>We need to check your Premium</b><span>Your code couldn’t be confirmed on this device for a while. Connect to the internet, then try again.</span></div>' +
         '<button type="button" class="btn btn--sm btn--primary" data-premium-retry>Try again</button></div>';
     }
-    // (Premium stopped on this device: no bar; the Premium card offers it again and a locked test explains why)
-    if (st.kind === 'lost') return '';
-    return '<div class="premium-bar">' + U.icon('lock') +
-      '<div><b>Premium: ' + U.esc(premiumSummary()) + '</b><span>' + (apiUrl() ? 'Have a code? Enter it to open all of them on this device.' : 'Premium codes are coming soon.') + '</span></div>' +
-      (apiUrl() ? '<button type="button" class="btn btn--sm btn--primary" data-premium-unlock>Enter code</button>' : '') + '</div>';
+    // Premium stopped or not bought: no bar; the Premium card offers it and a locked test explains why
+    return '';
   }
 
   /** Message shown in place of a Premium test this device cannot open (test page, exam, results). */
