@@ -198,7 +198,7 @@ function doGet(e) {
 function doPost(e) {
   var result;
   try {
-    if (e && e.parameter && hasOwn_(e.parameter, 'hook')) {
+    if (webhookToken_(e) !== null || looksLikeTransfer_(e)) {
       result = handlePaymentWebhook_(e);
     } else {
       var action = peekAction_(e);
@@ -580,6 +580,28 @@ function apiError_(code, messageKey, retryAfterMs, maxDevices) {
 // Payments: orders (website) and the bank-transfer webhook (SePay)
 // =============================================================================================
 
+/** The ?hook= value of the request URL ('' when empty), or null when there is none. */
+function webhookToken_(e) {
+  if (!e) return null;
+  var p = e.parameter;
+  if (p && p.hook !== undefined && p.hook !== null) return String(p.hook);
+  var m = /(?:^|&)hook=([^&]*)/.exec(typeof e.queryString === 'string' ? e.queryString : '');
+  if (!m) return null;
+  try { return decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (err) { return m[1]; }
+}
+
+/** A bank-transfer notification (SePay JSON) even without ?hook=, so a missing token is reported as such. */
+function looksLikeTransfer_(e) {
+  var body = (e && e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
+  if (!body || body.length > PREMIUM.MAX_WEBHOOK_BODY_CHARS || body.indexOf('transferType') === -1) return false;
+  try {
+    var d = JSON.parse(body);
+    return !!d && typeof d === 'object' && d.action === undefined && d.transferType !== undefined && d.transferAmount !== undefined;
+  } catch (err) {
+    return false;
+  }
+}
+
 /** The "action" of a JSON body, or '' (the full checks happen in the handler). */
 function peekAction_(e) {
   var body = (e && e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
@@ -736,9 +758,10 @@ function issueOrderCode_(ss, sheet, row, id, values) {
  */
 function handlePaymentWebhook_(e) {
   var expected = PropertiesService.getScriptProperties().getProperty(PREMIUM.PROP_WEBHOOK_TOKEN);
-  var token = readText_(e.parameter.hook);
+  var token = readText_(webhookToken_(e));
   if (!expected || !token || !sameText_(token, expected)) {
-    logEvent_('webhook', '', '', 'refused (wrong or missing token)');
+    logEvent_('webhook', '', '', 'refused (' + (!expected ? 'no token installed: menu Cài đặt thanh toán' : !token
+      ? 'missing token: the webhook URL must end with ?hook=…' : 'wrong token') + ')');
     return { success: false, message: 'unauthorized' };
   }
   var body = (e.postData && typeof e.postData.contents === 'string') ? e.postData.contents : '';
