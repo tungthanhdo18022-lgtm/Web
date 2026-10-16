@@ -2090,8 +2090,9 @@ test('payments: wrong token, too little money, no reference, outgoing transfer',
   const dev = newDevice();
   const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
   assert.deepEqual(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: 'x' + token.slice(1) }), { success: false, message: 'unauthorized' });
-  // Without ?hook the body goes to the code API, which refuses it
-  assertErr(sim.doPost(transfer(o.order, 69000), 'application/json', {}), 'invalid');
+  // Without ?hook a transfer is still recognised, and refused with a clear Log line
+  assert.deepEqual(sim.doPost(transfer(o.order, 69000), 'application/json', {}), { success: false, message: 'unauthorized' });
+  assert.match(String(sim.records('Log').slice(-1)[0].Result), /missing token/);
   assert.equal(sim.doPost(transfer(o.order, 50000), 'application/json', { hook: token }).message, 'underpaid');
   assert.equal(sim.records('Orders')[0].Status, 'pending');
   assert.match(String(sim.records('Orders')[0].Note), /Underpaid: received 50000 of 69000/);
@@ -2179,5 +2180,17 @@ test('payments: the webhook token can be shown again or replaced from the menu',
   const renewed = sim.runMenu('menuPaymentSetup', ['NO']);
   const second = /\?hook=([A-Za-z0-9_-]+)/.exec(renewed.dialogs[0].html)[1];
   assert.notEqual(second, first);
+  clean(sim);
+});
+
+test('payments: the token is also read from e.queryString (when e.parameter lacks it)', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  const r = sim.call('webhookToken_', { parameter: {}, queryString: 'hook=' + encodeURIComponent(token) + '&x=1' });
+  assert.equal(r, token);
+  assert.equal(sim.call('webhookToken_', { parameter: {}, queryString: '' }), null);
+  assert.equal(sim.doPost(transfer('MBVCB.1.' + o.order, 69000), 'application/json', { hook: token }).message, 'paid · code created');
   clean(sim);
 });
