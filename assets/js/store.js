@@ -73,6 +73,30 @@
   var manifest = [];
   var currentEntry = null;
 
+  /** The manifest entry of the test file running now (set explicitly, or the <script> loading it). */
+  function entryNow() {
+    if (currentEntry) return currentEntry;
+    var el = document.currentScript;
+    return (el && el.__tunnEntry) || null;
+  }
+
+  /** Loads one test file; files added this way download in parallel but run in the order they were added. */
+  function loadTestScript(src, entry, timeoutMs) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      var done = false;
+      var timer = setTimeout(function () {
+        if (done) return; done = true; reject(new Error('Timed out loading ' + src));
+      }, timeoutMs || 45000);
+      s.__tunnEntry = entry;
+      s.src = src;
+      s.async = false;
+      s.onload = function () { if (done) return; done = true; clearTimeout(timer); resolve(); };
+      s.onerror = function () { if (done) return; done = true; clearTimeout(timer); s.remove(); reject(new Error('Could not load ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
   var MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
   var MONTHS_SHORT = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -174,20 +198,21 @@
   var Library = {
     /** Called by the files in tests/ */
     register: function (def) {
+      var cur = entryNow();
       try {
         var res = typeof def === 'string' ? P.parseText(def) : P.normalizeObject(def);
         if (!res.test || res.errors.length) {
-          var title = (res.test && res.test.title) || (def && def.title) || (def && def.id) || (currentEntry && currentEntry.file) || 'untitled';
+          var title = (res.test && res.test.title) || (def && def.title) || (def && def.id) || (cur && cur.file) || 'untitled';
           loadErrors.push({ title: title, errors: res.errors });
           console.error('[SATLibrary] Test "' + title + '" has errors:', res.errors);
           return;
         }
         if (res.warnings.length) console.info('[SATLibrary] Notes for "' + res.test.title + '":', res.warnings);
         var t = prepare(res.test, { builtin: true });
-        if (currentEntry) { t.file = currentEntry.file; t.fileVersion = currentEntry.v; }
+        if (cur) { t.file = cur.file; t.fileVersion = cur.v; }
         builtin.set(t.id, t);
       } catch (e) {
-        loadErrors.push({ title: (def && def.title) || (currentEntry && currentEntry.file) || '?', errors: [{ msg: String(e && e.message || e) }] });
+        loadErrors.push({ title: (def && def.title) || (cur && cur.file) || '?', errors: [{ msg: String(e && e.message || e) }] });
         console.error(e);
       }
     },
@@ -198,9 +223,10 @@
      */
     registerPremium: function (stub, entry) {
       if (entry) { var prevEntry = currentEntry; currentEntry = normalizeEntry(entry); try { return Library.registerPremium(stub); } finally { currentEntry = prevEntry; } }
+      var cur = entryNow();
       var ok = stub && typeof stub === 'object' && stub.id && stub.key && stub.iv && stub.data;
       if (!ok) {
-        loadErrors.push({ title: (currentEntry && currentEntry.file) || 'premium test', errors: [{ msg: 'Invalid premium test file' }] });
+        loadErrors.push({ title: (cur && cur.file) || 'premium test', errors: [{ msg: 'Invalid premium test file' }] });
         return;
       }
       // section: 'advanced' (Advanced Tests), 'topic' (Topic Tests), 'challenge' (Elite Tests) or '' (a Premium Practice Test, listed with the practice tests by year)
@@ -211,7 +237,7 @@
         questionCount: +stub.questionCount || 0, mcqCount: +stub.mcqCount || 0, sprCount: +stub.sprCount || 0,
         totalTime: +stub.totalTime || 0, moduleCount: +stub.moduleCount || 1,
         kid: String(stub.kid || ''), key: String(stub.key), iv: String(stub.iv), data: String(stub.data),
-        file: currentEntry ? currentEntry.file : '', fileVersion: currentEntry ? currentEntry.v : ''
+        file: cur ? cur.file : '', fileVersion: cur ? cur.v : ''
       };
       var d = parseDate(s.date) || parseDate(s.title);
       s.year = d ? d.year : 0;
@@ -277,17 +303,15 @@
       return U.loadScript(base + 'manifest.js?t=' + bust, 15000).catch(function (e) {
         loadErrors.push({ title: 'tests/manifest.js', errors: [{ msg: 'Could not load the test list (' + e.message + ')' }] });
       }).then(function () {
-        var chain = Promise.resolve();
-        manifest.forEach(function (entry) {
-          chain = chain.then(function () {
-            currentEntry = entry;
-            var v = entry.v || global.APP_VERSION || '1';
-            return U.loadScript(base + entry.file + '?v=' + encodeURIComponent(v), 15000).catch(function (e) {
-              loadErrors.push({ title: entry.file, errors: [{ msg: 'Could not load tests/' + entry.file + ' (' + e.message + ')' }] });
-            }).then(function () { currentEntry = null; });
+        // Every test file downloads at the same time (one by one took one network round trip per file);
+        // async = false keeps them running in manifest order, and each file finds its entry through
+        // document.currentScript (see entryNow()).
+        return Promise.all(manifest.map(function (entry) {
+          var v = entry.v || global.APP_VERSION || '1';
+          return loadTestScript(base + entry.file + '?v=' + encodeURIComponent(v), entry, 45000).catch(function (e) {
+            loadErrors.push({ title: entry.file, errors: [{ msg: 'Could not load tests/' + entry.file + ' (' + e.message + ')' }] });
           });
-        });
-        return chain;
+        }));
       });
     },
 
