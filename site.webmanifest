@@ -1,0 +1,15 @@
+{
+  "name": "tunn.sat",
+  "short_name": "tunn.sat",
+  "description": "Free Digital SAT Math practice tests in a Bluebook-style interface.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf6ef",
+  "theme_color": "#faf6ef",
+  "lang": "en",
+  "icons": [
+    { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

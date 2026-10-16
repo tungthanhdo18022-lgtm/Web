@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 540" font-family="Georgia, serif">
+<rect x="0" y="0" width="680" height="540" fill="white"/>
+<text x="355" y="28" text-anchor="middle" font-size="14">Correlations Between Direct Observation and Estimates of Start, End,</text>
+<text x="355" y="50" text-anchor="middle" font-size="14">and Length of Growing Season Derived from SIF Data Sets</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="70" y1="380.0" x2="640" y2="380.0"/>
+<line x1="70" y1="330.0" x2="640" y2="330.0"/>
+<line x1="70" y1="280.0" x2="640" y2="280.0"/>
+<line x1="70" y1="230.0" x2="640" y2="230.0"/>
+<line x1="70" y1="180.0" x2="640" y2="180.0"/>
+<line x1="70" y1="130.0" x2="640" y2="130.0"/>
+<line x1="70" y1="80.0" x2="640" y2="80.0"/>
+</g>
+<line x1="70" y1="280.0" x2="640" y2="280.0" stroke="#333" stroke-width="1.4"/>
+<g stroke="#333" stroke-width="1.2"><line x1="70" y1="80" x2="70" y2="380"/><line x1="70" y1="380" x2="640" y2="380"/></g>
+<g font-size="13" fill="#333" text-anchor="end">
+<text x="62" y="384.0">-0.4</text>
+<text x="62" y="334.0">-0.2</text>
+<text x="62" y="284.0">0.0</text>
+<text x="62" y="234.0">0.2</text>
+<text x="62" y="184.0">0.4</text>
+<text x="62" y="134.0">0.6</text>
+<text x="62" y="84.0">0.8</text>
+</g>
+<text x="24" y="230" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 24 230)">Correlation</text>
+<rect x="71" y="160.0" width="56" height="120.0" fill="white" stroke="#333" stroke-width="1"/>
+<text x="99" y="152.0" text-anchor="middle" font-size="12" fill="#333">0.48</text>
+<rect x="137" y="115.0" width="56" height="165.0" fill="#b3b3b3"/>
+<text x="165" y="107.0" text-anchor="middle" font-size="12" fill="#333">0.66</text>
+<rect x="203" y="202.5" width="56" height="77.5" fill="#333333"/>
+<text x="231" y="194.5" text-anchor="middle" font-size="12" fill="#333">0.31</text>
+<text x="165" y="406" text-anchor="middle" font-size="13" fill="#333">start of season</text>
+<rect x="261" y="280.0" width="56" height="45.0" fill="white" stroke="#333" stroke-width="1"/>
+<text x="289" y="345.0" text-anchor="middle" font-size="12" fill="#333">-0.18</text>
+<rect x="327" y="280.0" width="56" height="50.0" fill="#b3b3b3"/>
+<text x="355" y="350.0" text-anchor="middle" font-size="12" fill="#333">-0.2</text>
+<rect x="393" y="280.0" width="56" height="67.5" fill="#333333"/>
+<text x="421" y="367.5" text-anchor="middle" font-size="12" fill="#333">-0.27</text>
+<text x="355" y="406" text-anchor="middle" font-size="13" fill="#333">end of season</text>
+<rect x="451" y="197.5" width="56" height="82.5" fill="white" stroke="#333" stroke-width="1"/>
+<text x="479" y="189.5" text-anchor="middle" font-size="12" fill="#333">0.33</text>
+<rect x="517" y="177.5" width="56" height="102.5" fill="#b3b3b3"/>
+<text x="545" y="169.5" text-anchor="middle" font-size="12" fill="#333">0.41</text>
+<rect x="583" y="245.0" width="56" height="35.0" fill="#333333"/>
+<text x="611" y="237.0" text-anchor="middle" font-size="12" fill="#333">0.14</text>
+<text x="545" y="406" text-anchor="middle" font-size="13" fill="#333">length of season</text>
+<rect x="200" y="438" width="18" height="14" fill="white" stroke="#333" stroke-width="0.8"/>
+<text x="224" y="450" font-size="13" fill="#333">data set B</text>
+<rect x="340" y="438" width="18" height="14" fill="#b3b3b3" stroke="#333" stroke-width="0.8"/>
+<text x="364" y="450" font-size="13" fill="#333">data set C</text>
+<rect x="480" y="438" width="18" height="14" fill="#333333" stroke="#333" stroke-width="0.8"/>
+<text x="504" y="450" font-size="13" fill="#333">data set E</text>
+</svg>

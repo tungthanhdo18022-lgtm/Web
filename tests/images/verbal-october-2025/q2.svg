@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 340" font-family="Georgia, serif"><rect x="0" y="0" width="100%" height="100%" fill="white"/>
+<g stroke="#666" stroke-width="1.2">
+<rect x="45" y="28" width="550" height="72" fill="#e9e9e9"/>
+<line x1="45" y1="100" x2="595" y2="100"/>
+<line x1="45" y1="152" x2="595" y2="152"/>
+<line x1="45" y1="204" x2="595" y2="204"/>
+<line x1="45" y1="256" x2="595" y2="256"/>
+<rect x="45" y="28" width="550" height="280" fill="none"/>
+<line x1="215" y1="28" x2="215" y2="308"/>
+<line x1="420" y1="28" x2="420" y2="308"/>
+</g>
+<g font-size="15" fill="#222" text-anchor="middle">
+<text x="130" y="70">Country</text>
+<text x="317" y="52">Percent change</text><text x="317" y="72">in total</text><text x="317" y="92">production</text>
+<text x="507" y="60">Percent change</text><text x="507" y="82">in market prices</text>
+</g>
+<g font-size="15" fill="#222" text-anchor="middle">
+<text x="130" y="134">Argentina</text>
+<text x="317" y="134">+0.90</text>
+<text x="507" y="134">+1.02</text>
+<text x="130" y="186">India</text>
+<text x="317" y="186">-1.34</text>
+<text x="507" y="186">-1.98</text>
+<text x="130" y="238">Russia</text>
+<text x="317" y="238">-3.48</text>
+<text x="507" y="238">-0.99</text>
+<text x="130" y="290">United States</text>
+<text x="317" y="290">+1.76</text>
+<text x="507" y="290">+0.44</text>
+</g>
+</svg>

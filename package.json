@@ -1,0 +1,16 @@
+{
+  "name": "tunn-sat",
+  "version": "2.8.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Static app ready'",
+    "lint": "node --check server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0",
+    "express": "^4.21.2"
+  }
+}

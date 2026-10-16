@@ -1,0 +1,584 @@
+/*
+ * Storage layer.
+ *  - Published tests (tests/ folder) are loaded through tests/manifest.js and SATLibrary.register(...)
+ *  - Local drafts (owner only) live in IndexedDB, with localStorage as a fallback
+ *  - Attempts and settings live in localStorage
+ */
+(function (global) {
+  'use strict';
+
+  var U = global.U, P = global.P;
+
+  /* ---------------- IndexedDB (fallback: localStorage) ---------------- */
+  var DB_NAME = 'sat-math-practice';
+  var DB_STORE = 'tests';
+  var LS_TESTS = 'satmath.userTests.v1';
+  var LS_DRAFT = 'satmath.builderDraft.v1';
+  var dbPromise = null;
+
+  function openDb() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function (resolve) {
+      if (!global.indexedDB) { resolve(null); return; }
+      var req;
+      try { req = global.indexedDB.open(DB_NAME, 1); }
+      catch (e) { resolve(null); return; }
+      var settled = false;
+      var timer = setTimeout(function () { if (!settled) { settled = true; resolve(null); } }, 8000);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE, { keyPath: 'id' });
+      };
+      req.onsuccess = function () {
+        if (settled) { try { req.result.close(); } catch (e) { /* ignore */ } return; }
+        settled = true; clearTimeout(timer); resolve(req.result);
+      };
+      req.onerror = function () { if (settled) return; settled = true; clearTimeout(timer); resolve(null); };
+      req.onblocked = function () { if (settled) return; settled = true; clearTimeout(timer); resolve(null); };
+    });
+    return dbPromise;
+  }
+
+  function idbAll(db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(DB_STORE, 'readonly');
+      var req = tx.objectStore(DB_STORE).getAll();
+      req.onsuccess = function () { resolve(req.result || []); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+  function idbPut(db, value) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(DB_STORE, 'readwrite');
+      tx.objectStore(DB_STORE).put(value);
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror = function () { reject(tx.error); };
+      tx.onabort = function () { reject(tx.error || new Error('Save failed')); };
+    });
+  }
+  function idbDelete(db, key) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(DB_STORE, 'readwrite');
+      tx.objectStore(DB_STORE).delete(key);
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror = function () { reject(tx.error); };
+    });
+  }
+
+  /* ---------------- Test library ---------------- */
+  var builtin = new Map();
+  var user = new Map();
+  var premium = new Map(); // encrypted Advanced tests (tests/premium/*.js), by id
+  var loadErrors = [];
+  var manifest = [];
+  var currentEntry = null;
+
+  var MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  var MONTHS_SHORT = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+  function safeId(id) {
+    return String(id || '').replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+  }
+
+  /** Reads "2026-09", "2026-09-12", "September 2026", "Sep 12, 2026"… → { year, month } */
+  function parseDate(text) {
+    var s = String(text || '').toLowerCase();
+    var m = /(\d{4})[-/.](\d{1,2})(?:[-/.](\d{1,2}))?/.exec(s);
+    if (m && +m[2] >= 1 && +m[2] <= 12) return { year: +m[1], month: +m[2], day: m[3] ? +m[3] : 0 };
+    var re = /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s+(?:(\d{1,2}),?\s+)?(\d{4})\b/;
+    m = re.exec(s);
+    if (m) {
+      var name = m[1].slice(0, 3);
+      var month = MONTHS_SHORT.indexOf(name) + 1;
+      return { year: +m[3], month: month, day: m[2] ? +m[2] : 0 };
+    }
+    m = /\b(20\d{2})\b/.exec(s);
+    if (m) return { year: +m[1], month: 0, day: 0 };
+    return null;
+  }
+
+  function seasonOf(month) {
+    if (!month) return '';
+    if (month >= 3 && month <= 5) return 'spring';
+    if (month >= 6 && month <= 8) return 'summer';
+    if (month >= 9 && month <= 11) return 'fall';
+    return 'winter';
+  }
+
+  /** Short, stable fingerprint of the question content (used to detect edited tests). */
+  function fingerprint(test) {
+    var s = test.modules.map(function (m) {
+      return m.questions.map(function (q) {
+        return q.type + '|' + q.prompt + '|' + (q.choices || []).join('||') + '|' + JSON.stringify(q.answer);
+      }).join('\n#\n');
+    }).join('\n##\n');
+    var h1 = 0x811c9dc5, h2 = 0x1b873593;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 16777619);
+      h2 = Math.imul(h2 ^ c, 2246822519);
+    }
+    return (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36);
+  }
+
+  function prepare(test, opts) {
+    if (!test.id) test.id = U.slug(test.title) + '-' + Math.random().toString(36).slice(2, 6);
+    test.id = safeId(test.id) || ('test-' + Math.random().toString(36).slice(2, 8));
+    test.builtin = !!opts.builtin;
+    // Drop empty modules defensively (an empty module would break the exam)
+    test.modules = test.modules.filter(function (m) { return m.questions && m.questions.length; });
+    test.questionCount = test.modules.reduce(function (n, m) { return n + m.questions.length; }, 0);
+    test.mcqCount = 0; test.sprCount = 0;
+    test.modules.forEach(function (m) {
+      m.questions.forEach(function (q) { if (q.type === 'mcq') test.mcqCount++; else test.sprCount++; });
+      if (m.time == null || !isFinite(m.time) || m.time <= 0) {
+        m.autoTime = true;
+        m.time = Math.max(5, Math.round(m.questions.length * (global.APP_CONFIG.defaultMinutesPerQuestion || 1.6)));
+      }
+    });
+    test.totalTime = test.modules.reduce(function (n, m) { return n + (m.time || 0); }, 0);
+    var d = parseDate(test.date) || parseDate(test.title);
+    test.year = d ? d.year : 0;
+    test.month = d ? d.month : 0;
+    test.season = d ? seasonOf(d.month) : '';
+    test.sortKey = d ? d.year * 10000 + d.month * 100 + (d.day || 0) : 0;
+    test.fingerprint = fingerprint(test);
+    test.mainDomain = mainDomain(test);
+    return test;
+  }
+
+  /** The SAT Math domain that most of the test's questions belong to ('' if none are tagged). */
+  function mainDomain(test) {
+    var count = {}, best = '', bestN = 0;
+    var known = (P && P.DOMAINS) || [];
+    test.modules.forEach(function (m) {
+      m.questions.forEach(function (q) {
+        if (known.indexOf(q.domain) === -1) return;
+        count[q.domain] = (count[q.domain] || 0) + 1;
+        if (count[q.domain] > bestN) { best = q.domain; bestN = count[q.domain]; }
+      });
+    });
+    return best;
+  }
+
+  function normalizeEntry(e) {
+    if (!e) return null;
+    if (typeof e === 'string') return { file: e, v: '' };
+    if (typeof e === 'object' && e.file) return { file: String(e.file), v: e.v != null ? String(e.v) : '' };
+    return null;
+  }
+
+  /** Sections a Premium stub may keep; anything else is listed as a Practice Test. */
+  var PREMIUM_SECTIONS = ['advanced', 'topic', 'challenge'];
+
+  var Library = {
+    /** Called by the files in tests/ */
+    register: function (def) {
+      try {
+        var res = typeof def === 'string' ? P.parseText(def) : P.normalizeObject(def);
+        if (!res.test || res.errors.length) {
+          var title = (res.test && res.test.title) || (def && def.title) || (def && def.id) || (currentEntry && currentEntry.file) || 'untitled';
+          loadErrors.push({ title: title, errors: res.errors });
+          console.error('[SATLibrary] Test "' + title + '" has errors:', res.errors);
+          return;
+        }
+        if (res.warnings.length) console.info('[SATLibrary] Notes for "' + res.test.title + '":', res.warnings);
+        var t = prepare(res.test, { builtin: true });
+        if (currentEntry) { t.file = currentEntry.file; t.fileVersion = currentEntry.v; }
+        builtin.set(t.id, t);
+      } catch (e) {
+        loadErrors.push({ title: (def && def.title) || (currentEntry && currentEntry.file) || '?', errors: [{ msg: String(e && e.message || e) }] });
+        console.error(e);
+      }
+    },
+
+    /**
+     * Called by the encrypted files in tests/premium/: keeps the public part (title, counts…) so the home
+     * page can list the test; the content is registered by unlockPremium() once Premium is active.
+     */
+    registerPremium: function (stub, entry) {
+      if (entry) { var prevEntry = currentEntry; currentEntry = normalizeEntry(entry); try { return Library.registerPremium(stub); } finally { currentEntry = prevEntry; } }
+      var ok = stub && typeof stub === 'object' && stub.id && stub.key && stub.iv && stub.data;
+      if (!ok) {
+        loadErrors.push({ title: (currentEntry && currentEntry.file) || 'premium test', errors: [{ msg: 'Invalid premium test file' }] });
+        return;
+      }
+      // section: 'advanced' (Advanced Tests), 'topic' (Topic Tests), 'challenge' (Elite Tests) or '' (a Premium Practice Test, listed with the practice tests by year)
+      var s = {
+        id: safeId(stub.id), title: String(stub.title || ''), category: String(stub.category || ''),
+        description: String(stub.description || ''), section: PREMIUM_SECTIONS.indexOf(stub.section) !== -1 ? stub.section : '',
+        date: String(stub.date || ''), premium: true, locked: true,
+        questionCount: +stub.questionCount || 0, mcqCount: +stub.mcqCount || 0, sprCount: +stub.sprCount || 0,
+        totalTime: +stub.totalTime || 0, moduleCount: +stub.moduleCount || 1,
+        kid: String(stub.kid || ''), key: String(stub.key), iv: String(stub.iv), data: String(stub.data),
+        file: currentEntry ? currentEntry.file : '', fileVersion: currentEntry ? currentEntry.v : ''
+      };
+      var d = parseDate(s.date) || parseDate(s.title);
+      s.year = d ? d.year : 0;
+      s.month = d ? d.month : 0;
+      s.sortKey = d ? d.year * 10000 + d.month * 100 + (d.day || 0) : 0;
+      premium.set(s.id, s);
+    },
+
+    /** Parses a test definition without registering it (e.g. to summarise it before publishing). */
+    preview: function (def) {
+      var res = typeof def === 'string' ? P.parseText(def) : P.normalizeObject(def);
+      return res.test && !res.errors.length ? prepare(res.test, { builtin: true }) : null;
+    },
+
+    /** Encrypted tests (unlocked or not). */
+    premiumStubs: function () { return Array.from(premium.values()); },
+    premiumStub: function (id) { return premium.get(id) || null; },
+    isPremium: function (id) { return premium.has(id); },
+    /** A premium test whose content has not been decrypted on this device. */
+    isLocked: function (id) { return premium.has(id) && !builtin.has(id); },
+
+    /** Registers the decrypted content of a premium test (def = the object a plain test file passes to register). */
+    unlockPremium: function (id, def) {
+      var stub = premium.get(id);
+      if (!stub) return false;
+      var prev = currentEntry;
+      currentEntry = { file: stub.file, v: stub.fileVersion };
+      try { Library.register(def); } finally { currentEntry = prev; }
+      var t = builtin.get(id);
+      if (t) t.premium = true;
+      return !!t;
+    },
+
+    /** Forgets every decrypted premium test (Premium was revoked or expired on this device). */
+    lockPremium: function () { premium.forEach(function (s, id) { builtin.delete(id); }); },
+
+    /** tests/manifest.js calls this with the list of published files */
+    manifest: function (entries) {
+      manifest = (entries || []).map(normalizeEntry).filter(Boolean);
+    },
+
+    manifestEntries: function () { return manifest.map(function (e) { return { file: e.file, v: e.v }; }); },
+
+    /** Registers a just-published test in memory (the live site updates after GitHub Pages redeploys). */
+    registerLocal: function (def, entry) {
+      var prev = currentEntry;
+      var e = normalizeEntry(entry);
+      currentEntry = e;
+      try { Library.register(def); } finally { currentEntry = prev; }
+      if (e) manifest = manifest.filter(function (x) { return x.file !== e.file; }).concat([e]);
+    },
+
+    /** Removes an unpublished test from memory. */
+    unregisterLocal: function (file) {
+      builtin.forEach(function (t, id) { if (t.file === file) builtin.delete(id); });
+      premium.forEach(function (s, id) { if (s.file === file) premium.delete(id); });
+      manifest = manifest.filter(function (x) { return x.file !== file; });
+    },
+
+    loadBuiltins: function () {
+      var base = 'tests/';
+      var bust = Date.now().toString(36);
+      return U.loadScript(base + 'manifest.js?t=' + bust, 15000).catch(function (e) {
+        loadErrors.push({ title: 'tests/manifest.js', errors: [{ msg: 'Could not load the test list (' + e.message + ')' }] });
+      }).then(function () {
+        var chain = Promise.resolve();
+        manifest.forEach(function (entry) {
+          chain = chain.then(function () {
+            currentEntry = entry;
+            var v = entry.v || global.APP_VERSION || '1';
+            return U.loadScript(base + entry.file + '?v=' + encodeURIComponent(v), 15000).catch(function (e) {
+              loadErrors.push({ title: entry.file, errors: [{ msg: 'Could not load tests/' + entry.file + ' (' + e.message + ')' }] });
+            }).then(function () { currentEntry = null; });
+          });
+        });
+        return chain;
+      });
+    },
+
+    loadUser: function () {
+      return openDb().then(function (db) {
+        var fromLs = U.lsGet(LS_TESTS, []) || [];
+        if (!db) return { list: fromLs, db: null };
+        return idbAll(db).catch(function () { return []; }).then(function (fromDb) {
+          // Merge: IndexedDB wins; move fallback records into IndexedDB
+          var have = {};
+          fromDb.forEach(function (r) { have[r.id] = true; });
+          var moved = fromLs.filter(function (r) { return r && r.id && !have[r.id]; });
+          var chain = Promise.resolve();
+          moved.forEach(function (r) { chain = chain.then(function () { return idbPut(db, r).catch(function () { /* keep in LS */ }); }); });
+          return chain.then(function () {
+            if (fromLs.length) U.lsDel(LS_TESTS);
+            return { list: fromDb.concat(moved), db: db };
+          });
+        });
+      }).then(function (res) {
+        user.clear();
+        (res.list || []).forEach(function (raw) {
+          try {
+            var r = P.normalizeObject(raw);
+            if (r.test) {
+              var t = prepare(r.test, { builtin: false });
+              t._key = raw.id;
+              t.createdAt = raw.createdAt; t.updatedAt = raw.updatedAt;
+              t.publishedFile = raw.publishedFile || '';
+              t.hasErrors = r.errors.length > 0;
+              user.set(t.id, t);
+            }
+          } catch (e) { console.error(e); }
+        });
+      });
+    },
+
+    errors: function () { return loadErrors.slice(); },
+
+    reportError: function (title, msg) { loadErrors.push({ title: title, errors: [{ msg: msg }] }); },
+
+    /** Published tests, newest first */
+    published: function () {
+      return Array.from(builtin.values()).sort(function (a, b) {
+        return (b.sortKey - a.sortKey) || String(a.title).localeCompare(String(b.title));
+      });
+    },
+
+    /** Local drafts (owner only) */
+    drafts: function () {
+      return Array.from(user.values()).sort(function (x, y) { return (y.updatedAt || 0) - (x.updatedAt || 0); });
+    },
+
+    all: function () { return Library.published().concat(Library.drafts()); },
+
+    get: function (id) { return user.get(id) || builtin.get(id) || null; },
+
+    /**
+     * Category used by the Advanced Tests filter: the test's "category:", else the domain its title
+     * starts with ("Algebra C" -> Algebra), else the domain most of its questions belong to.
+     */
+    categoryOf: function (t) { return (t && (t.category || P.normalizeCategory(t.title) || t.mainDomain)) || ''; },
+
+    getPublished: function (id) { return builtin.get(id) || null; },
+
+    isBuiltin: function (id) { return builtin.has(id) && !user.has(id); },
+
+    /** Save (create or update) a local draft. */
+    save: function (test) {
+      var now = Date.now();
+      var record = {
+        id: safeId(test.id),
+        title: test.title, author: test.author, description: test.description, date: test.date || '',
+        section: test.section || '',
+        premium: !!test.premium,
+        category: test.category || '',
+        source: test.source || '',
+        assets: test.assets || {},
+        publishedFile: test.publishedFile || '',
+        modules: test.modules.map(function (m) {
+          return {
+            title: m.title, time: m.autoTime ? null : m.time,
+            questions: m.questions.map(function (q) {
+              var o = { type: q.type, prompt: q.prompt, answer: q.answer };
+              if (q.type === 'mcq') o.choices = q.choices;
+              if (q.explanation) o.explanation = q.explanation;
+              if (q.domain) o.domain = q.domain;
+              if (q.label) o.label = q.label;
+              return o;
+            })
+          };
+        }),
+        createdAt: test.createdAt || now,
+        updatedAt: now
+      };
+      if (!record.id) record.id = U.slug(record.title) + '-' + Math.random().toString(36).slice(2, 6);
+      var oldKey = test._key && test._key !== record.id ? test._key : null;
+      return openDb().then(function (db) {
+        if (db) {
+          return idbPut(db, record).then(function () { if (oldKey) return idbDelete(db, oldKey).catch(function () { /* ignore */ }); });
+        }
+        var list = (U.lsGet(LS_TESTS, []) || []).filter(function (x) { return x.id !== record.id && x.id !== oldKey; });
+        list.push(record);
+        if (!U.lsSet(LS_TESTS, list)) throw new Error('Browser storage is full. Delete some drafts or use smaller images.');
+      }).then(function () {
+        var res = P.normalizeObject(record);
+        var t = prepare(res.test, { builtin: false });
+        t._key = record.id;
+        t.createdAt = record.createdAt; t.updatedAt = record.updatedAt;
+        t.publishedFile = record.publishedFile;
+        if (oldKey) user.delete(oldKey);
+        user.set(t.id, t);
+        return t;
+      });
+    },
+
+    remove: function (id) {
+      var t = user.get(id);
+      var key = (t && t._key) || id;
+      return openDb().then(function (db) {
+        if (db) return idbDelete(db, key);
+        U.lsSet(LS_TESTS, (U.lsGet(LS_TESTS, []) || []).filter(function (x) { return x.id !== key && x.id !== id; }));
+      }).then(function () { user.delete(id); });
+    },
+
+    /** Export a test as JSON (backup / sharing) */
+    exportJson: function (test) {
+      var o = {
+        id: test.id, title: test.title, author: test.author,
+        date: test.date || undefined,
+        description: test.description || undefined,
+        section: test.section || undefined,
+        premium: test.premium && test.section !== 'advanced' ? true : undefined,
+        category: test.category || undefined,
+        modules: test.modules.map(function (m) {
+          return {
+            title: m.title, time: m.time,
+            questions: m.questions.map(function (q) {
+              var x = { type: q.type, prompt: q.prompt };
+              if (q.type === 'mcq') x.choices = q.choices;
+              x.answer = q.answer;
+              if (q.domain) x.domain = q.domain;
+              if (q.explanation) x.explanation = q.explanation;
+              return x;
+            })
+          };
+        })
+      };
+      if (test.assets && Object.keys(test.assets).length) o.assets = test.assets;
+      if (test.source) o.source = test.source;
+      return JSON.stringify(o, null, 2);
+    },
+
+    safeId: safeId,
+    parseDate: parseDate,
+    seasonOf: seasonOf,
+    fingerprint: fingerprint
+  };
+
+  /* ---------------- Attempts ---------------- */
+  var LS_ATTEMPTS = 'satmath.attempts.v1';
+  var LS_SETTINGS = 'satmath.settings.v1';
+  var attemptsCache = null;
+  // Keep tabs in sync
+  window.addEventListener('storage', function (e) { if (e.key === LS_ATTEMPTS || e.key === null) attemptsCache = null; });
+
+  function readStored() {
+    var raw = U.lsGet(LS_ATTEMPTS, {});
+    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  }
+  function loadAttempts() {
+    if (!attemptsCache) attemptsCache = readStored();
+    return attemptsCache;
+  }
+  function persistAttempts() {
+    var ok = U.lsSet(LS_ATTEMPTS, attemptsCache || {});
+    if (!ok) {
+      // Free space without touching results: drop images from the builder draft first
+      var draft = U.lsGet(LS_DRAFT, null);
+      if (draft && draft.assets && Object.keys(draft.assets).length) {
+        draft.assets = {};
+        U.lsSet(LS_DRAFT, draft);
+        ok = U.lsSet(LS_ATTEMPTS, attemptsCache || {});
+      }
+    }
+    return ok;
+  }
+
+  /** True when a value holds something: a non-blank string, a non-empty array, or any other truthy value. */
+  function hasValue(v) {
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'string') return v.trim() !== '';
+    return !!v;
+  }
+  function anyValue(map) {
+    return !!map && Object.keys(map).some(function (k) { return hasValue(map[k]); });
+  }
+
+  var Attempts = {
+    /**
+     * An in-progress attempt with no work in it yet: no answers, nothing marked for review or
+     * crossed out, and no module submitted. It is kept (so Back or a reload can reopen it) but not
+     * shown as "in progress", and starting the test again clears it.
+     */
+    isUntouched: function (a) {
+      if (!a || a.status !== 'in-progress') return false;
+      if (anyValue(a.answers) || anyValue(a.marked) || anyValue(a.eliminated) || anyValue(a.highlights)) return false;
+      if ((a.moduleIndex || 0) > 0) return false;
+      return !(a.modules || []).some(function (m) { return m && m.done; });
+    },
+    all: function () {
+      return Object.values(loadAttempts()).sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+    },
+    get: function (id) { return loadAttempts()[id] || null; },
+    /** Fresh copy straight from storage (ignores this tab's cache). */
+    getStored: function (id) { return readStored()[id] || null; },
+    /**
+     * Saves an attempt. Returns false when storage is full.
+     * Refuses (returns 'stale') to overwrite an attempt that another tab already submitted.
+     * opts.keepTime: leave updatedAt as it is (redo progress should not reorder attempts).
+     */
+    save: function (a, opts) {
+      var stored = readStored()[a.id];
+      if (stored && stored.status === 'completed' && a.status !== 'completed') {
+        attemptsCache = null;
+        return 'stale';
+      }
+      if (!(opts && opts.keepTime)) a.updatedAt = Date.now();
+      attemptsCache = readStored();
+      attemptsCache[a.id] = a;
+      return persistAttempts();
+    },
+    remove: function (id) {
+      attemptsCache = readStored();
+      delete attemptsCache[id];
+      persistAttempts();
+    },
+    forTest: function (testId) {
+      return Attempts.all().filter(function (a) { return a.testId === testId; });
+    },
+    /** The latest in-progress attempt of a test that has some work in it (untouched ones are ignored). */
+    inProgress: function (testId) {
+      return Attempts.forTest(testId).filter(function (a) { return a.status === 'in-progress' && !Attempts.isUntouched(a); })[0] || null;
+    },
+    completed: function () {
+      return Attempts.all().filter(function (a) { return a.status === 'completed' && a.result; })
+        .sort(function (a, b) { return (b.finishedAt || 0) - (a.finishedAt || 0); });
+    },
+    best: function (testId) {
+      var done = Attempts.forTest(testId).filter(function (a) { return a.status === 'completed' && a.result; });
+      if (!done.length) return null;
+      return done.reduce(function (b, a) {
+        var better = a.result.correct > b.result.correct ||
+          (a.result.correct === b.result.correct && (a.finishedAt || 0) > (b.finishedAt || 0));
+        return better ? a : b;
+      });
+    },
+    create: function (test, opts) {
+      var a = {
+        id: U.uid('a'),
+        testId: test.id,
+        testTitle: test.title,
+        fingerprint: test.fingerprint,
+        name: opts.name || '',
+        timed: opts.timed !== false,
+        status: 'in-progress',
+        createdAt: Date.now(),
+        moduleIndex: 0,
+        modules: test.modules.map(function () { return { elapsed: 0, current: 0, review: false, done: false }; }),
+        answers: {},
+        marked: {},
+        eliminated: {},
+        highlights: {},
+        totalQuestions: test.questionCount
+      };
+      Attempts.save(a);
+      return a;
+    }
+  };
+
+  var Settings = {
+    get: function () { return U.lsGet(LS_SETTINGS, {}) || {}; },
+    set: function (patch) {
+      var s = Settings.get();
+      Object.keys(patch).forEach(function (k) { s[k] = patch[k]; });
+      U.lsSet(LS_SETTINGS, s);
+      return s;
+    }
+  };
+
+  global.SATLibrary = Library;
+  global.Attempts = Attempts;
+  global.Settings = Settings;
+})(window);

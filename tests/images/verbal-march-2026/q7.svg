@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 360" font-family="Georgia, serif"><rect x="0" y="0" width="100%" height="100%" fill="white"/>
+<!-- ⁸⁷Sr/⁸⁶Sr isotope ratio vs age (Ma) -->
+<g stroke="#1a1a1a" stroke-width="1.5" fill="none">
+<rect x="50" y="50" width="360" height="280"/>
+<line x1="230" y1="50" x2="230" y2="330"/>
+<line x1="50" y1="112" x2="410" y2="112"/>
+<line x1="50" y1="156" x2="410" y2="156"/>
+<line x1="50" y1="200" x2="410" y2="200"/>
+<line x1="50" y1="244" x2="410" y2="244"/>
+<line x1="50" y1="288" x2="410" y2="288"/>
+</g>
+<!-- stacked fraction header ⁸⁷Sr / ⁸⁶Sr -->
+<g font-size="16" fill="#222" text-anchor="middle">
+<text x="140" y="76">⁸⁷Sr</text>
+<line x1="108" y1="82" x2="172" y2="82" stroke="#222" stroke-width="1.2"/>
+<text x="140" y="102">⁸⁶Sr</text>
+<text x="320" y="87">Age (Ma)</text>
+</g>
+<g font-size="16" fill="#222" text-anchor="middle">
+<text x="140" y="141">0.708980</text><text x="320" y="141">6.20</text>
+<text x="140" y="185">0.709000</text><text x="320" y="185">5.86</text>
+<text x="140" y="229">0.709020</text><text x="320" y="229">5.40</text>
+<text x="140" y="273">0.709040</text><text x="320" y="273">4.75</text>
+<text x="140" y="317">0.709060</text><text x="320" y="317">3.00</text>
+</g>
+</svg>

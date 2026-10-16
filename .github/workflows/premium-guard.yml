@@ -1,0 +1,122 @@
+# Premium guard
+#
+# Premium tests (section: advanced, or premium: yes) are paid content: they must only be committed ENCRYPTED
+# (tests/premium/<name>.js). The normal way is to run `node tools/premium/encrypt.mjs` before committing,
+# or to publish from the admin page, which encrypts in the browser. This workflow is the safety net:
+#  - push to main (or a manual run): encrypt any plaintext Premium test with the PUBLIC key, commit the result
+#    as github-actions[bot] ("Encrypt premium tests [premium-guard]"), ask GitHub Pages to rebuild, then run
+#    `encrypt.mjs --check` (which also fails if a file in the repository looks like a PRIVATE key);
+#  - pull request: only `encrypt.mjs --check`, read-only, never commits.
+# Note: a plaintext file that was pushed stays in the git history; the guard only removes it from the site.
+name: Premium guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Read-only by default; the encrypt job asks for exactly what it needs. Explicit job permissions also work when the
+# repository's default GITHUB_TOKEN permission is "read repository contents".
+permissions:
+  contents: read
+
+concurrency:
+  group: premium-guard-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  encrypt:
+    name: Encrypt Premium tests
+    # Not for pull requests (see the check job). Loop guard: skip the bot's own encryption commits (pushes made with
+    # GITHUB_TOKEN do not start workflows anyway, and a second run would find nothing to do). A person's commit is
+    # never skipped, even if its message mentions [premium-guard].
+    if: >-
+      github.event_name != 'pull_request' && github.ref_type == 'branch' &&
+      !(github.actor == 'github-actions[bot]' && contains(github.event.head_commit.message, '[premium-guard]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write   # commit the encrypted files
+      pages: write      # request a GitHub Pages build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}   # the branch as it is now, not only the commit that started the run
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Encrypt, commit and push
+        id: encrypt
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          pushed=false
+          status=0
+          for attempt in 1 2 3; do
+            status=0
+            node tools/premium/encrypt.mjs || status=$?
+            if [ -z "$(git status --porcelain -- tests)" ]; then
+              echo "Nothing to commit."
+              break
+            fi
+            git add -A -- tests
+            git commit -q -m 'Encrypt premium tests [premium-guard]'
+            if git push origin "HEAD:refs/heads/${BRANCH}"; then
+              pushed=true
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::Could not push the encrypted files to ${BRANCH} (branch protection, or the branch kept moving). Run node tools/premium/encrypt.mjs locally, commit and push."
+              exit 1
+            fi
+            echo "Push rejected (the branch moved); starting again from the latest commit."
+            sleep $((attempt * 5))
+            git fetch --no-tags origin "${BRANCH}"
+            git reset -q --hard FETCH_HEAD
+          done
+          echo "pushed=${pushed}" >> "$GITHUB_OUTPUT"
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+
+      - name: Request a GitHub Pages build
+        if: steps.encrypt.outputs.pushed == 'true' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds" \
+            || echo "::warning::Could not request a GitHub Pages build; the site updates on the next Pages build."
+
+      - name: Verify
+        env:
+          ENCRYPT_STATUS: ${{ steps.encrypt.outputs.status }}
+        run: |
+          if [ "${ENCRYPT_STATUS}" != "0" ]; then
+            echo "::error::encrypt.mjs reported problems (see the 'Encrypt, commit and push' step). Fix those files and push again."
+            node tools/premium/encrypt.mjs --check || true
+            exit 1
+          fi
+          node tools/premium/encrypt.mjs --check
+
+  check:
+    name: Check Premium tests are encrypted
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check
+        run: node tools/premium/encrypt.mjs --check

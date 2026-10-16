@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 520" font-family="Georgia, serif">
+<rect x="0" y="0" width="680" height="520" fill="white"/>
+<text x="340.0" y="30" text-anchor="middle" font-size="17">Distribution of Silica Cements and Grains Associated with South</text>
+<text x="340.0" y="54" text-anchor="middle" font-size="17">Australian Ediacara Casts by Ge/Si Ratio</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="78" y1="402.0" x2="650" y2="402.0"/>
+<line x1="78" y1="366.0" x2="650" y2="366.0"/>
+<line x1="78" y1="330.0" x2="650" y2="330.0"/>
+<line x1="78" y1="294.0" x2="650" y2="294.0"/>
+<line x1="78" y1="258.0" x2="650" y2="258.0"/>
+<line x1="78" y1="222.0" x2="650" y2="222.0"/>
+<line x1="78" y1="186.0" x2="650" y2="186.0"/>
+<line x1="78" y1="150.0" x2="650" y2="150.0"/>
+<line x1="78" y1="114.0" x2="650" y2="114.0"/>
+<line x1="78" y1="78.0" x2="650" y2="78.0"/>
+</g>
+<g stroke="#333" stroke-width="1.2"><line x1="78" y1="78" x2="78" y2="402"/><line x1="78" y1="402" x2="650" y2="402"/></g>
+<g font-size="13" fill="#333" text-anchor="end">
+<text x="70" y="406.0">0</text>
+<text x="70" y="370.0">10</text>
+<text x="70" y="334.0">20</text>
+<text x="70" y="298.0">30</text>
+<text x="70" y="262.0">40</text>
+<text x="70" y="226.0">50</text>
+<text x="70" y="190.0">60</text>
+<text x="70" y="154.0">70</text>
+<text x="70" y="118.0">80</text>
+<text x="70" y="82.0">90</text>
+</g>
+<text x="20" y="240.0" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 20 240.0)">Share of all silica cements or grains (%)</text>
+<rect x="87.9" y="294.0" width="22.88" height="108.0" fill="#5a5a5a"/>
+<rect x="116.8" y="114.0" width="22.88" height="288.0" fill="#c4c4c4"/>
+<text x="113.8" y="422" text-anchor="middle" font-size="12.5" fill="#333">&lt;2.0</text>
+<rect x="159.4" y="355.2" width="22.88" height="46.8" fill="#5a5a5a"/>
+<rect x="188.2" y="362.4" width="22.88" height="39.6" fill="#c4c4c4"/>
+<text x="185.2" y="422" text-anchor="middle" font-size="12.5" fill="#333">2.0–2.5</text>
+<rect x="230.9" y="351.6" width="22.88" height="50.4" fill="#5a5a5a"/>
+<rect x="259.8" y="387.6" width="22.88" height="14.4" fill="#c4c4c4"/>
+<text x="256.8" y="422" text-anchor="middle" font-size="12.5" fill="#333">2.5–3.0</text>
+<rect x="302.4" y="348.0" width="22.88" height="54.0" fill="#5a5a5a"/>
+<rect x="331.2" y="394.8" width="22.88" height="7.2" fill="#c4c4c4"/>
+<text x="328.2" y="422" text-anchor="middle" font-size="12.5" fill="#333">3.0–3.5</text>
+<rect x="373.9" y="358.8" width="22.88" height="43.2" fill="#5a5a5a"/>
+<rect x="402.8" y="396.6" width="22.88" height="5.4" fill="#c4c4c4"/>
+<text x="399.8" y="422" text-anchor="middle" font-size="12.5" fill="#333">3.5–4.0</text>
+<rect x="445.4" y="373.2" width="22.88" height="28.8" fill="#5a5a5a"/>
+<rect x="474.2" y="398.4" width="22.88" height="3.6" fill="#c4c4c4"/>
+<text x="471.2" y="422" text-anchor="middle" font-size="12.5" fill="#333">4.0–4.5</text>
+<rect x="516.9" y="384.0" width="22.88" height="18.0" fill="#5a5a5a"/>
+<rect x="545.8" y="400.2" width="22.88" height="1.8" fill="#c4c4c4"/>
+<text x="542.8" y="422" text-anchor="middle" font-size="12.5" fill="#333">4.5–5.0</text>
+<rect x="588.4" y="387.6" width="22.88" height="14.4" fill="#5a5a5a"/>
+<text x="614.2" y="422" text-anchor="middle" font-size="12.5" fill="#333">&gt;5.0</text>
+<text x="364.0" y="462" text-anchor="middle" font-size="14" fill="#333">Ge/Si ratio of cements or grains (micromoles/mole)</text>
+<g><rect x="214.0" y="487" width="14" height="12" fill="#5a5a5a"/><text x="234.0" y="498" font-size="13" fill="#333">cements</text><rect x="379.0" y="487" width="14" height="12" fill="#c4c4c4"/><text x="399.0" y="498" font-size="13" fill="#333">grains</text></g>
+</svg>

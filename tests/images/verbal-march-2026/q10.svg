@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 655" font-family="Georgia, serif"><rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<!-- y gridlines 0-90 -->
+<g stroke="#bbb" stroke-width="0.8">
+<line x1="100" y1="70" x2="680" y2="70"/><line x1="100" y1="110" x2="680" y2="110"/><line x1="100" y1="150" x2="680" y2="150"/><line x1="100" y1="190" x2="680" y2="190"/><line x1="100" y1="230" x2="680" y2="230"/><line x1="100" y1="270" x2="680" y2="270"/><line x1="100" y1="310" x2="680" y2="310"/><line x1="100" y1="350" x2="680" y2="350"/><line x1="100" y1="390" x2="680" y2="390"/>
+</g>
+<g stroke="#333" stroke-width="1.2">
+<line x1="100" y1="70" x2="100" y2="430"/><line x1="100" y1="430" x2="680" y2="430"/>
+</g>
+<g font-size="14" fill="#222" text-anchor="end">
+<text x="90" y="435">0</text><text x="90" y="395">10</text><text x="90" y="355">20</text><text x="90" y="315">30</text><text x="90" y="275">40</text><text x="90" y="235">50</text><text x="90" y="195">60</text><text x="90" y="155">70</text><text x="90" y="115">80</text><text x="90" y="75">90</text>
+</g>
+<text x="36" y="250" text-anchor="middle" font-size="16" fill="#222" transform="rotate(-90 36 250)">Percentage</text>
+<!-- bars: values measured from source gridlines (4 px per unit) -->
+<!-- percentage of forms: self-dealing 9, taxable expenditures 3, undistributed income 88.5 -->
+<g stroke="#333" stroke-width="1">
+<rect x="210" y="394" width="48" height="36" fill="#909090"/>
+<rect x="266" y="418" width="48" height="12" fill="#ffffff"/>
+<rect x="322" y="76" width="48" height="354" fill="#1a1a1a"/>
+<!-- percentage of penalties: self-dealing 40, taxable expenditures 4, undistributed income 54.5 -->
+<rect x="440" y="270" width="48" height="160" fill="#909090"/>
+<rect x="496" y="414" width="48" height="16" fill="#ffffff"/>
+<rect x="552" y="212" width="48" height="218" fill="#1a1a1a"/>
+</g>
+<!-- diagonal group labels -->
+<g font-size="14" fill="#222">
+<text x="300" y="448" text-anchor="end" transform="rotate(-38 300 448)">percentage of forms</text>
+<text x="530" y="448" text-anchor="end" transform="rotate(-38 530 448)">percentage of penalties</text>
+</g>
+<!-- legend -->
+<g font-size="14" fill="#222">
+<rect x="200" y="565" width="330" height="76" fill="none" stroke="#333" stroke-width="1"/>
+<rect x="220" y="573" width="24" height="16" fill="#909090" stroke="#333" stroke-width="1"/>
+<text x="254" y="586">self-dealing</text>
+<rect x="220" y="597" width="24" height="16" fill="#ffffff" stroke="#333" stroke-width="1"/>
+<text x="254" y="610">taxable expenditures</text>
+<rect x="220" y="621" width="24" height="16" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+<text x="254" y="634">undistributed income</text>
+</g>
+</svg>

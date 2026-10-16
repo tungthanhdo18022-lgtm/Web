@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" font-family="Georgia, serif">
+<rect x="0" y="0" width="680" height="560" fill="white"/>
+<text x="340" y="34" text-anchor="middle" font-size="17">Average Total Agricultural Export Growth Rate, Five Years</text>
+<text x="340" y="58" text-anchor="middle" font-size="17">Pre- and Post-FTA with the United States</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="90" y1="430.0" x2="640" y2="430.0"/>
+<line x1="90" y1="373.3" x2="640" y2="373.3"/>
+<line x1="90" y1="316.7" x2="640" y2="316.7"/>
+<line x1="90" y1="260.0" x2="640" y2="260.0"/>
+<line x1="90" y1="203.3" x2="640" y2="203.3"/>
+<line x1="90" y1="146.7" x2="640" y2="146.7"/>
+<line x1="90" y1="90.0" x2="640" y2="90.0"/>
+</g>
+<g stroke="#333" stroke-width="1.2"><line x1="90" y1="90" x2="90" y2="430"/><line x1="90" y1="430" x2="640" y2="430"/></g>
+<g font-size="13" fill="#333" text-anchor="end">
+<text x="82" y="434.0">-5</text>
+<text x="82" y="377.3">0</text>
+<text x="82" y="320.7">5</text>
+<text x="82" y="264.0">10</text>
+<text x="82" y="207.3">15</text>
+<text x="82" y="150.7">20</text>
+<text x="82" y="94.0">25</text>
+</g>
+<text x="28" y="260" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 28 260)">Growth rate (%)</text>
+<rect x="144" y="216.9" width="56" height="156.4" fill="#1c3350"/>
+<rect x="212" y="373.3" width="56" height="15.9" fill="#4a7cb8"/>
+<rect x="280" y="150.1" width="56" height="223.3" fill="#b9cfe9"/>
+<text x="240" y="458" text-anchor="middle" font-size="14" fill="#333">Pre-FTA</text>
+<rect x="394" y="145.5" width="56" height="227.8" fill="#1c3350"/>
+<rect x="462" y="219.2" width="56" height="154.1" fill="#4a7cb8"/>
+<rect x="530" y="316.7" width="56" height="56.7" fill="#b9cfe9"/>
+<text x="490" y="458" text-anchor="middle" font-size="14" fill="#333">Post-FTA</text>
+<text x="90" y="500" font-size="14" font-weight="bold" fill="#333">Export growth</text>
+<rect x="90" y="512" width="16" height="14" fill="#1c3350"/>
+<text x="112" y="524" font-size="13" fill="#333">Guatemala (CAFTA-DR)</text>
+<rect x="286.0" y="512" width="16" height="14" fill="#4a7cb8"/>
+<text x="308.0" y="524" font-size="13" fill="#333">Mexico (NAFTA)</text>
+<rect x="438.8" y="512" width="16" height="14" fill="#b9cfe9"/>
+<text x="460.8" y="524" font-size="13" fill="#333">Morocco (MAFTA)</text>
+</svg>

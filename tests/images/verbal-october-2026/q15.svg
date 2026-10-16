@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 590" font-family="Georgia, serif">
+<rect x="0" y="0" width="640" height="590" fill="white"/>
+<text x="340" y="32" text-anchor="middle" font-size="16">Tax Penalties Assessed on Private</text>
+<text x="340" y="54" text-anchor="middle" font-size="16">Foundations That Filed Form 4720,</text>
+<text x="340" y="76" text-anchor="middle" font-size="16">by Reason, 2003–2005</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="70" y1="400.0" x2="610" y2="400.0"/>
+<line x1="70" y1="361.2" x2="610" y2="361.2"/>
+<line x1="70" y1="322.5" x2="610" y2="322.5"/>
+<line x1="70" y1="283.8" x2="610" y2="283.8"/>
+<line x1="70" y1="245.0" x2="610" y2="245.0"/>
+<line x1="70" y1="206.2" x2="610" y2="206.2"/>
+<line x1="70" y1="167.5" x2="610" y2="167.5"/>
+<line x1="70" y1="128.8" x2="610" y2="128.8"/>
+<line x1="70" y1="90.0" x2="610" y2="90.0"/>
+</g>
+<g stroke="#333" stroke-width="1.2"><line x1="70" y1="90" x2="70" y2="400"/><line x1="70" y1="400" x2="610" y2="400"/></g>
+<g font-size="13" fill="#333" text-anchor="end">
+<text x="62" y="404.0">0</text>
+<text x="62" y="365.2">10</text>
+<text x="62" y="326.5">20</text>
+<text x="62" y="287.8">30</text>
+<text x="62" y="249.0">40</text>
+<text x="62" y="210.2">50</text>
+<text x="62" y="171.5">60</text>
+<text x="62" y="132.8">70</text>
+<text x="62" y="94.0">80</text>
+</g>
+<text x="24" y="245" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 24 245)">Percentage of total penalty</text>
+<rect x="85.5" y="365.1" width="32" height="34.9" fill="#6e6e6e"/>
+<rect x="121.5" y="380.6" width="32" height="19.4" fill="#c9c9c9"/>
+<rect x="157.5" y="245.0" width="32" height="155.0" fill="#111111"/>
+<text x="145.5" y="414" text-anchor="end" font-size="13" fill="#333" transform="rotate(-40 145.5 414)">self-dealing</text>
+<rect x="220.5" y="93.9" width="32" height="306.1" fill="#6e6e6e"/>
+<rect x="256.5" y="101.6" width="32" height="298.4" fill="#c9c9c9"/>
+<rect x="292.5" y="186.9" width="32" height="213.1" fill="#111111"/>
+<text x="280.5" y="414" text-anchor="end" font-size="13" fill="#333" transform="rotate(-40 280.5 414)">undistributed income</text>
+<rect x="355.5" y="374.8" width="32" height="25.2" fill="#6e6e6e"/>
+<rect x="391.5" y="347.7" width="32" height="52.3" fill="#c9c9c9"/>
+<rect x="427.5" y="386.4" width="32" height="13.6" fill="#111111"/>
+<text x="415.5" y="414" text-anchor="end" font-size="13" fill="#333" transform="rotate(-40 415.5 414)">taxable expenditures</text>
+<rect x="490.5" y="390.3" width="32" height="9.7" fill="#6e6e6e"/>
+<rect x="526.5" y="386.4" width="32" height="13.6" fill="#c9c9c9"/>
+<rect x="562.5" y="396.1" width="32" height="3.9" fill="#111111"/>
+<text x="550.5" y="414" text-anchor="end" font-size="13" fill="#333" transform="rotate(-40 550.5 414)">excess business holdings</text>
+<text x="340" y="528" text-anchor="middle" font-size="14" fill="#333">Reason for tax penalty</text>
+<rect x="190" y="548" width="16" height="14" fill="#6e6e6e" stroke="#333" stroke-width="0.8"/>
+<text x="212" y="560" font-size="13" fill="#333">2003</text>
+<rect x="280" y="548" width="16" height="14" fill="#c9c9c9" stroke="#333" stroke-width="0.8"/>
+<text x="302" y="560" font-size="13" fill="#333">2004</text>
+<rect x="370" y="548" width="16" height="14" fill="#111111" stroke="#333" stroke-width="0.8"/>
+<text x="392" y="560" font-size="13" fill="#333">2005</text>
+</svg>

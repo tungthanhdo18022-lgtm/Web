@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 440" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="620" height="440" fill="#ffffff"/>
+  <!-- Plot geometry: y=330 baseline; 0.6 -> 300px (50px per 0.1) -->
+  <!-- Y gridlines + tick labels -->
+  <g font-size="15" fill="#444" text-anchor="end">
+    <line x1="92" y1="330" x2="580" y2="330" stroke="#999" stroke-width="1.5"/>
+    <line x1="92" y1="280" x2="580" y2="280" stroke="#ddd" stroke-width="1"/>
+    <line x1="92" y1="230" x2="580" y2="230" stroke="#ddd" stroke-width="1"/>
+    <line x1="92" y1="180" x2="580" y2="180" stroke="#ddd" stroke-width="1"/>
+    <line x1="92" y1="130" x2="580" y2="130" stroke="#ddd" stroke-width="1"/>
+    <line x1="92" y1="80"  x2="580" y2="80"  stroke="#ddd" stroke-width="1"/>
+    <line x1="92" y1="30"  x2="580" y2="30"  stroke="#ddd" stroke-width="1"/>
+    <text x="84" y="335">0</text>
+    <text x="84" y="285">0.1</text>
+    <text x="84" y="235">0.2</text>
+    <text x="84" y="185">0.3</text>
+    <text x="84" y="135">0.4</text>
+    <text x="84" y="85">0.5</text>
+    <text x="84" y="35">0.6</text>
+  </g>
+  <text x="34" y="180" font-size="17" fill="#222" text-anchor="middle" transform="rotate(-90 34 180)">Correlation</text>
+
+  <!-- Bars: Impressionist group centered x=236; Cubist group centered x=456 -->
+  <!-- bar width 46, gap 10 -> group width 158 -->
+  <g stroke-width="2">
+    <!-- Impressionist: P6=0.40 (200px), P1=0.58 (290px), P2=0.10 (50px) -->
+    <rect x="157" y="130" width="46" height="200" fill="#a7b0bf" stroke="#2f6fd0"/>
+    <rect x="213" y="40"  width="46" height="290" fill="#ffffff" stroke="#d43d3d"/>
+    <rect x="269" y="280" width="46" height="50"  fill="#222222" stroke="#222222"/>
+    <!-- Cubist: P6=0.28 (140px), P1=0.40 (200px), P2=0.23 (115px) -->
+    <rect x="377" y="190" width="46" height="140" fill="#a7b0bf" stroke="#2f6fd0"/>
+    <rect x="433" y="130" width="46" height="200" fill="#ffffff" stroke="#d43d3d"/>
+    <rect x="489" y="215" width="46" height="115" fill="#222222" stroke="#222222"/>
+  </g>
+
+  <!-- X group labels + axis title -->
+  <g font-size="17" fill="#222" text-anchor="middle">
+    <text x="236" y="358">Impressionist</text>
+    <text x="456" y="358">Cubist</text>
+    <text x="346" y="392" font-size="16" fill="#444">Painting style</text>
+  </g>
+
+  <!-- Legend -->
+  <g font-size="16" fill="#222">
+    <rect x="236" y="404" width="22" height="16" fill="#a7b0bf" stroke="#2f6fd0" stroke-width="2"/>
+    <text x="264" y="418">P6</text>
+    <rect x="316" y="404" width="22" height="16" fill="#ffffff" stroke="#d43d3d" stroke-width="2"/>
+    <text x="344" y="418">P1</text>
+    <rect x="392" y="404" width="22" height="16" fill="#222222" stroke="#222222" stroke-width="2"/>
+    <text x="420" y="418">P2</text>
+  </g>
+</svg>

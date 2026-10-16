@@ -1,0 +1,10 @@
+{
+  "name": "tunn.sat",
+  "description": "Bluebook-style Digital SAT Math practice tests in a Bluebook-style interface: timer, Desmos calculator, reference sheet, mark for review, answer eliminator, instant scoring and explanations.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

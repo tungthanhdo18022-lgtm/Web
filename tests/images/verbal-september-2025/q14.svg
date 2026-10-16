@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 640" font-family="Georgia, serif"><rect x="0" y="0" width="100%" height="100%" fill="white"/>
+<defs>
+<pattern id="q14dots" width="11" height="11" patternUnits="userSpaceOnUse">
+<rect width="11" height="11" fill="#4d4d4d"/>
+<circle cx="3" cy="3" r="1.7" fill="white"/><circle cx="8.5" cy="8.5" r="1.7" fill="white"/>
+</pattern>
+<pattern id="q14hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+<rect width="9" height="9" fill="white"/>
+<line x1="0" y1="0" x2="0" y2="9" stroke="#4d4d4d" stroke-width="2.4"/>
+</pattern>
+</defs>
+<text x="380" y="30" text-anchor="middle" font-size="16">Is the Federal Government Responsible for</text>
+<text x="380" y="52" text-anchor="middle" font-size="16">Ensuring All Americans Have Health Coverage?</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="110" y1="432.9" x2="650" y2="432.9"/><line x1="110" y1="375.7" x2="650" y2="375.7"/><line x1="110" y1="318.6" x2="650" y2="318.6"/><line x1="110" y1="261.4" x2="650" y2="261.4"/><line x1="110" y1="204.3" x2="650" y2="204.3"/><line x1="110" y1="147.1" x2="650" y2="147.1"/><line x1="110" y1="90" x2="650" y2="90"/>
+</g>
+<g stroke="#999" stroke-width="1.2">
+<line x1="110" y1="490" x2="650" y2="490"/><line x1="110" y1="490" x2="110" y2="90"/>
+</g>
+<g font-size="14" fill="#333" text-anchor="end">
+<text x="102" y="494">0%</text><text x="102" y="437">10%</text><text x="102" y="380">20%</text><text x="102" y="323">30%</text><text x="102" y="265">40%</text><text x="102" y="208">50%</text><text x="102" y="151">60%</text><text x="102" y="94">70%</text>
+</g>
+<g stroke="#333" stroke-width="1.4">
+<rect x="190" y="286.6" width="140" height="203.4" fill="white"/>
+<rect x="190" y="135.1" width="140" height="151.5" fill="#7f7f7f"/>
+<rect x="440" y="318.6" width="140" height="171.4" fill="url(#q14dots)"/>
+<rect x="440" y="284.3" width="140" height="34.3" fill="url(#q14hatch)"/>
+</g>
+<g font-size="15" fill="#333" text-anchor="middle">
+<text x="260" y="516">Yes</text><text x="510" y="516">No</text>
+</g>
+<text x="385" y="546" text-anchor="middle" font-size="15">Preferred Policy</text>
+<text x="34" y="290" text-anchor="middle" font-size="15" transform="rotate(-90 34 290)">Percent of Respondents</text>
+<g font-size="14" fill="#333">
+<rect x="110" y="562" width="540" height="64" fill="none" stroke="#666" stroke-width="1.2"/>
+<rect x="126" y="572" width="15" height="13" fill="white" stroke="#333" stroke-width="1.2"/>
+<text x="148" y="584">Single National</text>
+<rect x="126" y="594" width="15" height="13" fill="#7f7f7f" stroke="#333" stroke-width="1.2"/>
+<text x="148" y="606">Continue Existing</text>
+<rect x="380" y="572" width="15" height="13" fill="url(#q14dots)" stroke="#333" stroke-width="1.2"/>
+<text x="402" y="584">Government/Private Mix</text>
+<rect x="380" y="594" width="15" height="13" fill="url(#q14hatch)" stroke="#333" stroke-width="1.2"/>
+<text x="402" y="606">No Government</text>
+</g>
+</svg>

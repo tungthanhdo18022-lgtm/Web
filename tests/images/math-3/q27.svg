@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 60 350 230" font-family="Georgia, serif"><rect x="0" y="60" width="350" height="230" fill="white"/>
+<defs><pattern id="hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+<rect width="7" height="7" fill="#fde8e8"/><line x1="0" y1="0" x2="0" y2="7" stroke="#c0392b" stroke-width="1.2"/>
+</pattern></defs>
+<!-- front base: A(40,250) B(170,250) C(105,137.4), equilateral, side x -->
+<!-- length x*sqrt(3), drawn receding by (130,-55): A'(170,195) B'(300,195) C'(235,82.4) -->
+<polygon points="40,250 170,250 105,137.4" fill="url(#hatch)" stroke="#1a1a1a" stroke-width="2.2"/>
+<g stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="6,5" fill="none">
+<line x1="40" y1="250" x2="170" y2="195"/>
+<line x1="170" y1="195" x2="300" y2="195"/>
+<line x1="170" y1="195" x2="235" y2="82.4"/>
+</g>
+<g stroke="#1a1a1a" stroke-width="2.2" fill="none">
+<line x1="170" y1="250" x2="300" y2="195"/>
+<line x1="105" y1="137.4" x2="235" y2="82.4"/>
+<line x1="300" y1="195" x2="235" y2="82.4"/>
+</g>
+<g font-size="18" fill="#111">
+<text x="105" y="274" text-anchor="middle" font-style="italic">x</text>
+<text x="246" y="246"><tspan font-style="italic">x</tspan>√3</text>
+</g>
+</svg>

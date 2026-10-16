@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 360" font-family="Georgia, serif">
+<rect x="0" y="0" width="100%" height="100%" fill="white"/>
+<!-- plot: x in [-11,0.5] -> px = 40 + 30(x+11); y in [-14,1] -> py = 30 + 20(1-y) -->
+<polygon points="40,30 385.0,30 385.0,292.5 40,235.0" fill="#c9c9c9"/>
+<g stroke="#d0d0d0" stroke-width="0.8"><line x1="70" y1="30" x2="70" y2="330"/><line x1="130" y1="30" x2="130" y2="330"/><line x1="190" y1="30" x2="190" y2="330"/><line x1="250" y1="30" x2="250" y2="330"/><line x1="310" y1="30" x2="310" y2="330"/><line x1="370" y1="30" x2="370" y2="330"/><line x1="40" y1="50" x2="385.0" y2="50"/><line x1="40" y1="90" x2="385.0" y2="90"/><line x1="40" y1="130" x2="385.0" y2="130"/><line x1="40" y1="170" x2="385.0" y2="170"/><line x1="40" y1="210" x2="385.0" y2="210"/><line x1="40" y1="250" x2="385.0" y2="250"/><line x1="40" y1="290" x2="385.0" y2="290"/><line x1="40" y1="330" x2="385.0" y2="330"/></g>
+<!-- boundary line through (-8,-10) and (0,-12): x + 4y = -48 -->
+<line x1="40" y1="235.0" x2="385.0" y2="292.5" stroke="#1a1a1a" stroke-width="2.5"/>
+<g stroke="#222" stroke-width="1.8">
+<line x1="40" y1="50" x2="397.0" y2="50"/><polygon points="397.0,50 387.0,46 387.0,54" fill="#222"/>
+<line x1="370" y1="338" x2="370" y2="18"/><polygon points="370,18 366,28 374,28" fill="#222"/>
+</g>
+<g font-size="13" fill="#222" text-anchor="middle"><text x="70" y="67">−10</text><text x="130" y="67">−8</text><text x="190" y="67">−6</text><text x="250" y="67">−4</text><text x="310" y="67">−2</text></g>
+<g font-size="13" fill="#222"><text x="392.0" y="94">−2</text><text x="392.0" y="134">−4</text><text x="392.0" y="174">−6</text><text x="392.0" y="214">−8</text><text x="392.0" y="254">−10</text><text x="392.0" y="294">−12</text><text x="392.0" y="334">−14</text></g>
+<circle cx="130" cy="250" r="4.5" fill="#1a1a1a"/>
+<circle cx="370" cy="290" r="4.5" fill="#1a1a1a"/>
+<text x="358" y="66" font-size="13" fill="#222" text-anchor="middle">O</text>
+<text x="403.0" y="55" font-size="16" font-style="italic">x</text>
+<text x="378" y="26" font-size="16" font-style="italic">y</text>
+</svg>
