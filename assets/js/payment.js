@@ -47,14 +47,14 @@
   }
 
   /** "12 Practice Tests", "5 Elite Tests"… for the locked Premium tests. */
+  /** What Premium includes (sections without a locked test are left out), then the two promises. */
   function includedLines() {
-    var names = { '': 'Practice Test', challenge: 'Elite Test', topic: 'Topic Test', advanced: 'Advanced Test' };
-    var order = ['', 'challenge', 'topic', 'advanced'];
+    var names = { '': 'All 2026 Practice Tests', topic: 'All Topic Tests', challenge: 'All Elite Tests', advanced: 'All Advanced Tests' };
+    var order = ['', 'topic', 'challenge', 'advanced'];
     var n = {};
     lockedStubs().forEach(function (s) { var k = names[s.section] ? s.section : ''; n[k] = (n[k] || 0) + 1; });
-    return order.filter(function (k) { return n[k]; }).map(function (k) {
-      return n[k] + ' ' + names[k] + (n[k] === 1 ? '' : 's') + (k === '' ? ' (2026)' : '');
-    });
+    var lines = order.filter(function (k) { return n[k]; }).map(function (k) { return names[k]; });
+    return lines.length ? lines.concat(['Prediction tests before every SAT', 'New tests added regularly']) : [];
   }
 
   function qrUrl(o) {
@@ -95,11 +95,10 @@
     } else {
       action = '<p class="pp-prem-sub">Premium codes are coming soon.</p>';
     }
-    var total = lockedStubs().length;
     return '<section class="pp-side-card pp-prem" id="pp-premium" aria-label="Premium">' +
       '<span class="pp-prem-deco" aria-hidden="true"></span>' +
       '<div class="pp-prem-label">' + U.icon('sparkles') + 'PREMIUM</div>' +
-      '<div class="pp-prem-title">Unlock ' + total + ' more test' + (total === 1 ? '' : 's') + '</div>' +
+      '<div class="pp-prem-title">Unlock more tests</div>' +
       '<ul class="pp-prem-list">' + lines.map(function (l) { return '<li>' + U.icon('check') + U.esc(l) + '</li>'; }).join('') + '</ul>' +
       (enabled() && cheapest ? '<p class="pp-prem-price">From <b>' + money(cheapest) + '</b></p>' : '') +
       action +
