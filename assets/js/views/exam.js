@@ -5,6 +5,9 @@
   var U = global.U, R = global.R, G = global.G;
   var LETTERS = 'ABCDEFGH';
   var desmosPromise = null;
+  /** Text sizes in the More menu (m = default); the CSS classes .bb.ts-s / .bb.ts-l scale the question text */
+  var TEXT_SIZES = [{ id: 's', label: 'Small text' }, { id: 'm', label: 'Medium text' }, { id: 'l', label: 'Large text' }];
+  var LS_TEXT_SIZE = 'tunn.exam.textSize.v1';
 
   var SPR_RULES =
     '<ul class="bb-dir-list">' +
@@ -200,6 +203,11 @@
       '        <button role="menuitem" data-act="help">' + U.icon('help') + 'Help</button>' +
       '        <button role="menuitem" data-act="exit">' + U.icon('logout') + 'Save and Exit</button>' +
       '        <button role="menuitem" data-act="submit-now">' + U.icon('send') + 'Submit Test</button>' +
+      '        <div class="bb-ts" role="group" aria-label="Text size"><span class="bb-ts-label">Text size</span><div class="bb-ts-seg">' +
+      TEXT_SIZES.map(function (z) {
+        return '<button type="button" data-act="textsize" data-size="' + z.id + '" class="bb-ts-' + z.id + '" aria-pressed="false" aria-label="' + z.label + '" title="' + z.label + '">A</button>';
+      }).join('') +
+      '        </div></div>' +
       '      </div></div>' +
       '  </div>' +
       '</header>' +
@@ -230,6 +238,7 @@
       student: $('bb-student'), dir: $('bb-directions'), dirBtn: $('bb-dir-btn'),
       moreBtn: $('bb-more-btn'), moreMenu: $('bb-more-menu'), calcBtn: $('bb-calc-btn'), refBtn: $('bb-ref-btn')
     };
+    setTextSize(U.lsGet(LS_TEXT_SIZE, 'm'), true);
     document.body.classList.add('in-exam');
 
     /* ---------------- Render ---------------- */
@@ -634,6 +643,16 @@
       if (onlyAtStart && (ms.elapsed > 1 || ms.current > 0)) return;
       toggleDirections(true);
     }
+    /* Text size (More menu): saved on this device, applies to the question text and the choices */
+    function setTextSize(id, quiet) {
+      if (!TEXT_SIZES.some(function (z) { return z.id === id; })) id = 'm';
+      TEXT_SIZES.forEach(function (z) { els.bb.classList.toggle('ts-' + z.id, z.id === id && id !== 'm'); });
+      Array.prototype.forEach.call(els.moreMenu.querySelectorAll('[data-act="textsize"]'), function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-size') === id));
+      });
+      if (!quiet) U.lsSet(LS_TEXT_SIZE, id);
+    }
+
     function toggleMore(force) {
       ui.moreOpen = force != null ? force : !ui.moreOpen;
       els.moreMenu.hidden = !ui.moreOpen;
@@ -1055,6 +1074,7 @@
           toggleMore();
           break;
         case 'help': toggleMore(false); showHelp(); break;
+        case 'textsize': setTextSize(t.getAttribute('data-size')); break;
         case 'exit':
           toggleMore(false);
           save(true);
