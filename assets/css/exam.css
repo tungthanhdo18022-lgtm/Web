@@ -69,6 +69,19 @@
 }
 .bb-menu button:hover { background: #f2f2f4; }
 .bb-menu .ico { width: 19px; height: 19px; color: var(--bb-gray); }
+/* Text size: small / medium / large "A" buttons at the bottom of the More menu */
+.bb-ts { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding: 10px 6px 4px 12px; border-top: 1px solid #ececef; }
+.bb-ts-label { font-size: 14px; font-weight: 600; }
+.bb-ts-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: #f1f1f3; }
+.bb-menu .bb-ts-seg button {
+  display: grid; place-items: center; width: 32px; height: 30px; padding: 0; border-radius: 6px;
+  font-family: var(--font-serif); font-weight: 700; line-height: 1; color: var(--bb-gray);
+}
+.bb-menu .bb-ts-seg button:hover { background: #e6e6ea; }
+.bb-menu .bb-ts-seg button[aria-pressed="true"] { background: #fff; color: var(--bb-ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+.bb-menu .bb-ts-seg .bb-ts-s { font-size: 12px; }
+.bb-menu .bb-ts-seg .bb-ts-m { font-size: 15px; }
+.bb-menu .bb-ts-seg .bb-ts-l { font-size: 18px; }
 
 /* Signature dashed divider line, in many colours */
 .bb-dashline { flex: none; height: 2px; background: var(--bb-rainbow); }
@@ -133,7 +146,7 @@
   position: relative; flex: 1; display: flex; align-items: center; gap: 9px; min-height: 36px;
   padding: 5px 11px 5px 8px; border: 1px solid #3d3d3d; border-radius: 9px; background: #fff;
   text-align: left; color: var(--bb-ink);
-  font-family: var(--font-serif); font-size: 13px; line-height: 1.45;
+  font-family: var(--font-serif); font-size: calc(13px * var(--bb-ts)); line-height: 1.45;
   transition: box-shadow .12s, border-color .12s;
 }
 .bb-choice:hover { box-shadow: inset 0 0 0 1px #3d3d3d; }
@@ -341,7 +354,7 @@ body.is-exam .toast { background: #1a1a1a; }
   .bb-directions { top: 66px; padding: 0; }
   .bb-directions-body { padding: 18px 18px 6px; font-size: 15.5px; }
   .bb-stage--single { padding: 18px 16px 36px; }
-  .bb-choice { font-size: 15px; padding: 7px 12px 7px 10px; gap: 10px; }
+  .bb-choice { font-size: calc(15px * var(--bb-ts)); padding: 7px 12px 7px 10px; gap: 10px; }
   .bb-stage--split { display: block; height: auto; }
   .bb-divider { display: none; }
   .bb-pane { overflow: visible; }
@@ -397,8 +410,11 @@ mark.hl { padding: 0 1px; border-radius: 2px; color: inherit; }
 .bb-hl-trash .ico { width: 18px; height: 18px; }
 
 /* Question text in the exam: a little smaller than elsewhere on the site, so long passages and choices fit */
-.bb .content { font-size: 13.5px; line-height: 1.6; }
+.bb { --bb-ts: 1; }
+.bb.ts-s { --bb-ts: .92; }
+.bb.ts-l { --bb-ts: 1.2; }
+.bb .content { font-size: calc(13.5px * var(--bb-ts)); line-height: 1.6; }
 
 /* ---------------- Reading & Writing: split screen ---------------- */
 .bb-rw-stem { margin-bottom: 18px; }
-.bb-pane--left .bb-prompt { font-size: 13.5px; }
+.bb-pane--left .bb-prompt { font-size: calc(13.5px * var(--bb-ts)); }
