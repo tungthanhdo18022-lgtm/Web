@@ -370,65 +370,6 @@
       '</section>';
   }
 
-  var QOTD_KEY = 'satmath.qotd';
-  function hashStr(str) {
-    var h = 2166136261;
-    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
-  /** Today's question: a short text-only multiple-choice question from a free test, same for everyone each day. */
-  function qotdPick() {
-    var P = global.P;
-    var pool = [];
-    global.SATLibrary.published().forEach(function (t) {
-      if (P && P.isPremium && P.isPremium(t)) return;
-      (t.modules || []).forEach(function (m) {
-        (m.questions || []).forEach(function (q) {
-          if (q.type !== 'mcq' || !q.choices || q.choices.length !== 4 || !q.answer) return;
-          var text = String(q.prompt || '') + q.choices.join(' ');
-          if (/!\[|<|\|/.test(text) || String(q.prompt).length > 360) return;
-          pool.push({ test: t, q: q });
-        });
-      });
-    });
-    if (!pool.length) return null;
-    var key = global.Streak.dayKey(Date.now());
-    var item = pool[hashStr(key) % pool.length];
-    item.key = key;
-    return item;
-  }
-
-  function qotdHtml() {
-    var R = global.R;
-    var item = qotdPick();
-    if (!item || !R) return '';
-    var q = item.q;
-    var saved = U.lsGet(QOTD_KEY, '') || '';
-    var picked = saved.indexOf(item.key + ':') === 0 ? saved.slice(item.key.length + 1) : '';
-    var isMath = CATEGORIES.some(function (c) { return c.key === q.domain; });
-    var tag = isMath ? 'Math' : 'Reading &amp; Writing';
-    var letters = ['A', 'B', 'C', 'D'];
-    var opts = q.choices.map(function (c, i) {
-      var L = letters[i];
-      var cls = '';
-      if (picked) cls = L === q.answer ? ' is-right' : (L === picked ? ' is-wrong' : ' is-dim');
-      return '<button type="button" class="pp-qotd-opt' + cls + '" data-qotd-pick="' + L + '"' + (picked ? ' disabled' : '') + '>' +
-        '<span class="pp-qotd-letter">' + L + '</span><span class="pp-qotd-text">' + R.render(c, { inline: true }) + '</span></button>';
-    }).join('');
-    var feedback = '';
-    if (picked) {
-      var right = picked === q.answer;
-      feedback = '<div class="pp-qotd-feedback ' + (right ? 'is-right' : 'is-wrong') + '" role="status"><b>' +
-        (right ? 'Correct!' : 'Not quite. The answer is ' + q.answer + '.') + '</b>' +
-        (q.explanation ? '<div class="pp-qotd-expl">' + R.render(q.explanation) + '</div>' : '') +
-        '<span class="pp-qotd-from">From ' + U.esc(item.test.title) + ' &middot; New question tomorrow</span></div>';
-    }
-    return '<section class="pp-side-card pp-qotd" id="pp-qotd" aria-label="Question of the day">' +
-      '<div class="pp-qotd-top"><span class="pp-side-label">QUESTION OF THE DAY</span><span class="pp-qotd-tag">' + tag + '</span></div>' +
-      '<div class="pp-qotd-q">' + R.render(q.prompt) + '</div>' +
-      '<div class="pp-qotd-opts">' + opts + '</div>' + feedback + '</section>';
-  }
-
   var TIPS = [
     { t: 'Desmos tip', b: 'Type each side of an equation as its own line. The x-value where the graphs cross is the solution.' },
     { t: 'Desmos tip', b: 'For a system of equations, graph both and click the intersection point to read its coordinates.' },
@@ -636,7 +577,7 @@
         '</div>' +
         '<div class="pp-lists" id="pp-lists">' + ppListHtml(shown, groups, filter.year) + '</div>' +
         '</div>' +
-        '<aside class="pp-aside" aria-label="Today">' + ppCountdownHtml() + qotdHtml() + ppTipHtml() + '</aside>' +
+        '<aside class="pp-aside" aria-label="Today">' + ppCountdownHtml() + (global.Payment ? global.Payment.cardHtml() : '') + ppTipHtml() + '</aside>' +
         '</div>';
     }
 
@@ -802,15 +743,6 @@
         return;
       }
       if (e.target.closest('[data-menu-item]') || !e.target.closest('.pp-menu')) closeMenus();
-      var qp = e.target.closest('[data-qotd-pick]');
-      if (qp) {
-        U.lsSet(QOTD_KEY, global.Streak.dayKey(Date.now()) + ':' + qp.getAttribute('data-qotd-pick'));
-        var box = root.querySelector('#pp-qotd');
-        if (box) box.outerHTML = qotdHtml();
-        var nb = root.querySelector('#pp-qotd .pp-qotd-feedback');
-        if (nb) nb.setAttribute('tabindex', '-1');
-        return;
-      }
       var ft = e.target.closest('[data-fulltest-next]');
       if (ft) ftSet(ft.getAttribute('data-fulltest-from'), ft.getAttribute('data-fulltest-next'));
       var f = e.target.closest('[data-filter]');

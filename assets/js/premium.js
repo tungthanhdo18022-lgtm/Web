@@ -292,6 +292,30 @@
     });
   }
 
+  /** POSTs { action, deviceKey, ...extra } (orders); never rejects. */
+  function postAction(action, extra) {
+    var url = apiUrl();
+    if (!url) return Promise.resolve({ ok: false, error: 'unavailable' });
+    if (!hasCrypto()) return Promise.resolve({ ok: false, error: 'nocrypto' });
+    if (!storageWorks()) return Promise.resolve({ ok: false, error: 'storage' });
+    return createDeviceKey().then(function (k) {
+      if (!k) return { ok: false, error: 'storage' };
+      var payload = { action: action, device: deviceKey.id, deviceKey: deviceKey.spki };
+      Object.keys(extra || {}).forEach(function (name) { payload[name] = extra[name]; });
+      var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, REQUEST_TIMEOUT);
+      return fetch(url, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', signal: ctrl ? ctrl.signal : undefined })
+        .then(function (res) { return res.text(); })
+        .then(function (text) {
+          clearTimeout(timer);
+          try { var r = JSON.parse(text); return r && typeof r === 'object' ? r : { ok: false, error: 'server' }; } catch (e) { return { ok: false, error: 'server' }; }
+        }, function () {
+          clearTimeout(timer);
+          return { ok: false, error: 'network' };
+        });
+    }).catch(function () { return { ok: false, error: 'server' }; });
+  }
+
   /** Stores a successful server answer and unlocks the tests it has keys for. */
   function accept(code, r) {
     var keys = {};
@@ -774,6 +798,10 @@
     checkSymbol: checkSymbol,
     activate: activate,
     refresh: refresh,
+    /** New bank-transfer order for this device: { ok, order, amount, days, expiresAt } (never rejects). */
+    order: function (plan) { return postAction('order', { plan: plan }); },
+    /** { ok, status: pending | paid | expired | cancelled, code (when paid) } (never rejects). */
+    orderStatus: function (order) { return postAction('orderStatus', { order: order }); },
     boot: boot,
     openUnlock: openUnlock,
     openManage: openManage,

@@ -1443,7 +1443,7 @@ test('create codes menu ("Tạo mã mới…"): rows, dialog, validation of the 
 
 test('sheets and menu created by onOpen match the spec layout', () => {
   const sim = makeSim({ key: false });
-  assert.deepEqual(sim.sheetNames(), ['Codes', 'Settings', 'Log']);
+  assert.deepEqual(sim.sheetNames(), ['Codes', 'Settings', 'Orders', 'Log']);
   assert.deepEqual(sim.rows('Codes')[0], ['Code', 'Status', 'Days', 'Note', 'Created', 'Activated', 'Expires', 'Device', 'Device info', 'Last check', 'Moved', 'Moves']);
   assert.deepEqual(sim.rows('Log')[0], ['Time', 'Action', 'Code', 'Device', 'Result']);
   const settings = sim.rows('Settings');
@@ -1461,6 +1461,7 @@ test('sheets and menu created by onOpen match the spec layout', () => {
       { caption: 'Thu hồi mã đang chọn', fn: 'menuRevokeSelected' },
       { caption: 'Gỡ thiết bị của mã đang chọn', fn: 'menuResetDevice' },
       { separator: true },
+      { caption: 'Cài đặt thanh toán (webhook)…', fn: 'menuPaymentSetup' },
       { caption: 'Cài đặt khóa bí mật…', fn: 'menuInstallPrivateKey' },
       { caption: 'Kiểm tra cài đặt', fn: 'menuCheckSetup' }
     ]
@@ -1469,7 +1470,7 @@ test('sheets and menu created by onOpen match the spec layout', () => {
   sim.setSetting('Move after days', 3);
   sim.open();
   assert.deepEqual(sim.rows('Settings').slice(1).map((r) => r.slice(0, 2)), [['Move after days', 3], ['Refresh hours', 24]]);
-  assert.deepEqual(sim.sheetNames(), ['Codes', 'Settings', 'Log']);
+  assert.deepEqual(sim.sheetNames(), ['Codes', 'Settings', 'Orders', 'Log']);
   // "Refresh hours" sets checkAfter.
   clean(sim);
 });
@@ -2011,4 +2012,172 @@ test('command line: without a key every request is answered with "setup"', async
   } finally {
     child.kill();
   }
+});
+
+/* ================================================================================================
+ * Payments: orders and the bank-transfer webhook
+ * ============================================================================================== */
+const ORDER_RE = /^TUNN[0-9A-HJKMNP-TV-Z]{8}$/;
+function orderReq(action, device, extra = {}) {
+  return { action, deviceKey: DEVICES.get(device).spki, ...extra };
+}
+function webhookToken(sim) {
+  sim.open();
+  const r = sim.runMenu('menuPaymentSetup', []);
+  const m = /\?hook=([A-Za-z0-9_-]+)/.exec(r.dialogs[0].html);
+  assert.ok(m, 'the dialog shows ?hook=<token>');
+  return m[1];
+}
+function transfer(content, amount, id = Math.floor(Math.random() * 1e9)) {
+  return { id, gateway: 'MBBank', transactionDate: '2026-10-12 15:00:00', accountNumber: '0000000000', code: null,
+    content, transferType: 'in', transferAmount: amount, accumulated: 1000000, subAccount: null,
+    referenceCode: 'FT' + id, description: 'BankAPINotify ' + content };
+}
+
+test('payments: order -> webhook -> the paying device gets the code and activates it', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  assert.match(token, /^[A-Za-z0-9_-]{32}$/);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  assert.equal(o.ok, true, JSON.stringify(o));
+  assert.match(o.order, ORDER_RE);
+  assert.deepEqual([o.status, o.plan, o.amount, o.days], ['pending', '1m', 69000, 30]);
+  assert.equal(o.expiresAt, iso(T0 + 24 * HOUR));
+  assert.equal(sim.doPost(orderReq('orderStatus', dev, { order: o.order })).status, 'pending');
+
+  // The bank adds its own text and dots; the reference is still found.
+  const w = sim.doPost(transfer('MBVCB.1234.' + o.order.toLowerCase() + '.chuyen tien', 69000, 555), 'application/json', { hook: token });
+  assert.deepEqual(w, { success: true, message: 'paid · code created' });
+  const rec = sim.records('Orders')[0];
+  assert.equal(rec.Status, 'paid');
+  assert.match(String(rec.Payment), /txn 555/);
+  const st = sim.doPost(orderReq('orderStatus', dev, { order: o.order }));
+  assert.equal(st.status, 'paid');
+  assert.equal(st.code, rec.Code);
+  assert.equal(sim.codeRecord(st.code).Status, 'new');
+  assert.equal(sim.codeRecord(st.code).Days, 30);
+  assert.equal(sim.codeRecord(st.code).Note, 'Order ' + o.order);
+  // The page then activates the code the usual way.
+  assertOk(sim.doPost(req('activate', st.code, dev)), { code: st.code, expires: T0 + 30 * DAY, device: dev });
+  // The same transfer sent again does nothing more.
+  assert.equal(sim.doPost(transfer(o.order, 69000, 555), 'application/json', { hook: token }).message, 'already paid');
+  assert.equal(sim.records('Codes').length, 1);
+  clean(sim);
+});
+
+test('payments: the code is only answered to the device that made the order', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '3m' }));
+  assert.deepEqual([o.amount, o.days], [189000, 90]);
+  sim.doPost(transfer(o.order, 189000), 'application/json', { hook: token });
+  const other = sim.doPost(orderReq('orderStatus', newDevice(), { order: o.order }));
+  assertErr(other, 'notfound');
+  assert.match(other.message, /payment was not found/);
+  assert.equal(sim.doPost(orderReq('orderStatus', dev, { order: o.order })).status, 'paid');
+  // No device key -> "update"; bad plan / order -> invalid
+  assertErr(sim.doPost({ action: 'order', plan: '1m' }), 'update');
+  assertErr(sim.doPost(orderReq('order', dev, { plan: '12m' })), 'invalid');
+  assertErr(sim.doPost(orderReq('orderStatus', dev, { order: 'TUNN-0000' })), 'invalid');
+  clean(sim);
+});
+
+test('payments: wrong token, too little money, no reference, outgoing transfer', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  assert.deepEqual(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: 'x' + token.slice(1) }), { success: false, message: 'unauthorized' });
+  // Without ?hook the body goes to the code API, which refuses it
+  assertErr(sim.doPost(transfer(o.order, 69000), 'application/json', {}), 'invalid');
+  assert.equal(sim.doPost(transfer(o.order, 50000), 'application/json', { hook: token }).message, 'underpaid');
+  assert.equal(sim.records('Orders')[0].Status, 'pending');
+  assert.match(String(sim.records('Orders')[0].Note), /Underpaid: received 50000 of 69000/);
+  assert.equal(sim.doPost(transfer('chuyen tien hoc phi', 69000), 'application/json', { hook: token }).message, 'no order');
+  assert.equal(sim.doPost({ ...transfer(o.order, 69000), transferType: 'out' }, 'application/json', { hook: token }).message, 'ignored');
+  assert.equal(sim.doPost(transfer('TUNNZZZZZZZZ', 69000), 'application/json', { hook: token }).message, 'order not found');
+  assert.equal(sim.records('Codes').length, 0);
+  // Paying the rest later (a second transfer of the full amount) still works.
+  assert.equal(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: token }).message, 'paid · code created');
+  clean(sim);
+});
+
+test('payments: no webhook token installed -> every webhook call is refused', () => {
+  const sim = makeSim();
+  sim.open();
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  assert.equal(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: '' }).success, false);
+  assert.equal(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: 'anything' }).success, false);
+  clean(sim);
+});
+
+test('payments: the owner marks an order paid by hand (Status = paid) and the page gets a code', () => {
+  const sim = makeSim();
+  sim.open();
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '3m' }));
+  sim.setCell('Orders', 2, 'Status', 'paid');
+  const st = sim.doPost(orderReq('orderStatus', dev, { order: o.order.toLowerCase() }));
+  assert.equal(st.status, 'paid');
+  assert.match(st.code, /^TUNN-/);
+  assert.equal(sim.codeRecord(st.code).Days, 90);
+  // Asking again gives the same code (no second code).
+  assert.equal(sim.doPost(orderReq('orderStatus', dev, { order: o.order })).code, st.code);
+  assert.equal(sim.records('Codes').length, 1);
+  clean(sim);
+});
+
+test('payments: an unpaid order expires after 24 hours; a payment after that still counts', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  sim.advance(25 * HOUR);
+  assert.equal(sim.doPost(orderReq('orderStatus', dev, { order: o.order })).status, 'expired');
+  assert.equal(sim.records('Orders')[0].Status, 'expired');
+  sim.doPost(transfer(o.order, 69000), 'application/json', { hook: token });
+  assert.equal(sim.doPost(orderReq('orderStatus', dev, { order: o.order })).status, 'paid');
+  clean(sim);
+});
+
+test('payments: at most 5 new orders per device per hour', () => {
+  const sim = makeSim();
+  sim.open();
+  const dev = newDevice();
+  const ids = new Set();
+  for (let i = 0; i < 5; i++) ids.add(sim.doPost(orderReq('order', dev, { plan: '1m' })).order);
+  assert.equal(ids.size, 5);
+  const sixth = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  assertErr(sixth, 'rate');
+  assert.match(sixth.message, /payment requests/);
+  assert.equal(sim.doPost(orderReq('order', newDevice(), { plan: '1m' })).ok, true, 'other devices are not affected');
+  sim.advance(61 * MIN);
+  assert.equal(sim.doPost(orderReq('order', dev, { plan: '1m' })).ok, true);
+  clean(sim);
+});
+
+test('payments: an edited Orders header turns payments off (no guessing columns)', () => {
+  const sim = makeSim();
+  const token = webhookToken(sim);
+  const dev = newDevice();
+  const o = sim.doPost(orderReq('order', dev, { plan: '1m' }));
+  sim.setCell('Orders', 1, 2, 'Trạng thái');
+  assertErr(sim.doPost(orderReq('orderStatus', dev, { order: o.order })), 'setup');
+  assertErr(sim.doPost(orderReq('order', dev, { plan: '1m' })), 'setup');
+  assert.equal(sim.doPost(transfer(o.order, 69000), 'application/json', { hook: token }).message, 'setup');
+  clean(sim);
+});
+
+test('payments: the webhook token can be shown again or replaced from the menu', () => {
+  const sim = makeSim({ key: false });
+  const first = webhookToken(sim);
+  const again = sim.runMenu('menuPaymentSetup', ['YES']);
+  assert.ok(again.dialogs[0].html.includes('?hook=' + first));
+  const renewed = sim.runMenu('menuPaymentSetup', ['NO']);
+  const second = /\?hook=([A-Za-z0-9_-]+)/.exec(renewed.dialogs[0].html)[1];
+  assert.notEqual(second, first);
+  clean(sim);
 });
