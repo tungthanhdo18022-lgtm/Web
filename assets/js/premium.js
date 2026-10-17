@@ -643,11 +643,7 @@
   /** The Premium bar above the Advanced Tests (home page). */
   function barHtml(locked) {
     var st = status();
-    if (st.kind === 'active') {
-      return '<div class="premium-bar is-active" tabindex="-1" data-premium-focus>' + U.icon('check') +
-        '<div><b>Premium is active</b><span>' + (st.license.expires ? 'Valid until ' + U.esc(fmtDate(st.license.expires)) : 'No end date') + '</span></div>' +
-        '<button type="button" class="btn btn--sm btn--ghost" data-premium-manage>Details</button></div>';
-    }
+    if (st.kind === 'active') return ''; // the Premium card in the right column says it is active
     if (!locked) return '';
     if (st.kind === 'stale' && apiUrl()) {
       return '<div class="premium-bar is-warn">' + U.icon('warn') +

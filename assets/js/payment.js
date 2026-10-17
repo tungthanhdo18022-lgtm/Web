@@ -75,7 +75,7 @@
     if (!P()) return '';
     var st = P().state();
     if (st.active) {
-      return '<section class="pp-side-card pp-prem is-active" id="pp-premium" aria-label="Premium">' +
+      return '<section class="pp-side-card pp-prem is-active" id="pp-premium" aria-label="Premium" tabindex="-1" data-premium-focus>' +
         '<div class="pp-prem-label">' + U.icon('sparkles') + 'PREMIUM</div>' +
         '<div class="pp-prem-title">Premium is active</div>' +
         '<p class="pp-prem-sub">' + (st.expires ? 'Valid until ' + U.esc(fmtDay(st.expires)) : 'No end date') + '</p>' +
