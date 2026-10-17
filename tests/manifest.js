@@ -81,6 +81,7 @@ SATLibrary.manifest([
   { file: 'rhetorical-synthesis-1.js', v: '1' },
   { file: 'premium/rhetorical-synthesis-2.js', v: '2' },
   { file: 'premium/rhetorical-synthesis-3.js', v: '2' },
+  { file: 'pronoun-reference.js', v: '1' },
   { file: 'premium/percent-ratio-proportion-1.js', v: '3' },
   { file: 'premium/percent-ratio-proportion-2.js', v: '3' },
   { file: 'premium/math-1.js', v: '5' },
