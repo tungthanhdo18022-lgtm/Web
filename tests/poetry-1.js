@@ -1,5 +1,5 @@
 /*
- * Practice test: Poetry 1 (20 questions).
+ * Topic test: Poetry 1 (20 questions).
  * Digital SAT Reading and Writing — poetry practice set.
  * Note: the content lives inside String.raw`...` — do not use backticks (`) inside the test.
  */
@@ -10,6 +10,7 @@ SATLibrary.register({
 title: Poetry 1
 author: tunn.sat
 description: A 20-question Digital SAT Reading and Writing practice set focused on poetry: Craft and Structure, Information and Ideas, and Words in Context questions drawn from classic and modern poems.
+section: topic
 time: 26
 ---
 
