@@ -82,6 +82,7 @@ SATLibrary.manifest([
   { file: 'transitions-4.js', v: '1' },
   { file: 'transitions-5.js', v: '1' },
   { file: 'transitions-6.js', v: '1' },
+  { file: 'transitions-7.js', v: '1' },
   { file: 'grammar-1.js', v: '3' },
   { file: 'premium/grammar-2.js', v: '4' },
   { file: 'premium/grammar-3.js', v: '4' },
