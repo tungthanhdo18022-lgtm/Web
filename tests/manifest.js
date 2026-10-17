@@ -39,7 +39,7 @@ SATLibrary.manifest([
   { file: 'verbal-december-2025.js', v: '4' },
   { file: 'premium/verbal-march-2026.js', v: '5' },
   { file: 'premium/verbal-may-2026.js', v: '6' },
-  { file: 'premium/verbal-june-2026.js', v: '6' },
+  { file: 'premium/verbal-june-2026.js', v: '7' },
   { file: 'premium/verbal-august-2026.js', v: '2' },
   { file: 'premium/verbal-september-2026.js', v: '4' },
   { file: 'premium/verbal-october-2026.js', v: '5' },

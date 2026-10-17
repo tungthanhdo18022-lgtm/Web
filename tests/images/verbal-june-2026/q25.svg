@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 540" font-family="Georgia, serif">
+<rect x="0" y="0" width="560" height="540" fill="white"/>
+<text x="295" y="34" text-anchor="middle" font-size="16">Value Added to Local Economies by RECs</text>
+<g stroke="#bbb" stroke-width="0.7">
+<line x1="70" y1="400.0" x2="520" y2="400.0"/>
+<line x1="70" y1="361.2" x2="520" y2="361.2"/>
+<line x1="70" y1="322.5" x2="520" y2="322.5"/>
+<line x1="70" y1="283.8" x2="520" y2="283.8"/>
+<line x1="70" y1="245.0" x2="520" y2="245.0"/>
+<line x1="70" y1="206.2" x2="520" y2="206.2"/>
+<line x1="70" y1="167.5" x2="520" y2="167.5"/>
+<line x1="70" y1="128.8" x2="520" y2="128.8"/>
+<line x1="70" y1="90.0" x2="520" y2="90.0"/>
+</g>
+<g stroke="#333" stroke-width="1.2"><line x1="70" y1="90" x2="70" y2="400"/><line x1="70" y1="400" x2="520" y2="400"/></g>
+<g font-size="13" fill="#333" text-anchor="end">
+<text x="62" y="404.0">0</text>
+<text x="62" y="365.2">5</text>
+<text x="62" y="326.5">10</text>
+<text x="62" y="287.8">15</text>
+<text x="62" y="249.0">20</text>
+<text x="62" y="210.2">25</text>
+<text x="62" y="171.5">30</text>
+<text x="62" y="132.8">35</text>
+<text x="62" y="94.0">40</text>
+</g>
+<text x="24" y="245" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 24 245)">Dollars (billions)</text>
+<rect x="129" y="159.8" width="42" height="240.2" fill="#6e6e6e"/>
+<rect x="179" y="121.0" width="42" height="279.0" fill="#c9c9c9"/>
+<rect x="279" y="194.6" width="42" height="205.4" fill="#6e6e6e"/>
+<rect x="329" y="155.9" width="42" height="244.1" fill="#c9c9c9"/>
+<rect x="429" y="314.8" width="42" height="85.2" fill="#6e6e6e"/>
+<rect x="479" y="283.8" width="42" height="116.2" fill="#c9c9c9"/>
+<g font-size="13" fill="#333" text-anchor="middle">
+<text x="175" y="420">direct</text>
+<text x="325" y="420">indirect</text>
+<text x="475" y="420">induced</text>
+</g>
+<text x="295" y="452" text-anchor="middle" font-size="14" fill="#333">Type of impact</text>
+<g font-size="13" fill="#333">
+<rect x="215" y="474" width="14" height="14" fill="#6e6e6e"/><text x="236" y="486">2019</text>
+<rect x="300" y="474" width="14" height="14" fill="#c9c9c9"/><text x="321" y="486">2022</text>
+</g>
+</svg>
