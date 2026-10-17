@@ -67,7 +67,7 @@ SATLibrary.manifest([
   { file: 'premium/words-in-context-12.js', v: '2' },
   { file: 'premium/words-in-context-13.js', v: '4' },
   { file: 'premium/words-in-context-14.js', v: '2' },
-  { file: 'transitions-1.js', v: '7' },
+  { file: 'transitions-1.js', v: '8' },
   { file: 'transitions-2.js', v: '5' },
   { file: 'transitions-3.js', v: '1' },
   { file: 'transitions-4.js', v: '1' },

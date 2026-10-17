@@ -97,7 +97,7 @@ Explanation: Spatial contrast: Monument 4 was found at La Venta in Tabasco, whil
 
 7.
 
-Every US state has an associated state soil, which is typically selected by a group of experts, then passed through the state legislature to receive its official designation. For example, Wisconsin's Antigo soil was formally designated in 1983, and Vermont's Tunbridge soil in 1985. _______ years pass between a soil's selection and official designation, as the legislative process can be notorious slow.
+Every US state has an associated state soil, which is typically selected by a group of experts, then passed through the state legislature to receive its official designation. For example, Wisconsin's Antigo soil was formally designated in 1983, and Vermont's Tunbridge soil in 1985. _______ years pass between a soil's selection and official designation, as the legislative process can be notoriously slow.
 
 Which choice completes the text with the most logical transition?
 A. In many cases,
