@@ -6,6 +6,8 @@
  * (TUNNXXXXXXXX) goes in the transfer content. When the money arrives (SePay webhook, or the owner marks
  * the order paid), "orderStatus" answers this device with a new code, which is activated the usual way.
  * The order in progress is kept in localStorage, so closing the dialog or the tab does not lose it.
+ * Premium belongs to an account: signed out, the card asks to log in first, and an order paid while signed
+ * out is turned on once someone logs in again.
  */
 (function (global) {
   'use strict';
@@ -32,6 +34,7 @@
   function money(n) {
     return String(Math.round(+n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
   }
+  function signedIn() { return !!(P() && P().signedIn && P().signedIn()); }
   function planOf(id) { return plans().filter(function (p) { return p.id === id; })[0] || null; }
 
   function pending() {
@@ -86,7 +89,9 @@
     var o = pending();
     var cheapest = plans().reduce(function (m, p) { return m === null || +p.price < m ? +p.price : m; }, null);
     var action;
-    if (o && enabled()) {
+    if (!signedIn()) {
+      action = '<button type="button" class="pp-prem-btn" data-auth-open>Log in to get Premium</button>';
+    } else if (o && enabled()) {
       action = '<button type="button" class="pp-prem-btn is-wait" data-pay-resume><span class="pp-prem-dot"></span>Waiting for payment · Show QR</button>';
     } else if (enabled()) {
       action = '<button type="button" class="pp-prem-btn" data-pay>' + U.esc(cfg().buttonLabel || 'Pay now') + '</button>';
@@ -102,7 +107,8 @@
       '<ul class="pp-prem-list">' + lines.map(function (l) { return '<li>' + U.icon('check') + U.esc(l) + '</li>'; }).join('') + '</ul>' +
       (enabled() && cheapest ? '<p class="pp-prem-price">From <b>' + money(cheapest) + '</b></p>' : '') +
       action +
-      (enabled() ? '<button type="button" class="pp-prem-link" data-premium-unlock>Have a code? Enter it</button>' : '') +
+      (!signedIn() ? '<p class="pp-prem-note">Already have Premium? Log in with the same account.</p>'
+        : enabled() ? '<button type="button" class="pp-prem-link" data-premium-unlock>Have a code? Enter it</button>' : '') +
       '</section>';
   }
 
@@ -117,6 +123,7 @@
 
   function open() {
     if (!enabled()) return;
+    if (P().needLogin && P().needLogin()) return;
     if (dialog) return;
     var body = document.createElement('div');
     body.className = 'pay';
@@ -269,7 +276,7 @@
 
   function schedule() {
     stop();
-    if (!pending() || !enabled()) return;
+    if (!pending() || !enabled() || !signedIn()) return; // checked again when someone logs in
     var delay = dialog ? POLL_OPEN : (document.hidden ? POLL_HIDDEN : POLL_BACKGROUND);
     timer = setTimeout(check, delay);
   }
@@ -282,7 +289,7 @@
   function check(manual) {
     timer = null;
     var o = pending();
-    if (!o) return;
+    if (!o || !signedIn()) return;
     if (busy) { schedule(); return; }
     busy = true;
     P().orderStatus(o.order).then(function (r) {
@@ -319,15 +326,26 @@
 
   /** After start-up: keep waiting for an order made earlier (the tab may have been closed). */
   function resume() {
-    if (pending()) checkSoon();
+    watchAccount();
+    if (pending() && signedIn()) checkSoon();
   }
 
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-pay], [data-pay-resume]')) open();
   });
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && pending()) checkSoon();
+    if (!document.hidden && pending() && signedIn()) checkSoon();
   });
+  // Logged in again: keep waiting for an order made earlier; logged out: stop asking
+  var watching = false;
+  function watchAccount() {
+    if (watching || !global.Auth || !global.Auth.onChange) return;
+    watching = true;
+    global.Auth.onChange(function () {
+      if (signedIn()) resume(); else { stop(); if (dialog) closeDialog(); }
+      refreshCard();
+    });
+  }
 
   global.Payment = {
     cardHtml: cardHtml,

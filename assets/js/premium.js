@@ -9,6 +9,10 @@
  * The device is a WebCrypto RSA-OAEP key pair made NON-EXTRACTABLE and kept in IndexedDB: its private
  * key cannot be read or copied out of the browser. The server binds the code to the key and sends the
  * test keys wrapped for it, so copying this browser's saved data to another browser opens nothing there.
+ *
+ * Premium also belongs to the account signed in on this site: the saved license remembers the account it was
+ * bought or entered with. Signed out (or signed in with another account), every Premium test stays locked and
+ * the page offers to log in; the license is kept, so signing in again with that account opens the tests.
  */
 (function (global) {
   'use strict';
@@ -188,6 +192,31 @@
     return os + ' · ' + br;
   }
 
+  /* ---------------- Account ---------------- */
+
+  /** The account signed in on this site ('gis:…' / 'fb:…'), or '' when signed out. */
+  function account() {
+    var A = global.Auth;
+    var u = A && A.user ? A.user() : null;
+    return u && typeof u.sub === 'string' ? u.sub : '';
+  }
+  /**
+   * The saved license may open tests for the account signed in now. A license saved before licenses kept
+   * their account (no `account`) is claimed by the first account that signs in here.
+   */
+  function forAccount(s) {
+    var a = account();
+    if (!s || !a) return false;
+    if (!s.account) { s.account = a; save(s); }
+    return s.account === a;
+  }
+  /** Locks the Premium tests opened in this page (the saved license stays for its account). */
+  function closeTests() {
+    var open = Lib().premiumStubs().some(function (st) { return !Lib().isLocked(st.id); });
+    if (open) Lib().lockPremium();
+    return open;
+  }
+
   /* ---------------- Saved license ---------------- */
 
   function load() {
@@ -327,13 +356,14 @@
     // wrapped: the server wrapped the keys for this device key (servers before device keys send them plain)
     var wrapped = r.wrapped === true;
     save({
-      code: code, device: wrapped ? deviceKey.id : r.sentDevice, wrapped: wrapped,
+      code: code, account: account() || (prev && prev.account) || '', device: wrapped ? deviceKey.id : r.sentDevice, wrapped: wrapped,
       expires: r.expires || null, keys: keys, checkedAt: Date.now(),
       checkAfter: Math.max(3600, Math.min(7 * 86400, +r.checkAfter || 86400)),
       missingCheckedAt: missing ? Date.now() : 0,
       activatedAt: prev && prev.code === code && prev.activatedAt ? prev.activatedAt : Date.now()
     });
     U.lsDel(LS_LOST);
+    if (!forAccount(load())) return Promise.resolve(0);
     return applyKeys(keys, wrapped).then(function (n) {
       // A key that does not open its test (it was encrypted again meanwhile): ask again at most hourly
       var cur = load();
@@ -407,6 +437,7 @@
     var contact = contactHtml(plain);
     var ask = contact ? ' Contact ' + contact + ' for help.' : '';
     switch (r.error) {
+      case 'login': return 'Log in or sign up first: Premium belongs to your tunn.sat account.';
       case 'empty': return 'Enter your Premium code.';
       case 'length': return 'A code has 12 letters and numbers after TUNN-, in the form TUNN-XXXX-XXXX-XXXX.';
       case 'chars':
@@ -482,8 +513,18 @@
   }
 
   /** origin: the id of the test whose card or page opened the dialog (focus goes back there after unlocking). */
+  /** Signed out: asks to log in (Premium belongs to an account) and returns true. */
+  function needLogin() {
+    if (account()) return false;
+    U.toast('Log in or sign up to get Premium.', 'info', 4000);
+    if (global.Auth && global.Auth.openModal) global.Auth.openModal('login');
+    return true;
+  }
+
   function openUnlock(origin) {
+    if (needLogin()) return Promise.resolve();
     var saved = load();
+    if (saved && !forAccount(saved)) saved = null;
     if (usable(saved) && apiUrl()) {
       // Premium is active here but some test is still locked (e.g. just published): ask the server again
       U.toast('Checking your Premium…', 'info', 2500);
@@ -577,8 +618,9 @@
   }
 
   function openManage() {
+    if (needLogin()) return Promise.resolve();
     var s = load();
-    if (!s) return openUnlock();
+    if (!s || !forAccount(s)) return openUnlock();
     var body =
       '<dl class="pm-facts">' +
       '<div><dt>Code</dt><dd class="mono">' + U.esc(masked(s.code)) + '</dd></div>' +
@@ -610,10 +652,13 @@
 
   /**
    * State of Premium on this device for the page:
-   * active | stale (saved but not confirmed for a week) | lost (stopped, with a reason) | none.
+   * active | stale (saved but not confirmed for a week) | lost (stopped, with a reason) | none |
+   * signedout (nobody is logged in: Premium tests are locked until someone logs in).
    */
   function status() {
+    if (!account()) return { kind: 'signedout' };
     var s = load();
+    if (s && !forAccount(s)) s = null; // saved for another account: this one has no Premium
     if (s && usable(s) && Lib().premiumStubs().some(function (st) { return !Lib().isLocked(st.id); })) return { kind: 'active', license: s };
     if (s && !expired(s)) return { kind: 'stale', license: s };
     var l = lost();
@@ -660,6 +705,14 @@
     var st = status();
     var text = U.esc(opts.text || ('Enter your Premium code to open ' + (stub && stub.title ? stub.title + ' and the other Premium tests (' : 'the Premium tests (') + premiumSummary() + ') on this device.'));
     if (st.kind === 'lost') text = lostText(st.lost) + ' ' + text;
+    if (st.kind === 'signedout') {
+      return '<div class="paywall">' +
+        '<div class="paywall-icon">' + U.icon('lock') + '</div>' +
+        '<div class="paywall-text"><b>' + U.esc(opts.title || 'This test is part of Premium') + '</b><p>Log in or sign up to get Premium and open ' +
+        U.esc(stub && stub.title ? stub.title + ' and the other Premium tests (' + premiumSummary() + ').' : 'the Premium tests (' + premiumSummary() + ').') +
+        ' Already have Premium? Log in with the same account.</p></div>' +
+        '<button type="button" class="btn btn--primary" data-auth-open>' + U.icon('lock') + 'Log in / Sign up</button></div>';
+    }
     var action = !apiUrl() ? '<p class="muted">Premium codes are coming soon.</p>'
       : st.kind === 'stale' ? '<button type="button" class="btn btn--primary" data-premium-retry>' + U.icon('refresh') + 'Check my Premium</button>'
       : '<button type="button" class="btn btn--primary" data-premium-unlock>' + U.icon('lock') + 'Unlock with a code</button>';
@@ -701,7 +754,8 @@
     if (e.key !== LS_KEY && e.key !== null) return;
     var s = load();
     readDeviceKey().then(function () {
-      if (s && usable(s)) applyKeys(s.keys, s.wrapped).then(function (n) { if (n) notify(); });
+      if (s && usable(s) && forAccount(s)) applyKeys(s.keys, s.wrapped).then(function (n) { if (n) notify(); });
+      else if (s && !forAccount(s)) { if (closeTests()) notify(); }
       else if (!s && Lib().premiumStubs().some(function (st) { return !Lib().isLocked(st.id); })) { Lib().lockPremium(); notify(); }
     });
   });
@@ -712,6 +766,7 @@
   function activate(code) {
     var n = normalize(code);
     if (!n.ok) return Promise.resolve(n);
+    if (!account()) return Promise.resolve({ ok: false, error: 'login' });
     if (!hasCrypto()) return Promise.resolve({ ok: false, error: 'nocrypto' });
     if (!apiUrl()) return Promise.resolve({ ok: false, error: 'unavailable' });
     // A browser that cannot keep its device key would bind the code to a device that no longer exists
@@ -738,8 +793,10 @@
    * the saved keys may not be used yet.
    */
   function boot() {
+    watchAccount();
     var s = load();
     if (!s) return Promise.resolve();
+    if (!forAccount(s)) return Promise.resolve(); // signed out, or another account: the tests stay locked
     if (expired(s)) {
       lockAll('expired');
       return Promise.resolve();
@@ -782,6 +839,27 @@
     return Promise.race([check, wait]).then(function () {});
   }
 
+  /** Signing in opens the Premium tests of that account; signing out (or switching account) locks them. */
+  var watching = false;
+  function watchAccount() {
+    if (watching || !global.Auth || !global.Auth.onChange) return;
+    watching = true;
+    var last = account();
+    global.Auth.onChange(function () {
+      var now = account();
+      if (now === last) return;
+      last = now;
+      var s = load();
+      if (!s || !forAccount(s)) { closeTests(); notify(); return; }
+      closeTests(); // another account's tests may be open
+      if (expired(s)) { lockAll('expired'); notify(); return; }
+      readDeviceKey().then(function () { return bootWith(s); }).then(function () { notify(); }, function (e) {
+        console.error('[Premium]', e);
+        notify();
+      });
+    });
+  }
+
   global.Premium = {
     normalize: normalize,
     format: formatTyping,
@@ -789,7 +867,7 @@
     activate: activate,
     refresh: refresh,
     /** New bank-transfer order for this device: { ok, order, amount, days, expiresAt } (never rejects). */
-    order: function (plan) { return postAction('order', { plan: plan }); },
+    order: function (plan) { return account() ? postAction('order', { plan: plan }) : Promise.resolve({ ok: false, error: 'login' }); },
     /** { ok, status: pending | paid | expired | cancelled, code (when paid) } (never rejects). */
     orderStatus: function (order) { return postAction('orderStatus', { order: order }); },
     boot: boot,
@@ -799,6 +877,9 @@
     lockedHtml: lockedHtml,
     barHtml: barHtml,
     available: function () { return !!apiUrl(); },
+    /** Someone is logged in (Premium belongs to an account). */
+    signedIn: function () { return !!account(); },
+    needLogin: needLogin,
     /** The owner's contact as HTML (a link when configured with a URL), or '' */
     contact: function () { return contactHtml(); },
     /** { active, saved, code, expires } for the UI */
