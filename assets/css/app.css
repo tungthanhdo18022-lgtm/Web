@@ -1367,6 +1367,7 @@ body:not(.is-exam) .main-col {
 .pp-prem-link:hover { color: #fff; }
 .pp-prem.is-active { background: var(--primary-soft); color: var(--banner-text); }
 .pp-prem.is-active .pp-prem-label { color: var(--primary); }
+.pp-prem-note { align-self: center; margin: -3px 0 0; font-size: 12.5px; color: #d9cfc2; text-align: center; }
 .pp-prem.is-active .pp-prem-sub { color: var(--banner-text); }
 .pp-prem.is-active .pp-prem-link { color: var(--primary-hover); align-self: flex-start; padding-left: 0; }
 @keyframes payPulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
