@@ -109,7 +109,8 @@
 /* ---------------- Main ---------------- */
 .bb-main { flex: 1; min-height: 0; overflow: auto; position: relative; background: #fff; }
 .bb-stage--single { display: flex; justify-content: center; padding: 18px 18px 28px; min-height: 100%; height: max-content; }
-.bb-qcol { width: 100%; max-width: 800px; }
+/* Keep about 85 characters per line, like Bluebook: the column follows the text size (it was 740px at 18px text) */
+.bb-qcol { width: 100%; max-width: calc(560px * var(--bb-ts)); }
 
 .bb-qhead {
   display: flex; align-items: center; gap: 8px; padding: 0 6px 0 0; margin-bottom: 12px;
@@ -138,6 +139,9 @@
 
 .bb-prompt { margin-bottom: 13px; }
 .bb-prompt p { text-align: justify; }
+/* Math questions (multiple choice and student response): left-aligned like Bluebook. Justified text with inline
+   formulas stretches the spaces between words. Reading and Writing passages (left pane) stay justified. */
+.bb-stage--single .bb-prompt p, .bb-pane--right .bb-prompt p { text-align: left; }
 
 /* Answer choices */
 .bb-choices { display: grid; gap: 8px; }
@@ -180,7 +184,7 @@
 .bb-stage--split { --split: 50%; display: grid; grid-template-columns: var(--split) 14px 1fr; height: 100%; }
 .bb-stage--split.is-resizing { user-select: none; cursor: col-resize; }
 .bb-pane { min-width: 0; overflow: auto; }
-.bb-pane-inner { padding: 18px 24px 28px; max-width: 860px; margin: 0 auto; }
+.bb-pane-inner { padding: 18px 24px 28px; max-width: calc(48px + 540px * var(--bb-ts)); margin: 0 auto; }
 .bb-pane--left { background: #fff; }
 .bb-spr-dir { font-family: var(--font-serif); font-size: 13.5px; line-height: 1.6; }
 .bb-spr-dir summary {
