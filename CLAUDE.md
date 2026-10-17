@@ -30,7 +30,7 @@ assets/js/payment.js     Premium by bank transfer: Premium card, VietQR dialog, 
 assets/js/admin.js       owner publishing through the GitHub API (encrypts Advanced tests in the browser)
 assets/js/views/         pages (home, intro, exam, results, guide, builder, admin)
 assets/premium-key.json  Premium PUBLIC key (RSA-OAEP-256, kid k1)
-tests/manifest.js        list of published test files: { file: 'x.js', v: 'n' }
+tests/manifest.js        list of published test files: { file: 'x.js', v: 'n', added: 'YYYY-MM-DD' }
 tests/<id>.js            free tests (plaintext)
 tests/premium/<id>.js    Advanced tests, ENCRYPTED
 tests/images/<id>/       figures (SVG), public
@@ -120,5 +120,8 @@ tools/premium/           encrypt.mjs + test-encrypt.mjs, decrypt.mjs (needs the 
   the String.raw. Full syntax: the header of `assets/js/parser.js`, README "Test format (text)", and the builder's
   Syntax guide (`#/admin`). The id must be unique and should equal the file name.
 - **Manifest format:** exactly what `manifestText()` in `assets/js/admin.js` writes (the admin page rewrites the
-  whole file); entry order does not matter for the site, but tools keep it.
+  whole file); entry order does not matter for the site, but tools keep it. An entry may carry
+  `added: 'YYYY-MM-DD'`, the day the test was first published: the admin page sets it for a new file, `encrypt.mjs`
+  keeps it, and the home page's What's new card lists the newest (then the newest by test date). When you add a
+  new test file by hand, give its entry today's `added`; never change it when a test is only edited.
 - Do not commit or push unless asked; work on a branch and open a PR to `main`.

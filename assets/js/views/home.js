@@ -353,7 +353,7 @@
       '</div></section>';
   }
 
-  /* ---------- Right panel: SAT countdown, question of the day, tip ---------- */
+  /* ---------- Right panel: SAT countdown, Premium, What's new ---------- */
 
   function ppCountdownHtml() {
     var next = nextTestDate();
@@ -370,22 +370,42 @@
       '</section>';
   }
 
-  var TIPS = [
-    { t: 'Desmos tip', b: 'Type each side of an equation as its own line. The x-value where the graphs cross is the solution.' },
-    { t: 'Desmos tip', b: 'For a system of equations, graph both and click the intersection point to read its coordinates.' },
-    { t: 'Desmos tip', b: 'Use a slider: type an equation with a letter like k and Desmos lets you drag k to test answer choices.' },
-    { t: 'Timing tip', b: 'Mark hard questions for review and move on. Every question is worth the same, so collect the easy points first.' },
-    { t: 'Reading tip', b: 'For Words in Context, cover the choices and predict your own word before you read A to D.' },
-    { t: 'Math tip', b: 'Read the last line of the question again before you answer. Many traps ask for 2x or x + 1, not x.' },
-    { t: 'Grammar tip', b: 'Two complete sentences cannot be joined by a comma alone. Look for a period, a semicolon or a conjunction.' }
-  ];
-  function ppTipHtml() {
+  /* What's new: the tests published most recently ("added" in tests/manifest.js), then the newest by test date */
+  var SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function addedDay(t) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String((t && t.added) || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function kindOf(t) {
+    return isChallenge(t) ? { mark: 'elite', label: 'Elite Test' } : isTopic(t) ? { mark: 'topic', label: 'Topic Test' }
+      : isAdvanced(t) ? { mark: 'advanced', label: 'Advanced Test' } : { mark: 'practice', label: 'Practice Test' };
+  }
+  function ppNewHtml(tests) {
+    var seen = {};
+    var list = tests.filter(function (t) { if (!t || !t.id || seen[t.id]) return false; seen[t.id] = true; return addedDay(t) || t.sortKey > 0; });
+    list.sort(function (a, b) {
+      var da = addedDay(a), db = addedDay(b);
+      if (da && db && +da !== +db) return db - da;
+      if (!!da !== !!db) return da ? -1 : 1;
+      return ((b.sortKey || 0) - (a.sortKey || 0)) || String(a.title).localeCompare(String(b.title));
+    });
+    list = list.slice(0, 3);
+    if (!list.length) return '';
     var now = new Date();
-    var idx = Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 86400000) % TIPS.length;
-    var tip = TIPS[idx];
-    return '<section class="pp-side-card pp-tip" aria-label="Tip of the day">' +
-      '<span class="pp-tip-icon">' + U.icon('bulb') + '</span>' +
-      '<div><div class="pp-side-label">' + U.esc(tip.t.toUpperCase()) + '</div><p>' + U.esc(tip.b) + '</p></div></section>';
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return '<section class="pp-side-card pp-news" aria-label="What\u2019s new">' +
+      '<div class="pp-side-label">' + U.icon('bell') + 'WHAT\u2019S NEW</div>' +
+      '<ul class="pp-news-list">' + list.map(function (t) {
+        var k = kindOf(t);
+        var d = addedDay(t);
+        var fresh = d && today - d <= 14 * 86400000;
+        var meta = (d ? 'Added ' + SHORT_MONTHS[d.getMonth()] + ' ' + d.getDate() : k.label) +
+          (t.premium || t.locked ? ' \u00b7 <span class="pp-news-prem">Premium</span>' : ' \u00b7 Free');
+        return '<li><a class="pp-news-item" href="#/test/' + encodeURIComponent(t.id) + '">' +
+          '<span class="pp-news-mark">' + testMark(k.mark) + '</span>' +
+          '<span class="pp-news-text"><b>' + U.esc(t.title) + (fresh ? '<span class="pp-chip-new">NEW</span>' : '') + '</b>' +
+          '<span>' + meta + '</span></span></a></li>';
+      }).join('') + '</ul></section>';
   }
 
   function greeting() {
@@ -577,7 +597,7 @@
         '</div>' +
         '<div class="pp-lists" id="pp-lists">' + ppListHtml(shown, groups, filter.year) + '</div>' +
         '</div>' +
-        '<aside class="pp-aside" aria-label="Today">' + ppCountdownHtml() + (global.Payment ? global.Payment.cardHtml() : '') + ppTipHtml() + '</aside>' +
+        '<aside class="pp-aside" aria-label="Today">' + ppCountdownHtml() + (global.Payment ? global.Payment.cardHtml() : '') + ppNewHtml(Lib.published().concat(lockedStubs())) + '</aside>' +
         '</div>';
     }
 

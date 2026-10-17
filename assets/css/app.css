@@ -1330,13 +1330,19 @@ body:not(.is-exam) .main-col {
 .pp-countdown p { margin: 0; font-size: 13px; color: #f0faf5; }
 .pp-countdown .pp-countdown-sub { margin-top: 2px; font-size: 12px; color: #cdebdc; }
 
-.pp-tip { display: flex; gap: 12px; background: #efe7d9; border-color: transparent; padding: 15px 16px; }
-.pp-tip-icon {
-  flex: none; width: 32px; height: 32px; border-radius: 10px; background: #e8b04b; color: #3b2c22;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.pp-tip-icon .ico { width: 17px; height: 17px; }
-.pp-tip p { margin: 3px 0 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+/* What's new (right column): the three most recently published tests */
+.pp-news { display: flex; flex-direction: column; gap: 6px; padding: 15px 16px 10px; }
+.pp-news-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.pp-news-list li + li { border-top: 1px solid var(--border); }
+.pp-news-item { display: flex; align-items: center; gap: 10px; padding: 8px 4px; margin: 0 -4px; border-radius: 10px; color: var(--ink); text-decoration: none; }
+.pp-news-item:hover { background: var(--surface-2); text-decoration: none; }
+.pp-news-mark { flex: none; width: 34px; height: 34px; }
+.pp-news-mark svg { display: block; width: 100%; height: 100%; }
+.pp-news-text { min-width: 0; display: grid; gap: 1px; }
+.pp-news-text b { font-size: 13.5px; font-weight: 700; line-height: 1.3; }
+.pp-news-text b .pp-chip-new { margin-left: 5px; vertical-align: 1px; }
+.pp-news-text span { font-size: 12px; color: var(--muted); }
+.pp-news-text .pp-news-prem { color: #a8701a; font-weight: 700; }
 
 /* Premium card (right column) and the bank-transfer dialog (assets/js/payment.js) */
 .pp-prem { position: relative; overflow: hidden; background: #3b2c22; border: 0; color: #fff; display: flex; flex-direction: column; gap: 9px; padding: 16px 18px; }
