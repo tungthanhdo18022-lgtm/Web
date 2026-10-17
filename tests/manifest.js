@@ -85,6 +85,8 @@ SATLibrary.manifest([
   { file: 'premium/grammar-6.js', v: '3' },
   { file: 'grammar-7.js', v: '1' },
   { file: 'grammar-8.js', v: '1' },
+  { file: 'grammar-9.js', v: '1' },
+  { file: 'grammar-10.js', v: '1' },
   { file: 'tense-1.js', v: '1' },
   { file: 'rhetorical-synthesis-1.js', v: '1' },
   { file: 'premium/rhetorical-synthesis-2.js', v: '2' },

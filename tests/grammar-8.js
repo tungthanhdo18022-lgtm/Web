@@ -9,7 +9,7 @@ SATLibrary.register({
 ---
 title: Grammar 8
 author: tunn.sat
-description: A 25-question Digital SAT Reading and Writing topic test focusing on Standard English Conventions (grammar) — hard punctuation questions.
+description: A 25-question Digital SAT Reading and Writing topic test focusing on Standard English Conventions (grammar).
 category: Grammar
 section: topic
 time: 32
@@ -19,327 +19,363 @@ time: 32
 
 1.
 
-On March 3, 2005, American astronomers detected a striking and unusual phenomenon occurring in the constellation Coma Berenices, 4.7 billion light-years from ______ explosion of a massive star, also known as a supernova, an extremely bright yet transient event that typically results from the collapse of a star’s core.
-
+The term “retroflex” derives from Latin and means “bent back,” an apt descriptor for the branch of
+consonants—retroflex consonants—pronounced with the tongue curling up and back in the mouth. In
+many languages, including English, these consonants are______in some dialects of Mandarin,
+however, four such consonants (“ch,” “sh,” “zh,” and “r”) are relatively common.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. Earth; the
-B. Earth, it was the
-C. Earth. The
-D. Earth: the
+A. rare and
+B. rare,
+C. rare
+D. rare;
 Answer: D
 Domain: Standard English Conventions
-Explanation: Colon for explanation: the colon follows the complete clause ending at 'Earth' to introduce what the detected phenomenon was — the explosion of a massive star. Choice D provides it. Choice A fails because a semicolon must join two independent clauses, and 'the explosion of a massive star...' has no main verb. Choice B creates a comma splice with a vague 'it,' and choice C strands that verbless phrase as a fragment after the period.
+Explanation: Semicolon between independent clauses: "these consonants are rare" and "four such consonants are relatively common" are two contrasting independent clauses, so a semicolon is required. Choice B ("rare,") creates a comma splice, and choice A mangles the clause structure.
 
 2.
 
-Each year, the Nobel Prize in Literature is given to an author who has, in the words of its founder Alfred Nobel, “produced the most outstanding work in an idealistic ______ in 2004, for instance, judges recognized Elfriede Jelinek “for her musical flow of voices and counter-voices in novels and plays that with extraordinary linguistic zeal reveal the absurdity of society’s clichés and their subjugating power.”
-
+Hegra is an archaeological site in present-day Saudi Arabia and was the second largest city of the
+Nabataean Kingdom (fourth century BCE to first century CE). Archaeologist Laila Nehmé recently traveled
+to Hegra to study its ancient______into the rocky outcrops of a vast desert, these burial chambers
+seem to blend seamlessly with nature.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. direction”
-B. direction” and,
-C. direction,”
-D. direction”;
-Answer: D
+A. tombs. Built
+B. tombs, built
+C. tombs and built
+D. tombs built
+Answer: A
 Domain: Standard English Conventions
-Explanation: Semicolon outside the closing quotes: the quoted Nobel phrase ends the first independent clause, and the semicolon — placed outside the closing quotation mark — correctly joins it to the second clause ('in 2004, for instance, judges recognized...'). Choice D does this. Choice C is the trap: the comma sits inside the quotes but still creates a comma splice. Choice A has no punctuation at all, and choice B inserts a nonsensical 'and.'
+Explanation: Punctuation between clauses: "Built into the rocky outcrops..." is a participial phrase modifying "these burial chambers," so the previous sentence must end with a period. Choice B ("tombs, built") creates a comma splice with the later finite verb "seem."
 
 3.
 
-For her film I Am Somebody (1970), a documentary about a successful months-long strike held by Black female hospital workers in Charleston, South Carolina, director Madeline Anderson chose a narrator who had participated in the ______ by allowing the narrative to be shaped by one of their own, amplified the agency and power the workers possessed.
-
+Unique among animal species, humans use our vocal apparatuses primarily for two separate
+communicative purposes: to talk and to sing. The question of what cross-cultural traits distinguish these
+distinct modes, and secondarily what pressures led humans to develop them in the first place,
+neuropsychologist Daniela Sammler’s 2024 study “Signatures of Speech and Song: ‘Universal’ Links
+despite Cultural Diversity.” ______
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. protest a decision that,
-B. protest. A decision that
-C. protest; a decision that,
-D. protest, a decision that,
-Answer: D
+A. animates
+B. have animated
+C. animate
+D. animating
+Answer: A
 Domain: Standard English Conventions
-Explanation: Nonrestrictive appositive with paired commas: 'a decision that...' renames 'the protest' and adds nonessential information, so it must be opened and closed with commas — choice D does this. Choice A never opens the appositive (no comma after 'protest'), and choice B breaks the structure with a period while omitting the comma after 'that' that the 'by allowing...' parenthetical requires. Choice C misuses the semicolon: the phrase is an appositive renaming 'the protest,' not a separate independent clause.
+Explanation: Subject-verb agreement: The subject is the singular noun "question" ("The question ... animates ... the study"), so the verb must be the singular "animates." The long subject phrase ending in "the first place" tempts plural verbs, but B ("have animated") and C ("animate") are plural, and D ("animating") is a participle that leaves the sentence with no main verb.
 
 4.
 
-Brothers Orville and Wilbur Wright famously received a patent for their flying machine on May 22, 1906. Louisiana native Charles F. Page, who was born into slavery and self-educated, created a gas-powered flying ship in 1903 that was officially patented on April 10, ______ only model had been suspiciously destroyed en route to a planned demonstration at the 1904 World’s Fair, and, discouraged, he never built a replacement.
-
+Philosopher Peter Kivy was a leading figure in musical______evidenced by his belief that instead of
+evoking particular emotions, such as sadness or joy, compositions elicit a listener’s emotional response to
+the structure and artistry of the music itself, Kivy’s approach to the study of music was decidedly
+formalist.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. 1906—roughly six weeks earlier—Page’s
-B. 1906.Roughly six weeks earlier, Page’s
-C. 1906 roughly six weeks earlier, Page’s
-D. 1906—roughly six weeks earlier. Page’s
+A. aesthetics as
+B. aesthetics and as
+C. aesthetics, as
+D. aesthetics. As
 Answer: D
 Domain: Standard English Conventions
-Explanation: Dash-closed aside plus period for timeline clarity: 'roughly six weeks earlier' is an aside modifying the April 10, 1906 patent date (about six weeks before the Wrights' May 22 patent), so it is closed with a dash and followed by a period starting the new sentence about Page's model. Choice D does this. Choice A's paired dashes would attach 'roughly six weeks earlier' to the model's destruction — but that happened en route to the 1904 World's Fair, not six weeks before 1906. Choice B makes the same timeline error by opening the next sentence with 'Roughly six weeks earlier,' and choice C omits needed punctuation.
+Explanation: Sentence boundaries: "Philosopher Peter Kivy was a leading figure in musical aesthetics" and "Kivy's approach... was decidedly formalist" are two independent clauses, so they must be separated by a period. Choice C creates a comma splice, since the "as evidenced by..." phrase is subordinate and cannot bridge the two clauses.
 
 5.
 
-Among the world’s largest deserts are the Sonoran Desert, ranked_____and the Ferlo Desert, ranked thirty-second.
-
+Quantum particles of light—photons—provide an unhackable means of transmitting encryption keys over
+networks, as attempts to observe particles in quantum states will invariably alter the particles
+dismantle any information they transmit. ______
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. fifteenth in size, the Great Salt Desert; ranked thirty-first,
-B. fifteenth in size; the Great Salt Desert, ranked thirty-first;
-C. fifteenth in size the Great Salt Desert, ranked thirty-first
-D. fifteenth in size; the Great Salt Desert; ranked thirty-first;
+A. and in the process,
+B. and, in the process,
+C. and in the process—
+D. and, in the process
 Answer: B
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons: the three deserts form a list whose items contain internal commas ('Sonoran Desert, ranked fifteenth in size'), so semicolons must separate the items. Choice B correctly ends the first two items with semicolons. Choice A uses a comma after 'size,' choice C provides no separation at all, and choice D wrongly severs 'the Great Salt Desert' from its 'ranked' descriptor with a semicolon.
+Explanation: Parenthetical commas: the interrupting phrase "in the process" must be set off with a matching pair of commas, giving "and, in the process,." Choices A and D each omit one of the two commas, and choice C wrongly closes the interruption with an em dash.
 
 6.
 
-Located on the Emscher River in Germany, the city of Dortmund was a member of a powerful mercantile alliance that dominated northern European trade between the 13th and 17th ______ a loose confederation of cities from eleven modern-day countries, it has been described as a precursor to today’s European Union.
-
+In 2016, engineer Vanessa Galvez oversaw the installation of 164 bioswales, vegetated channels designed to
+absorb and divert stormwater, along the streets of Queens, New York. By reducing the runoff flowing into
+city sewers, ______
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. centuries: the Hanseatic League,
-B. centuries—the Hanseatic League;
-C. centuries; the Hanseatic League,
-D. centuries, the Hanseatic League,
+A. the mitigation of both street flooding and the resulting pollution of nearby waterways has been achieved by bioswales.
+B. the bioswales have mitigated both street flooding and the resulting pollution of nearby waterways.
+C. the bioswales’ mitigation of both street flooding and the resulting pollution of nearby waterways has been achieved.
+D. both street flooding and the resulting pollution of nearby waterways have been mitigated by bioswales.
 Answer: B
 Domain: Standard English Conventions
-Explanation: Dash to name the alliance, semicolon to transition: the dash after 'centuries' specifies which mercantile alliance is meant (the Hanseatic League), and the semicolon correctly leads into the following descriptive clause. Choice B does both. Choice A pairs a colon with a comma that cannot carry the next clause, choice C puts the semicolon in the wrong spot (before the name instead of after it), and choice D's commas create a run-on.
+Explanation: Dangling modifier: The introductory phrase "By reducing the runoff flowing into city sewers" must be followed by whoever does the reducing — the bioswales. Only choice B makes "the bioswales" the subject. In A and C the subject is "the mitigation," and in D it is "the flooding and pollution" — none of which can reduce runoff.
 
 7.
 
-Most sand is beige because of deposits of gray- and tan-hued minerals, such as quartz and feldspar. The sand at Les Sables Roses Beach in French Polynesia is a more unusual ______ deposits of crushed coral and other organic matter lend the sand a unique pink hue.
-
+A groundbreaking visual artist of her day,______including artists Vasily Kandinsky and Piet
+Mondrian.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. shade, though;
-B. shade, though,
-C. shade, though
-D. shade; though
-Answer: A
+A. Hilma af Klint, well before many of her contemporaries, explored abstract modes of painting,
+B. Hilma af Klint explored abstract modes of painting well before many of her contemporaries,
+C. well before many of her contemporaries, Hilma af Klint explored abstract modes of painting,
+D. the explorations of Hilma af Klint into abstract modes of painting occurred well before those of many of her contemporaries,
+Answer: B
 Domain: Standard English Conventions
-Explanation: Sentence-final 'though' as conjunctive adverb: like 'however,' 'though' here closes the first clause (contrasting 'a more unusual shade' with 'Most sand is beige' in the prior sentence) and is set off by a comma; the semicolon then joins the two independent clauses. Choice A does this. Choice B is a comma splice, choice C omits the semicolon, and choice D misplaces 'though' at the start of the second clause without its comma.
+Explanation: Modifier placement: The opening appositive ("A groundbreaking visual artist of her day") must be followed by the artist, Hilma af Klint — which both A and B do. The decider is "including artists Vasily Kandinsky and Piet Mondrian," which must modify "contemporaries" (fellow artists, not paintings). Only choice B places "contemporaries" directly before "including"; in A the parenthetical commas detach it, so the phrase would illogically describe her "painting." Choices C and D attach the appositive to "well before..." and "the explorations," neither of which is an artist.
 
 8.
 
-For the past 20 million years, Earth’s magnetic poles in the far north and far south have remained roughly where they are today. This has not always been the ______ throughout geologic history, Earth’s magnetic poles have swapped places several times through a process called polar wandering.
-
+Joshua Hinson, director of the language revitalization program of the Chickasaw Nation in Oklahoma,
+helped produce the world’s first Indigenous-language instructional app, Chickasaw______Chickasaw
+TV, in 2010; and a Rosetta Stone language course in Chickasaw, in 2015.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. case; though,
-B. case, though,
-C. case, though;
-D. case, though
+A. Basic; in 2009, an online television network;
+B. Basic; in 2009, an online television network,
+C. Basic, in 2009; an online television network,
+D. Basic, in 2009, an online television network,
 Answer: C
 Domain: Standard English Conventions
-Explanation: Sentence-final 'though' as conjunctive adverb: 'though' closes the first clause (contrasting with the 20-million-year stability just stated) and is set off by a comma; the semicolon joins the two independent clauses. Choice C does this. Choice A misplaces 'though' after the semicolon, choice B is a comma splice, and choice D omits the semicolon.
+Explanation: Semicolons in a complex list: The three items each contain internal commas, so semicolons must separate the items. Choice C correctly completes the first item ("Chickasaw Basic, in 2009") and places the semicolon before the second item ("an online television network..."). Choices A and B put the semicolon inside the first item, and D uses only commas, leaving the three items indistinguishable.
 
 9.
 
-“Streetwide and bitter as hope / strewn between El Salvador and San Francisco.” These lines are from a poem by Chicano ______ whose early career as a campesino informs the dialogue on Mexican American politics and identity that unfolds in his work.
-
+The fibularis longus and the______move the fibula and humerus, respectively.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. writer Juan Felipe Herrera,
-B. writer, Juan Felipe Herrera
-C. writer, Juan Felipe Herrera,
-D. writer Juan Felipe Herrera
-Answer: A
+A. brachialis are cylindrical in shape, which are skeletal muscles, and help
+B. brachialis are cylindrical in shape and help, which are skeletal muscles,
+C. brachialis, which are skeletal muscles, are cylindrical in shape and help
+D. brachialis are cylindrical, which are skeletal muscles, in shape and help
+Answer: C
 Domain: Standard English Conventions
-Explanation: Restrictive name plus nonrestrictive 'whose'-clause: 'Juan Felipe Herrera' identifies which Chicano writer (restrictive — no comma before the name), while the 'whose'-clause adds nonessential information (comma before 'whose'). Choice A does both. Choices B and C wrongly set off the restrictive name with a comma, and choice D omits the required comma before 'whose.'
+Explanation: Placement of nonrestrictive clauses: the "which" clause ("which are skeletal muscles") describes both muscles and must sit directly after "brachialis," set off by commas, before the main verbs "are... and help." Choices A, B, and D strand "which" after "shape" or "help," where it has no sensible antecedent.
 
 10.
 
-Writer Silvia Moreno-Garcia’s love of short fiction began when she read a collection of Edgar Allan Poe stories as a child, and she later would become a prolific short story writer herself, publishing pieces like “In the Details” (2015) and “To See Pedro Infante” (2014). Yet she’s best ______ especially since her 2020 novel Mexican Gothic reached the New York Times Best Sellers list—as a novelist.
-
+In the list “Adorable Things” from Sei Shō nagon’s Pillow Book, the author delights in baby sparrows, a face
+drawn on a melon, and a young courtier in ceremonial garb. So shrewd an observer is Shō nagon, a lady-
+in-waiting to Empress Teishi, that her book’s musings on tenth-century Japanese courtly life
+readers a thousand years later. ______
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. known
-B. known:
-C. known—
-D. known;
-Answer: C
+A. fascinate
+B. has fascinated
+C. fascinates
+D. is fascinating
+Answer: A
 Domain: Standard English Conventions
-Explanation: Opening dash of a paired parenthetical: the long interrupter 'especially since her 2020 novel...Best Sellers list' must be set off by paired dashes, so the opening dash goes after 'known' (matching the given closing dash before 'as'). Choice C provides it. Choice A leaves the interrupter unopened, choice B's colon cannot open a parenthetical, and choice D's semicolon would wrongly demand an independent clause after it.
+Explanation: Subject-verb agreement: The subject is the plural noun "musings," so the verb must be "fascinate." Choice C ("fascinates") is a proximity trap, agreeing with the nearby singular noun "life."
 
 11.
 
-As behavioral economists, Ai Hisano, a senior lecturer at Kyoto ______ professor at Georgetown University; and Iris Bohnet, a professor at Harvard University, apply insights from psychology to the study of economic issues.
-
+Long attributed to Jacques-Louis David, the preeminent Neoclassical painter of his day, the 1801 painting
+Marie Joséphine Charlotte du Val d’Ognes gained fresh attention in the 1990s when art historians discovered
+that the painting—which depicts a solitary young woman sketching—was actually the work of little-
+known French portrait______Marie-Denise Villers (1774–1821).
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. University, George Akerlof,
-B. University George Akerlof,
-C. University; George Akerlof,
-D. University; George Akerlof;
-Answer: C
+A. artist—
+B. artist
+C. artist:
+D. artist,
+Answer: B
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons in a list of people: the three economists each carry a comma-containing appositive ('a senior lecturer at Kyoto University'), so semicolons separate the items. Choice C correctly ends Hisano's item with a semicolon after 'University' and uses a comma between 'George Akerlof' and his title. Choice A uses a comma where the semicolon belongs, choice B omits punctuation, and choice D wrongly severs Akerlof from his appositive with a semicolon.
+Explanation: Restrictive appositive: "Marie-Denise Villers (1774–1821)" identifies exactly which portrait artist is meant, so no punctuation separates it from "artist" (B). A comma (D) would wrongly mark the name as nonrestrictive (and there is no closing comma), while a dash (A) or colon (C) cannot introduce a mere name.
 
 12.
 
-Most sand is beige because of deposits of gray- and tan-hued minerals, such as quartz and feldspar. The sand at Balos Beach in Greece is a more unusual ______ deposits of crushed coral and other organic matter lend the sand a unique pink hue.
-
+Interest in mechanotransduction, the mechanism by which cells sense and convert mechanical stimuli
+into biochemical signals, is expanding because of innovative work by biomedical scientists—many of
+whom, like neuroscience and biophysics expert Elba Serrano,______this mechanism to better
+understand how the body’s neurological and biomechanical systems interact.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. shade, though
-B. shade: though
-C. shade, though,
-D. shade, though;
-Answer: D
+A. studies
+B. has studied
+C. study
+D. is studying
+Answer: C
 Domain: Standard English Conventions
-Explanation: Sentence-final 'though' as conjunctive adverb: 'though' closes the first clause (contrasting 'a more unusual shade' with 'Most sand is beige') and is set off by a comma; the semicolon joins the two independent clauses. Choice D does this. Choice A omits the semicolon, choice B's colon cannot join the clauses, and choice C is a comma splice.
+Explanation: Subject-verb agreement: The subject of the relative clause is the plural "many," so the verb must be the plural "study." Choice A ("studies") is tempting because it agrees with the nearby singular noun "Elba Serrano," but the phrase naming her is only an interrupting example, not the subject.
 
 13.
 
-Social media platforms have made the collection of qualitative human behavioral data easier than ever. To collect such data by means of social media does raise a serious ethical ______ terms of service stipulate that platforms can analyze users’ accounts and posts, according to sociologist Jose van Dijck, users are not informed when their data are included in behavioral studies.
-
+Not all plants benefit equally or from the same kind of______okra and sorghum, for example, benefit
+from endomycorrhizal associations; many tree species, such as hazel and oak, benefit from
+ectomycorrhizal associations; and plants in the Brassica family, such as rutabaga, don’t benefit from
+mycorrhizae at all.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. concern, though;
-B. concern, though:
-C. concern, though
-D. concern: though
-Answer: D
+A. mycorrhizae
+B. mycorrhizae:
+C. mycorrhizae;
+D. mycorrhizae.
+Answer: B
 Domain: Standard English Conventions
-Explanation: Colon for explanation with subordinating 'though': the colon after 'concern' introduces the explanation of the ethical problem, and 'though' here means 'although' — a subordinating conjunction, not the conjunctive adverb. Choice D provides the colon. Choices A and C create comma splices, and choice B combines a comma splice with a misplaced colon.
+Explanation: Colon use: The first clause is complete, and the colon introduces the examples illustrating "the same kind of mycorrhizae." No punctuation (A) creates a run-on; the semicolon (C) and period (D) would merely separate complete sentences instead of marking what follows as examples of the claim.
 
 14.
 
-Citing the example of Zeus, a mythological god whose tomb was reportedly located on the island of Crete, the writer Euhemerus (fourth century BCE) theorized that all the deities in the Greek pantheon—including the god of knowledge and the arts, Apollo; the god of wine and the theater, Dionysus; and the god of constellations, ______may have been historical figures who, through the power of myth, underwent apotheosis.
-
+Digital artist Jung (Lulu) Chen primarily uses a suite of software tools to create illustrations for children’s
+books. To manifest the warm and welcoming atmospheres that are a signature of her______she
+occasionally relies on more traditional art techniques, such as painting with watercolors.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. Crius;
-B. Crius—
-C. Crius,
-D. Crius
-Answer: B
+A. work, though,
+B. work, though
+C. work; though,
+D. work, though;
+Answer: A
 Domain: Standard English Conventions
-Explanation: Closing dash of a dash pair with internal semicolons: the parenthetical opened with '—including' contains semicolon-separated items, so it must be closed with a matching em dash after the final item ('Crius'). Choice B provides it. Choice A's semicolon and choice C's comma cannot close a dash pair, and choice D leaves it unclosed.
+Explanation: Conjunctive adverb placement: The words before the blank ("To manifest the warm and welcoming atmospheres that are a signature of her work") form an introductory phrase, not an independent clause, so the semicolon in C is impossible. "Though" (meaning "however") is simply a parenthetical interrupter here and must be set off with commas on both sides — only choice A does this. Choice B omits the closing comma, and D misplaces a semicolon after "though."
 
 15.
 
-Among the world’s largest deserts are the Syrian Desert, ranked ______ and the Ferlo Desert, ranked thirty-second.
-
+Mineralogists classify minerals by how much light can pass through them, labeling them as either
+transparent, translucent, or opaque. Given that all or almost all light can pass through kanoite, for
+instance, it would be obvious to a mineralogist what kanoite’s classification should ______
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. ninth in size the Kyzylkum Desert, ranked sixteenth
-B. ninth in size; the Kyzylkum Desert, ranked sixteenth;
-C. ninth in size; the Kyzylkum Desert; ranked sixteenth;
-D. ninth in size, the Kyzylkum Desert; ranked sixteenth,
+A. be; transparent.
+B. be: transparent.
+C. be and transparent.
+D. be transparent.
 Answer: B
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons: the three deserts form a list whose items contain internal commas, so semicolons separate them. Choice B correctly ends the first two items with semicolons. Choice A provides no separation after 'size,' choice C wrongly severs 'the Kyzylkum Desert' from its 'ranked' descriptor, and choice D uses a comma between items plus a stray trailing comma.
+Explanation: Colon use: The clause before the blank is complete, and the colon introduces the single-word answer "transparent." Choice D ("be transparent.") would absurdly state that the classification itself should be transparent, and a semicolon cannot join a clause to a lone word.
 
 16.
 
-Scholars have praised Gwendolyn Brooks’s 1949 poem “Matthew Cole” for its nuanced portrayal of life in Brooks’s South Side Chicago neighborhood. The poem shouldn’t be regarded as being simply a product of Brooks’s ______ the breadth of the poet’s influences, which range from medieval English ballads to the poetry of Countee Cullen and Emily Dickinson.
-
+Named for the year in which it was detected by American astronomers, SN 2011fe was a supernova (the
+explosion of a massive______in the constellation Ursa Major, 21 million light-years from Earth, the
+transient yet powerful blast propelled particles and debris into space at extremely high speeds.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. surroundings, though, considering
-B. surroundings, though. Considering
-C. surroundings; though, considering
-D. surroundings, though; considering
+A. star). Occurring
+B. star) occurring
+C. star), occurring
+D. star) and occurring
 Answer: A
 Domain: Standard English Conventions
-Explanation: Paired commas for stacked parentheticals: 'though' is a mere interrupter (set off by paired commas), and 'considering the breadth...' is a participial phrase modifying the main clause — neither can stand alone as a sentence. Choice A punctuates both correctly. Choice B strands 'Considering...' as a fragment after the period, while choices C and D wrongly put a semicolon before a phrase that cannot stand alone.
+Explanation: Parenthesis and sentence boundaries: The parenthetical phrase "(the explosion of a massive star" must be closed with ")" — only choice A does this — and its period correctly separates the two independent clauses. Choices B and C leave the clauses joined by only a comma (a comma splice), while D's "and occurring" cannot parallel the main verb "was."
 
 17.
 
-The transit method, a means of indirect planetary discovery, has detected previously unknown exoplanets at vast distances from ______ the super Earth TRAPPIST-1 b; at 352 light-years away, the super Earth Kepler-102 f; and, as of 2023, over 4,000 other exoplanets that are too far away and dim to be observed directly.
-
+In the canon of North African literature, Moroccan author Driss Chraïbi’s 1954 novel The Simple Past (Le
+Passé simple) looms large. A coming-of-age story, a social meditation, and a sober gaze into the dark maw of
+French colonialism,______interrogates systemic power with memorable intensity.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. Earth: at 41 light-years away,
-B. Earth at 41 light-years away:
-C. Earth, at 41 light-years away,
-D. Earth at 41 light-years away,
-Answer: A
+A. Morocco gained its independence two years before the publication of Chraïbi’s debut novel, which
+B. Chraïbi’s debut novel, published two years before Morocco gained its independence,
+C. Chraïbi wrote a debut novel that, published two years before Morocco gained its independence,
+D. published two years before Morocco gained its independence, Chraïbi wrote a debut novel that
+Answer: B
 Domain: Standard English Conventions
-Explanation: Colon introducing a super-comma list: the colon after 'Earth' introduces the list of detected exoplanets, whose comma-containing items are separated by semicolons. Choice A places the colon correctly and keeps 'at 41 light-years away' with its item. Choice B puts the colon after the first item instead of before the list, while choices C and D omit the colon entirely.
+Explanation: Dangling modifier: The opening appositive ("A coming-of-age story, a social meditation, and a sober gaze...") describes the novel, so it must be followed by the novel itself. Only choice B places "Chraïbi's debut novel" right after the appositive. In A the appositive lands on "Morocco," and in C and D on "Chraibi" — neither of which is a coming-of-age story.
 
 18.
 
-When attempting to determine a fault’s seismic history, geophysicists like Dr. Estella Atekwana at the University of Delaware rely in part on data about the fault’s physical dimensions and geological features. For the Ione Valley fault in Lander County, Nevada, the US Geological Survey compiles such data in several ______ exchanging information with state geological surveys, by linking maps of the fault with sources that offer detailed descriptions of it, and by maintaining a database of quantitative data such as the fault’s length (76 km).
-
+By occupying the Earth-Moon L2 Lagrange point, where the gravitational forces from Earth and the Moon
+are in equilibrium, the THEMIS satellite—which studies Earth’s magnetosphere—maintains a constant
+orbital position relative to the Moon. The orbital stability of objects positioned at a Lagrange point is not
+______spacecraft occupying the Earth-Moon L2 Lagrange point still need to make occasional
+adjustments, using small amounts of fuel to fine-tune their positions.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. ways. By
-B. ways: by
-C. ways; by
-D. ways by:
-Answer: B
+A. perfect, though,
+B. perfect, though
+C. perfect, though;
+D. perfect; though
+Answer: C
 Domain: Standard English Conventions
-Explanation: Colon before a list (lowercase after colon): the colon follows the complete clause ending at 'ways' to introduce the three parallel 'by...'-phrases; lowercase 'by' after a colon is standard. Choice B is correct. Choice A strands 'By exchanging...' as a fragment, choice C wrongly uses a semicolon before a non-clause, and choice D is incoherent.
+Explanation: Conjunctive adverb placement: Here "though" is a sentence-final adverb ("...is not perfect, though" = "...is not perfect, however"), contrasting with the previous sentence — it is not joining the two clauses. So it takes a comma before it, and a semicolon must follow to join the second independent clause. Choice A creates a comma splice, B a run-on, and D misuses "though" as a subordinating conjunction, leaving the second half a fragment with no main clause.
 
 19.
 
-The programming languages COBOL, developed by Grace Hopper in ______ developed by Rich Hickey in 2007, are all routinely translated into executable code by tools known as compilers.
-
+In 1453, English King Henry VI became unfit to rule after falling gravely ill. As a result, Parliament
+appointed Richard, Third Duke of York, who had a strong claim to the English throne, to rule as Lord
+Protector. Upon recovering two years later,______forcing an angered Richard from the royal court
+and precipitating a series of battles later known as the Wars of the Roses.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. 1959, Java developed by James Gosling in 1995; and Clojure
-B. 1959, Java; developed by James Gosling in 1995; and Clojure,
-C. 1959; Java, developed by James Gosling in 1995, and Clojure,
-D. 1959; Java, developed by James Gosling in 1995; and Clojure,
-Answer: D
+A. Henry resumed his reign,
+B. the reign of Henry resumed,
+C. Henry’s reign resumed,
+D. it was Henry who resumed his reign,
+Answer: A
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons: each language carries a comma-containing 'developed by...' appositive, so semicolons must separate the three items. Choice D does this correctly. Choice A uses a comma after '1959,' choice B severs 'Java' from its appositive with a semicolon, and choice C uses a comma instead of a semicolon before the final item.
+Explanation: Dangling modifier: The introductory phrase "Upon recovering two years later" must be followed by the person who recovered — Henry. Only choice A places "Henry" as the subject. In B and C the subject is "the reign," which cannot recover from an illness, and in D the grammatical subject is the dummy "it," so the modifier still dangles.
 
 20.
 
-Alberto Gabriele, author of Reading Popular Culture in Victorian Print, tracks the transnational dissemination of works by author Mary Elizabeth Braddon via the magazine ______ from 1866 to 1899 and distributed throughout the Australian cities of Melbourne, Adelaide, and Hobart; the continental European cities of Brussels, Paris, and Turin; and cities in Turkey, India, and Jamaica, this magazine helped make Braddon’s serialized novels globally available.
-
+______ a US state when it ratified the US Constitution on December 12, 1787, was thereby empowered,
+via its representatives to the US Congress, to vote on whether to admit Louisiana as a state on April 30, 1812.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. Belgravia, published
-B. Belgravia; published
-C. Belgravia. Published
-D. Belgravia published
-Answer: C
+A. Pennsylvania would officially become
+B. Pennsylvania had officially become
+C. Pennsylvania officially became
+D. Pennsylvania, having officially become
+Answer: D
 Domain: Standard English Conventions
-Explanation: Period before a sprawling participial phrase: the 'Published...' phrase is extremely long and itself contains a semicolon-separated list, so a period cleanly detaches it from 'Belgravia' instead of tangling it with a comma. Choice C does this. Choice A's comma leaves the massive phrase awkwardly attached, choice B's semicolon wrongly precedes a non-clause, and choice D omits needed punctuation.
+Explanation: Participial phrase vs. comma splice: "Having officially become a US state..." is a participial phrase modifying Pennsylvania, so it is set off by a comma and the single main verb "was empowered" carries the sentence (D). Choices A, B, and C each supply a second finite verb ("would become"/"had become"/"became"), creating a comma splice.
 
 21.
 
-Conceptual artist Joan Jonas’s first work, Wind (1968), is a silent film depicting people on a beach struggling to move about in extremely windy conditions. Wind has been recognized for bringing the principles of postmodern dance—which demystifies traditional choreography by foregrounding features of movement that ballet and other classical dance forms obscure (such as clumsiness, weightiness, resistance, and ______ to video.
-
+On sunny days, dark rooftops absorb solar energy and convert it to unwanted heat, raising the
+surrounding air______a light-colored covering to an existing dark roof, either by attaching
+prefabricated reflective sheets or spraying on a paint-like coating, helps combat this effect.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. gravity),
-B. gravity);
-C. gravity)—
-D. gravity)
+A. temperature; by adding
+B. temperature, adding
+C. temperature. Adding
+D. temperature by adding
 Answer: C
 Domain: Standard English Conventions
-Explanation: Parenthesis closed inside a dash pair: the '(such as...)' parenthetical sits within the dash-pair aside opened by 'dance—', so the parenthesis must close first, then the dash: 'gravity)—'. Choice C orders both correctly. Choices A and B substitute a comma or semicolon for the closing dash, and choice D closes the parenthesis but leaves the dash pair unclosed.
+Explanation: Sentence boundary: The blank separates two independent clauses, so a period (C) is required. Choice B creates a comma splice, A puts a semicolon before the fragment "by adding...," and D fuses the clauses so that "helps" is left without a clear subject.
 
 22.
 
-A single specimen of N. vivans, collected at a depth of 129 fathoms (236 meters) in the Indian Ocean, and a single specimen of P. obliguiloculata, collected at a depth of 260 fathoms (475 meters) in the South Atlantic have been preserved as exemplars of their respective ______ the former in a repository at Washington, DC’s Museum of Natural History and the latter in a repository at London’s Natural History Museum.
-
+In Puerto Rico, it’s not unusual for a city or town to be known by a nickname that corresponds to one of its
+notable features, like landscape, climate, famous residents, or chief exports. For example, the Puerto
+Rican municipality of Aibonito has also been called “the City of Flowers,” a nickname that alludes to what
+the area is well______its lush greenery.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. species. The
-B. species, the
-C. species; the
-D. species, and the
-Answer: B
+A. known for;
+B. known: for
+C. known for:
+D. known for
+Answer: C
 Domain: Standard English Conventions
-Explanation: Comma with an elliptical supplement: 'the former in [a repository] and the latter in [a repository]' has no verb, so it is a fragment that must attach to the main clause with a comma — never a semicolon or period. Choice B does this. Choices A and C strand the fragment after terminal punctuation, and choice D adds a needless 'and.'
+Explanation: Colon use and idiom: The idiom is "known for," so the blank must keep "for" attached to "known" — eliminating B ("known: for"). The colon then correctly introduces "its lush greenery" as the explanation of what the area is known for. Choice A wrongly uses a semicolon before a fragment, and D omits the needed punctuation, fusing the explanation into the clause ungrammatically.
 
 23.
 
-While the ancient Celts—Iron Age peoples who inhabited parts of western and central Europe—weren’t a single unified group, their art often featured common elements. These included intricate patterns of interlocking spiral lines, which often held symbolic ______ of birds, horses, and other animals; and inlaid enamel accents.
-
+In the late nineteenth and early twentieth centuries, automobiles were commonly referred to as horseless
+carriages after the older technology they still resembled. Known as the Brass Era, this period in
+automotive design is remembered for its grandeur and artistry, its vehicles______by collectors for
+their ornate detailing and gleaming brass fittings.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. significance. Depictions
-B. significance: depictions
-C. significance; depictions
-D. significance, depictions
+A. are highly prized
+B. had been highly prized
+C. highly prized
+D. were highly prized
 Answer: C
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons: the first list item contains an internal comma (the 'which'-clause), so semicolons must separate the items ('intricate patterns...'; 'depictions of birds...'; 'and inlaid enamel accents'). Choice C does this. Choice A strands 'Depictions...' as a fragment, choice B's colon doesn't fit the parallel list, and choice D uses a comma where a semicolon is required.
+Explanation: Absolute phrase: "its vehicles highly prized by collectors..." is an absolute phrase with no finite verb, modifying the main clause ("this period... is remembered"). Choices A, B, and D supply finite verbs, creating a double predicate.
 
 24.
 
-Among the world’s largest deserts are the Chihuahuan Desert, ranked___and the Taklamakan Desert, ranked seventeenth.
-
+In 1955, Indian Bengali filmmaker Satyajit Ray released his first movie, Pather______quiet black-and-
+white drama about a family in rural India, Ray’s film was quite different from the loud, colorful action-
+romance movies that were popular at the time.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. eleventh in size; the Karakum Desert; ranked twelfth;
-B. eleventh in size the Karakum Desert, ranked twelfth
-C. eleventh in size, the Karakum Desert; ranked twelfth,
-D. eleventh in size; the Karakum Desert, ranked twelfth;
+A. Panchali a
+B. Panchali, which was a
+C. Panchali, a
+D. Panchali. A
 Answer: D
 Domain: Standard English Conventions
-Explanation: Super-comma semicolons: the three deserts form a list whose items contain internal commas, so semicolons separate them. Choice D correctly ends the first two items with semicolons. Choice A wrongly severs 'the Karakum Desert' from its 'ranked' descriptor, choice B provides no separation, and choice C uses a comma between items plus a stray trailing comma.
+Explanation: Punctuation between independent clauses: What follows the blank ("Ray's film was quite different...") is an independent clause, so the sentence must end with a period. Choice C ("Panchali, a") looks like a perfect appositive but creates a comma splice, and choice B has the same problem.
 
 25.
 
-The poem "Naomi," which was published in 1960, contains three signature elements of Gwendolyn Brooks’s poetic ______ compressed lines infused with bursts of vivid imagery; syncopated rhythms, largely inspired by the blues tradition; and a keen attention to everyday life in Brooks’s South Side Chicago neighborhood.
-
+In recent years, the English writer Helen Maria Williams (1759–1827), whose poetry was widely read
+during her lifetime, has been rediscovered by contemporary audiences—a resurgence of interest that is
+largely due to literary scholars such as Lia Guerra, whose work______the richness of Williams’s
+poems and the poet’s historical importance to the Romantic literary movement encourages a broader
+rethinking of British Romanticism itself.
 Which choice completes the text so that it conforms to the conventions of Standard English?
-A. style. Terse,
-B. style, terse,
-C. style: terse,
-D. style; terse,
+A. is highlighting
+B. has highlighted
+C. highlighting
+D. highlights
 Answer: C
 Domain: Standard English Conventions
-Explanation: Colon before a super-comma list: the colon after 'poetic style' introduces the three signature elements, which are separated by semicolons because they contain internal commas. Choice C does this. Choice A shatters the list with a period (stranding a fragment), choice B's comma cannot introduce the list, and choice D misuses the semicolon.
-
-`});
+Explanation: Participial phrase vs. finite verb: The main verb is "encourages," so the blank must be the participial phrase "highlighting..." modifying "work" (C). Choices A ("is highlighting"), B ("has highlighted"), and D ("highlights") each supply a second finite verb, leaving the sentence with two competing predicates.
+` });
