@@ -131,23 +131,40 @@
     var entries = [];
     var m = /SATLibrary\.manifest\s*\(\s*\[([\s\S]*?)\]\s*\)/.exec(text || '');
     if (!m) return entries;
-    var re = /\{\s*file\s*:\s*(['"])([^'"]+)\1\s*(?:,\s*v\s*:\s*(['"])([^'"]*)\3\s*)?,?\s*\}|(['"])([^'"]+\.js)\5/g;
+    // { file: 'x.js', v: '3', added: '2026-10-12' } (keys in any order; v and added optional) or 'x.js'
+    var re = /\{([^{}]*)\}|(['"])([^'"]+\.js)\2/g;
     var x;
     while ((x = re.exec(m[1]))) {
-      if (x[2]) entries.push({ file: x[2], v: x[4] || '' });
-      else if (x[6]) entries.push({ file: x[6], v: '' });
+      if (x[1] != null) {
+        var o = {}, kv = /(\w+)\s*:\s*(['"])([^'"]*)\2/g, y;
+        while ((y = kv.exec(x[1]))) o[y[1]] = y[3];
+        if (!o.file) continue;
+        var e = { file: o.file, v: o.v || '' };
+        if (/^\d{4}-\d{2}-\d{2}$/.test(o.added || '')) e.added = o.added;
+        entries.push(e);
+      } else if (x[3]) entries.push({ file: x[3], v: '' });
     }
     return entries;
+  }
+
+  /** Today on this computer as YYYY-MM-DD (the "added" day of a newly listed test). */
+  function localDay() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
   }
 
   function manifestText(entries) {
     return '/*\n' +
       ' * Published practice tests. The site sorts them by test date, so order does not matter.\n' +
       ' * This file is updated by the admin page (#/admin) and can also be edited by hand.\n' +
-      ' * Each entry: { file: \'name.js\', v: \'version\' } — "v" changes on every publish so browsers fetch the new file.\n' +
+      ' * Each entry: { file: \'name.js\', v: \'version\', added: \'YYYY-MM-DD\' } — "v" changes on every publish so browsers fetch the new file;\n' +
+      ' * "added" is the day the test was first published (the home page lists the newest under What\'s new).\n' +
       ' */\n' +
       'SATLibrary.manifest([\n' +
-      entries.map(function (e) { return '  { file: ' + JSON.stringify(e.file).replace(/"/g, '\'') + ', v: ' + JSON.stringify(e.v || '1').replace(/"/g, '\'') + ' }'; }).join(',\n') +
+      entries.map(function (e) {
+        return '  { file: ' + JSON.stringify(e.file).replace(/"/g, '\'') + ', v: ' + JSON.stringify(e.v || '1').replace(/"/g, '\'') +
+          (e.added ? ', added: ' + JSON.stringify(e.added).replace(/"/g, '\'') : '') + ' }';
+      }).join(',\n') +
       '\n]);\n';
   }
 
@@ -301,7 +318,7 @@
         entries.forEach(function (e) {
           if (e.file === target || e.file === file) { e.file = target; e.v = stamp; found = true; }
         });
-        if (!found) entries.push({ file: target, v: stamp });
+        if (!found) entries.push({ file: target, v: stamp, added: localDay() });
         // Keep one entry per file
         var seen = {};
         return entries.filter(function (e) { if (seen[e.file]) return false; seen[e.file] = true; return true; });

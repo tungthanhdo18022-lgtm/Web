@@ -176,10 +176,12 @@ export function manifestText(entries) {
   return '/*\n' +
     ' * Published practice tests. The site sorts them by test date, so order does not matter.\n' +
     ' * This file is updated by the admin page (#/admin) and can also be edited by hand.\n' +
-    ' * Each entry: { file: \'name.js\', v: \'version\' } — "v" changes on every publish so browsers fetch the new file.\n' +
+    ' * Each entry: { file: \'name.js\', v: \'version\', added: \'YYYY-MM-DD\' } — "v" changes on every publish so browsers fetch the new file;\n' +
+    ' * "added" is the day the test was first published (the home page lists the newest under What\'s new).\n' +
     ' */\n' +
     'SATLibrary.manifest([\n' +
-    entries.map((e) => '  { file: ' + JSON.stringify(e.file).replace(/"/g, '\'') + ', v: ' + JSON.stringify(e.v || '1').replace(/"/g, '\'') + ' }').join(',\n') +
+    entries.map((e) => '  { file: ' + JSON.stringify(e.file).replace(/"/g, '\'') + ', v: ' + JSON.stringify(e.v || '1').replace(/"/g, '\'') +
+      (e.added ? ', added: ' + JSON.stringify(e.added).replace(/"/g, '\'') : '') + ' }').join(',\n') +
     '\n]);\n';
 }
 
@@ -187,7 +189,11 @@ export function manifestText(entries) {
 function normalizeEntry(e) {
   if (!e) return null;
   if (typeof e === 'string') return { file: e, v: '' };
-  if (typeof e === 'object' && e.file) return { file: String(e.file), v: e.v != null ? String(e.v) : '' };
+  if (typeof e === 'object' && e.file) {
+    const out = { file: String(e.file), v: e.v != null ? String(e.v) : '' };
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(e.added || ''))) out.added = String(e.added);
+    return out;
+  }
   return null;
 }
 
@@ -217,7 +223,7 @@ function readManifest(root) {
     throw new Error('Could not read tests/manifest.js: ' + (e && e.message || e));
   }
   if (calls !== 1) throw new Error('tests/manifest.js must call SATLibrary.manifest([...]) exactly once (found ' + calls + ').');
-  return { exists: true, text, entries: entries.map((e) => ({ file: cleanFile(e.file), v: e.v })) };
+  return { exists: true, text, entries: entries.map((e) => (e.added ? { file: cleanFile(e.file), v: e.v, added: e.added } : { file: cleanFile(e.file), v: e.v })) };
 }
 
 /* ---------------- The site's parser (assets/js/parser.js) ---------------- */
@@ -612,21 +618,24 @@ function scan(root, site, pub) {
 
 /** Applies plans and repairs to the manifest entries (positions kept). Returns the new entries. */
 function nextManifest(entries, plans, repairs) {
-  let out = entries.map((e) => ({ file: e.file, v: e.v }));
+  const entry = (file, v, added) => (added ? { file, v, added } : { file, v });
+  let out = entries.map((e) => entry(e.file, e.v, e.added));
   const replace = (plainFile, premiumFile) => {
     if (plainFile === premiumFile) { // encrypted in place
       const i = out.findIndex((e) => e.file === premiumFile);
-      if (i >= 0) out[i] = { file: premiumFile, v: bumpVersion(out[i].v) };
+      if (i >= 0) out[i] = entry(premiumFile, bumpVersion(out[i].v), out[i].added);
       return;
     }
     const iPlain = out.findIndex((e) => e.file === plainFile);
     const iPrem = out.findIndex((e) => e.file === premiumFile);
     if (iPlain >= 0) {
       const versions = [out[iPlain].v].concat(iPrem >= 0 ? [out[iPrem].v] : []);
-      out[iPlain] = { file: premiumFile, v: bumpVersion(...versions) };
+      // keep the first publication day (the earlier one when both entries have one)
+      const days = [out[iPlain].added, iPrem >= 0 ? out[iPrem].added : ''].filter(Boolean).sort();
+      out[iPlain] = entry(premiumFile, bumpVersion(...versions), days[0]);
       out = out.filter((e, i) => !(e.file === plainFile) && !(i !== iPlain && e.file === premiumFile));
     } else if (iPrem >= 0) {
-      out[iPrem] = { file: premiumFile, v: bumpVersion(out[iPrem].v) };
+      out[iPrem] = entry(premiumFile, bumpVersion(out[iPrem].v), out[iPrem].added);
     }
   };
   plans.forEach((p) => replace(p.file, p.premiumFile));

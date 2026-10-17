@@ -188,7 +188,12 @@
   function normalizeEntry(e) {
     if (!e) return null;
     if (typeof e === 'string') return { file: e, v: '' };
-    if (typeof e === 'object' && e.file) return { file: String(e.file), v: e.v != null ? String(e.v) : '' };
+    if (typeof e === 'object' && e.file) {
+      var out = { file: String(e.file), v: e.v != null ? String(e.v) : '' };
+      // "added": the day the test was first published (YYYY-MM-DD), for the home page's What's new card
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(e.added || ''))) out.added = String(e.added);
+      return out;
+    }
     return null;
   }
 
@@ -209,7 +214,7 @@
         }
         if (res.warnings.length) console.info('[SATLibrary] Notes for "' + res.test.title + '":', res.warnings);
         var t = prepare(res.test, { builtin: true });
-        if (cur) { t.file = cur.file; t.fileVersion = cur.v; }
+        if (cur) { t.file = cur.file; t.fileVersion = cur.v; t.added = cur.added || ''; }
         builtin.set(t.id, t);
       } catch (e) {
         loadErrors.push({ title: (def && def.title) || (cur && cur.file) || '?', errors: [{ msg: String(e && e.message || e) }] });
@@ -237,7 +242,7 @@
         questionCount: +stub.questionCount || 0, mcqCount: +stub.mcqCount || 0, sprCount: +stub.sprCount || 0,
         totalTime: +stub.totalTime || 0, moduleCount: +stub.moduleCount || 1,
         kid: String(stub.kid || ''), key: String(stub.key), iv: String(stub.iv), data: String(stub.data),
-        file: cur ? cur.file : '', fileVersion: cur ? cur.v : ''
+        file: cur ? cur.file : '', fileVersion: cur ? cur.v : '', added: cur ? cur.added || '' : ''
       };
       var d = parseDate(s.date) || parseDate(s.title);
       s.year = d ? d.year : 0;
@@ -264,7 +269,7 @@
       var stub = premium.get(id);
       if (!stub) return false;
       var prev = currentEntry;
-      currentEntry = { file: stub.file, v: stub.fileVersion };
+      currentEntry = { file: stub.file, v: stub.fileVersion, added: stub.added };
       try { Library.register(def); } finally { currentEntry = prev; }
       var t = builtin.get(id);
       if (t) t.premium = true;
@@ -279,7 +284,7 @@
       manifest = (entries || []).map(normalizeEntry).filter(Boolean);
     },
 
-    manifestEntries: function () { return manifest.map(function (e) { return { file: e.file, v: e.v }; }); },
+    manifestEntries: function () { return manifest.map(function (e) { return e.added ? { file: e.file, v: e.v, added: e.added } : { file: e.file, v: e.v }; }); },
 
     /** Registers a just-published test in memory (the live site updates after GitHub Pages redeploys). */
     registerLocal: function (def, entry) {
